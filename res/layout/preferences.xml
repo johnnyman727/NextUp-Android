@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+	<ImageView 
+		android:id="@+id/Logo" 
+		android:scaleType="fitXY"
+		android:layout_width="fill_parent" 
+		android:src="@drawable/images"
+		android:layout_height="40dip">
+	</ImageView>
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    >
+		<TextView
+			android:text="I'm Looking For..."
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+		<CheckBox 
+			android:text="Something I know I like" 
+			android:id="@+id/Comfortable" 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content">
+		</CheckBox>
+		<CheckBox 
+			android:text="Something recommended for me" 
+			android:id="@+id/Recommend" 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content">
+		</CheckBox>
+		<CheckBox 
+			android:text="A new experience" 
+			android:id="@+id/New" 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content"/>
+	</LinearLayout>
+</LinearLayout>

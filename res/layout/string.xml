@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello, and welcome to NextUp!</string>
+    <string name="app_name">NextUp</string>
+    <string name="main_no_items">No Venues were found! You're too picky!</string>
+</resources>

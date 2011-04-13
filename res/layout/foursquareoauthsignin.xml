@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="#00BAE1">
+
+
+	<RelativeLayout android:id="@+id/SignInLayout"
+		android:layout_width="fill_parent" android:layout_height="fill_parent">
+		<Button android:text="Sign in with Foursquare" android:id="@+id/SignInButton"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:layout_centerVertical="true" android:layout_centerHorizontal="true"></Button>
+
+		<ImageView android:layout_width="wrap_content" android:id="@+id/FoursquareLogo"
+			android:layout_above="@+id/SignInButton" android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true" android:layout_centerVertical="true"
+			android:src="@drawable/foursquarelogo"></ImageView>
+	</RelativeLayout>
+
+</LinearLayout>
+
+

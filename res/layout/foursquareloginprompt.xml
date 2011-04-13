@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent" android:layout_height="match_parent"
+	android:orientation="vertical">
+
+	<Button android:text="Connect your recommendations to FourSquare!"
+		android:id="@+id/loginbutton" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_centerVertical="true"
+		android:layout_centerHorizontal="true"></Button>
+
+	<Button android:text="No thanks, I don't want a custom recommendation engine."
+		android:id="@+id/nothanksbutton" android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_centerHorizontal="true"></Button>
+
+</LinearLayout>

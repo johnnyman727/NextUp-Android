@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="consumerKey">CAJRXU4W3CJFBRCUULAGU15ZYAXGO552YYYN5H5CDSQTDYF1
+	</string>
+	<string name="consumerSecret">MIU4IDCTTQZG5N3PSWMV3XIUWJ4LNOS21R1T0LFXEFPGZRH5
+	</string>
+	<string name="accessTokenUrl">https://foursquare.com/oauth2/access_token</string>
+	<string name="authenticationUrl">https://foursquare.com/oauth2/authenticate</string>
+	<string name="oauthCallbackUri">nextup-android://</string>
+	<string name="touch">true</string>
+	<string name="androidOauthLogTag">AndroidOAuth2</string>
+	<string name="resultingActivityPackageName">com.dotcom.nextup</string>
+	<string name="resultingActivityClassName">com.dotcom.nextup.FourSquareLoginPrompt</string>
+</resources>

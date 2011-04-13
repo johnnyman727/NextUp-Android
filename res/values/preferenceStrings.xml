@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="accessTokenPreferenceName">accessTokenPreference</string>
+	<string name="accessCodePreferenceName">accessCodePreference</string>
+	<string name="histogramPreferenceName">histogramPreference</string>
+</resources>
