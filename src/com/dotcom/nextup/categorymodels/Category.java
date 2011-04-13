@@ -31,7 +31,7 @@ public class Category implements Comparator<Category> {
 		this.frequency = frequency;
 	}
 	public Integer getFrequency() {
-		return frequency;
+		return this.frequency;
 	}
 	
 	@Override

@@ -14,4 +14,23 @@ public class RecommendationInput {
 		this.latitude = lat;
 		this.longitude = lon;
 	}
+	
+	public ArrayList<Category> getCategories() {
+		return this.categories;
+	}
+	public void setCategories(ArrayList<Category> cats) {
+		this.categories = cats;
+	}
+	public double getLatitude() {
+		return this.latitude;
+	}
+	public void setLatitude(double lat) {
+		this.latitude = lat;
+	}
+	public double getLongitude() {
+		return this.longitude;
+	}
+	public void setLongitude(double lon) {
+		this.latitude = lon;
+	}
 }
