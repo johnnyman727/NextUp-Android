@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="oauth_consumer_key">mDTMqfyR7uk5qZ7oJXfxzQ</string>
+<string name="oauth_consumer_secret">qDes5kGrBinSq938oyPF_7rmNSw</string>
+<string name="oauth_token">TiCbXQMxf5PVwGNCMtjBEKP3OAtPIMpa</string>
+<string name="oauth_signature_method">hmac-sha1</string>
+<string name="oauth_token_secret">VB4rE1_Osl8PEX6aFqLyu8kK0H8</string>
+</resources>

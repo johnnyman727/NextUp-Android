@@ -1,4 +1,4 @@
-/*package com.dotcom.nextup.yelp;
+package com.dotcom.nextup.yelp;
 
 import java.util.ArrayList;
 
@@ -11,16 +11,17 @@ import android.util.Log;
 
 public class YelpWebScrape {
 	static String TAG = "YelpWebScrape";
+	
 	public static String getYelpVenueInfo(String url, String attr) {
-		 given the url of the yelp page for a venue
-		 * and the user-friendly attribute name, so far it recognizes
-		 *    "hours", "price range"
+		/* given the url of the yelp page for a venue
+		 * and the user-friendly attribute name
+		 *    (ex. "hours" not what the yelp web page source calls it)
 		 * returns a string of the requested attribute info for that venue
 		 * error codes:
 		 *    "bad attribute name" if an unrecognized attribute is requested
 		 *    "could not connect" if problems with getting source code from yelp
 		 *    "attribute not found" if source code doesn't have that attribute
-		
+		*/
 		
 		ArrayList<String> keys = translateAttr(attr);
 		if (keys.get(0) == "bad attribute name") { return keys.get(0); }
@@ -35,10 +36,20 @@ public class YelpWebScrape {
 		
 		String doc_string = doc.toString();
 		int i = doc_string.indexOf(keys.get(0));
-		String relevant_section = doc_string.substring(i, i + 1000); // assume 1000 is enough to get all attr data
-		Document doc_smaller = Jsoup.parse(relevant_section);
-		
-		return webScrapeSpecificAttr(attr, keys, doc_smaller);
+		if (i != -1) {
+			String relevant_section = null;
+			try {
+				relevant_section = doc_string.substring(i, i + 1000); // assume 1000 is enough to get all attr data
+			} catch (StringIndexOutOfBoundsException e) {
+				int len = doc_string.length();
+				relevant_section = doc_string.substring(i, len-1);
+			}
+			Document doc_smaller = Jsoup.parse(relevant_section);
+			
+			return webScrapeSpecificAttr(attr, keys, doc_smaller);
+		} else {
+			return null;
+		}
 	}
 	
 	private static String webScrapeSpecificAttr(String attr, ArrayList<String> keys, Document doc) {
@@ -73,16 +84,17 @@ public class YelpWebScrape {
 	}
 	
 	private static ArrayList<String> translateAttr(String user_attr) {
-		 given user-friendly attribute name,
+		/* given user-friendly attribute name,
 		 * returns ArrayList of the strings to search for on Yelp web page
 		 * in order from higher-level to lower-level
 		 * error codes:
 		 *    ArrayList of only "bad attribute name" if an unrecognized attribute is requested
-		 
+		 */
 		ArrayList<String> res = new ArrayList<String>();
+		
 		if (user_attr == "hours") {
 			res.add("<dt class=\"attr-BusinessHours\">");
-			res.add("hours");
+			res.add("hours"); //class
 			return res;
 		}
 		
@@ -97,4 +109,3 @@ public class YelpWebScrape {
 		return res;
 	}
 }
-*/

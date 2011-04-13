@@ -2,11 +2,13 @@ package com.dotcom.nextup.activities;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -21,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -31,22 +34,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dotcom.nextup.yelp.Yelp;
+import com.dotcom.nextup.yelp.YelpVenue;
 import com.dotcom.nextup.R;
-import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
-import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
-import com.dotcom.nextup.datastoring.CategoryHistogramManager;
 import com.dotcom.nextup.oauth.AndroidOAuth;
+import com.dotcom.nextup.datastoring.CategoryHistogramManager;
 
 public class Home extends ListActivity {
-	private static final Integer SECONDS_IN_THREE_HOURS = 60 * 60 * 3;
 	/** Called when the activity is first created. */
 	private Boolean codeStored;
 	private String token;
@@ -101,42 +104,8 @@ public class Home extends ListActivity {
 	public void onResume() {
 		super.onResume();
 		if (this.checkIns != null)
-			this.checkInManager.getLastCheckInLocation(this.checkIns);
+			getLastLocation();
 		getCurrentLocation();
-	}
-	
-	public RecommendationInput getCategoryInput() {
-		Category prefix = null;
-		if (this.checkIns != null) {
-			CheckIn last = this.checkInManager.getLastCheckIn(this.checkIns);
-			Date date = new Date();
-			if ((last.getTime() + SECONDS_IN_THREE_HOURS >= (date.getTime() * 1000 ))) {
-				ArrayList<Category> cats = last.getCategories(); 
-				if (cats != null) {
-					prefix = cats.get(cats.size() - 1);
-				}
-				ArrayList<Category> topThree = this.ch.getTopThreeSuffixes(prefix);
-				if (topThree != null) {
-					String lat = last.getLocation().substring(0, last.getLocation().indexOf(","));
-					String lon = last.getLocation().substring(last.getLocation().indexOf(",") + 1);
-					double latitude = Double.parseDouble(lat);
-					double longitude = Double.parseDouble(lon);
-					RecommendationInput ri = new RecommendationInput(topThree,latitude, longitude);
-					return ri;
-				}	
-			}
-		} else {
-			prefix = new Category();
-			prefix.setCategoryFromCurrentLocation(this.myLocation);
-			ArrayList<Category> topThree = this.ch.getTopThreeSuffixes(prefix);
-			if (topThree != null) {
-				RecommendationInput ri = new RecommendationInput(topThree, 
-						this.myLocation.getLatitude(), 
-						this.myLocation.getLongitude());
-				return ri;
-			}	
-		}
-		return null;		
 	}
 
 	/*----------------------- ACCESS TOKEN CODE BELOW --------------------*/
@@ -247,6 +216,11 @@ public class Home extends ListActivity {
 
 
 	/* ----------------LOCATION CODE BELOW --------------------- */
+
+	private void getLastLocation() {
+		this.lastLocationName = this.checkIns.get(0).getName();
+		this.lastLocationCoord = this.checkIns.get(0).getLocation();
+	}
 
 	private void getCurrentLocation() {
 		locationManager = (LocationManager) this
@@ -415,6 +389,7 @@ public class Home extends ListActivity {
 
 	private void getVenues() {
 		try {
+			/*
 			my_venues = new ArrayList<Venue>();
 			my_venues.add(new Venue("Craigie on Main", "123 Main, Cambridge"));
 			my_venues.add(new Venue("Stephanie's on Newbury",
@@ -423,10 +398,65 @@ public class Home extends ListActivity {
 					"75 Green Street, Cambridge"));
 			Thread.sleep(5000);
 			Log.i("ARRAY", "" + my_venues.size());
+			*/
+			Yelp yelp = getYelp();
+	        ArrayList<YelpVenue> venues = yelp.venuesSearch("burritos", 42.2833333,-71.2333333);
+	        my_venues = new ArrayList<Venue>();
+	        my_venues.add(new Venue("option1", venues.get(0).toString()));
+	        my_venues.add(new Venue("option2", venues.get(1).toString()));
+	        my_venues.add(new Venue("option3", venues.get(2).toString()));
+	        Thread.sleep(5000);
 		} catch (Exception e) {
 			Log.e("BACKGROUND_PROC", e.getMessage());
 		}
 		runOnUiThread(returnRes);
+	}
+	
+	/* like everything in Java, you need to make a Yelp object in order to actually do anything
+	 * (actually there's a reason for this:  it authorizes you with the Yelp API)
+	 */
+    public Yelp getYelp() {
+        String consumerKey = getString( R.string.oauth_consumer_key );
+        String consumerSecret = getString( R.string.oauth_consumer_secret);
+        String token = getString(R.string.oauth_token);
+        String tokenSecret = getString(R.string.oauth_token_secret);
+        
+        Yelp yelp = new Yelp(consumerKey, consumerSecret, token, tokenSecret);
+        
+        return yelp;
+    }
+
+    
+    /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/ 
+     * returns a Drawable from a URL for an image
+     * an ImageView can set itself to display this Drawable as its image
+     * example usage:
+     * Drawable image = ImageOperations(this,res.get(0).rating_img_url_small,"image.jpg");
+       ImageView imgView = new ImageView(this);
+       imgView = (ImageView)findViewById(R.id.image1);
+       imgView.setImageDrawable(image);
+     */
+	private Drawable ImageOperations(Context ctx, String url, String saveFilename) {
+		try {
+			InputStream is = (InputStream) this.fetch(url);
+			Drawable d = Drawable.createFromStream(is, saveFilename);
+			return d;
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+    /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/
+     * used by ImageOperations to get an image from a URL
+     */
+	public Object fetch(String address) throws MalformedURLException,IOException {
+		URL url = new URL(address);
+		Object content = url.getContent();
+		return content;
 	}
 
 }

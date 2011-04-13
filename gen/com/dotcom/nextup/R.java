@@ -70,6 +70,11 @@ public final class R {
         public static final int histogramPreferenceName=0x7f04000c;
         public static final int initialHistogramFile=0x7f040009;
         public static final int oauthCallbackUri=0x7f040004;
+        public static final int oauth_consumer_key=0x7f04000f;
+        public static final int oauth_consumer_secret=0x7f040010;
+        public static final int oauth_signature_method=0x7f040012;
+        public static final int oauth_token=0x7f040011;
+        public static final int oauth_token_secret=0x7f040013;
         public static final int resultingActivityClassName=0x7f040008;
         public static final int resultingActivityPackageName=0x7f040007;
         public static final int touch=0x7f040005;
