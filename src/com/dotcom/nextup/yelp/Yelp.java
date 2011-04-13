@@ -3,12 +3,10 @@ package com.dotcom.nextup.yelp;
 Example code based on code from Nicholas Smith at http://imnes.blogspot.com/2011/01/how-to-use-yelp-v2-from-java-including.html
 For a more complete example (how to integrate with GSON, etc) see the blog post above.
 */
-import com.dotcom.nextup.classes.*;
-import com.dotcom.nextup.categorymodels.*;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +18,9 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
 import android.util.Log;
+
+import com.dotcom.nextup.categorymodels.Category;
+import com.dotcom.nextup.classes.RecommendationInput;
 
 /**
 * Example for accessing the Yelp API.
@@ -79,7 +80,11 @@ public class Yelp {
 		ArrayList<YelpVenue> best = new ArrayList<YelpVenue>();
 		int i = 0;
 		int len = all_venues.size();
-		while ( i < 0 && i <= 3 ) { best.add(all_venues.get(i)); }
+		while ( i < len && i <= 3 ) { 
+			Log.v("Yelp", "about to add a venue to best. i ="+Integer.toString(i)+ ", len=" + Integer.toString(len));
+			best.add(all_venues.get(i)); 
+			i++;
+		}
 		return best;
 	}
 		

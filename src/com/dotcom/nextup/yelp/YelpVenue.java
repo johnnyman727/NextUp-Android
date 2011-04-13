@@ -61,6 +61,8 @@ public class YelpVenue {
 		this.initializeAddressLatLong(jbus.optJSONObject("location"));
 		this.distance = jbus.optDouble("distance");    // distance from search location if available
 		Log.v("Yelp", "distance: " + Double.toString(this.distance));
+		
+		/* web scraping makes it really slow and sometimes run out of memory
 		this.hours = YelpWebScrape.getYelpVenueInfo(this.url, "hours");
 		this.price_range = YelpWebScrape.getYelpVenueInfo(this.url, "price range");
 		if (this.hours != null ){
@@ -73,6 +75,7 @@ public class YelpVenue {
 		} else {
 			Log.v("Yelp", "price_range: null");
 		}
+		*/
 		
 	}
 	

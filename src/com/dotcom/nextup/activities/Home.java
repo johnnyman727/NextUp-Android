@@ -45,7 +45,9 @@ import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
+import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.classes.Venue;
+import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.dotcom.nextup.datastoring.CategoryHistogramManager;
 
@@ -389,7 +391,7 @@ public class Home extends ListActivity {
 
 	private void getVenues() {
 		try {
-			/*
+			/* version 1: just put in our own data
 			my_venues = new ArrayList<Venue>();
 			my_venues.add(new Venue("Craigie on Main", "123 Main, Cambridge"));
 			my_venues.add(new Venue("Stephanie's on Newbury",
@@ -399,15 +401,34 @@ public class Home extends ListActivity {
 			Thread.sleep(5000);
 			Log.i("ARRAY", "" + my_venues.size());
 			*/
+			/* version 2: basic yelp search for burritos
 			Yelp yelp = getYelp();
 	        ArrayList<YelpVenue> venues = yelp.venuesSearch("burritos", 42.2833333,-71.2333333);
 	        my_venues = new ArrayList<Venue>();
 	        my_venues.add(new Venue("option1", venues.get(0).toString()));
 	        my_venues.add(new Venue("option2", venues.get(1).toString()));
 	        my_venues.add(new Venue("option3", venues.get(2).toString()));
+	        */
+			/* version 3: yelp search based on RecommendationInput and filtering for best */
+			Yelp yelp = getYelp();
+			Log.v("BACKGROUND PROC", "yelp: " + yelp.toString());
+			ArrayList<Category> cats = new ArrayList<Category>();
+			cats.add(new Category("cafe"));
+			cats.add(new Category("dessert"));
+			cats.add(new Category("coffee"));
+			Log.v("BACKGROUND PROC", "cats: " + cats.toString());
+			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
+			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23);
+			Log.v("BACKGROUND PROC", "input: " + input.toString());
+			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
+			Log.v("BACKGROUND PROC", "venues: " + venues.toString());
+			my_venues = new ArrayList<Venue>();
+	        my_venues.add(new Venue("option1", venues.get(0).toString()));
+	        my_venues.add(new Venue("option2", venues.get(1).toString()));
+	        my_venues.add(new Venue("option3", venues.get(2).toString()));
 	        Thread.sleep(5000);
 		} catch (Exception e) {
-			Log.e("BACKGROUND_PROC", e.getMessage());
+			Log.e("BACKGROUND_PROC", e.toString());
 		}
 		runOnUiThread(returnRes);
 	}
