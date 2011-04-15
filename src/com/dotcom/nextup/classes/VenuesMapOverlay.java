@@ -12,13 +12,11 @@ import com.google.android.maps.OverlayItem;
 public class VenuesMapOverlay extends ItemizedOverlay {
 	private ArrayList<OverlayItem> myOverlays = new ArrayList<OverlayItem>();
 	Context myContext = null;
-	public VenuesMapOverlay(Drawable defaultMarker) {
-		super(boundCenterBottom(defaultMarker));
-	}
 	public VenuesMapOverlay(Drawable defaultMarker, Context context) {
-		super(defaultMarker);
-		myContext = context;
+		super(boundCenterBottom(defaultMarker));
+		myContext= context;
 	}
+
 	public void addOverlay(OverlayItem overlay){
 		myOverlays.add(overlay);
 		populate();
