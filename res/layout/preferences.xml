@@ -15,7 +15,7 @@
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:orientation="vertical"
 	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
+	    android:layout_height="wrap_content"
 	    >
 		<TextView
 			android:text="I'm Looking For..."
@@ -39,4 +39,40 @@
 			android:layout_width="wrap_content" 
 			android:layout_height="wrap_content"/>
 	</LinearLayout>
+		<LinearLayout
+		android:orientation="vertical"
+    	android:layout_width="fill_parent"
+   		android:layout_height="fill_parent" 
+   		android:gravity="bottom">
+		<LinearLayout
+			android:orientation="horizontal"
+	    	android:layout_width="fill_parent"
+	    	android:layout_gravity="bottom"
+	   		android:layout_height="40dip" >
+	   		<Button
+	   			android:id="@+id/toPreferences"
+	   			android:onClick="toPreferences"
+	   			android:layout_width="wrap_content"
+	   			android:layout_height="fill_parent"
+	   			android:layout_weight="1"
+	   			android:background="@drawable/icon"
+	   			/>
+	   		<Button
+	   			android:id="@+id/toMap"
+	   			android:onClick="toMap"
+	   			android:layout_width="wrap_content"
+	   			android:layout_weight="10"
+	   			android:layout_height="fill_parent"
+	   			android:background="@drawable/images"
+	   			/>
+	   		<Button
+	   			android:id="@+id/toFriends"
+	   			android:onClick="toFriends"
+	   			android:layout_width="wrap_content"
+	   			android:layout_weight="1"
+	   			android:layout_height="fill_parent"
+	   			android:background="@drawable/icon"
+	   			/>	
+	   	</LinearLayout>
+	  </LinearLayout>
 </LinearLayout>
