@@ -10,8 +10,13 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 
 
 
@@ -22,6 +27,7 @@ public class Map extends MapActivity{
 	protected boolean isRouteDisplayed() {
 	    return false;
 	}
+
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -46,5 +52,29 @@ public class Map extends MapActivity{
 	    itemizedOverlay.addOverlay(overlayitem);
 	    mapOverlays.add(itemizedOverlay);
 	}
+	
+	public boolean onCreateOptionsMenu(Menu menu) {
+    	MenuInflater inflater = getMenuInflater();
+    	inflater.inflate(R.menu.menu, menu);
+    	return true; 
+    }
+
+
+		
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.Friends:    Intent toFriends = new Intent(this, Friends.class);	
+    								startActivity(toFriends);
+                                break;
+            case R.id.Home:     Intent toHome = new Intent(this, Home.class);
+            					startActivity(toHome);
+                                break;
+            case R.id.Preferences: Intent toPreferences = new Intent(this, Preferences.class);
+            						startActivity(toPreferences);
+            					break;
+        }
+        return true;
+    }
 	
 }; 
