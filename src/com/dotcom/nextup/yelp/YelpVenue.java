@@ -147,5 +147,6 @@ public class YelpVenue {
 	public double getLatitude() { return latitude; }
 	public double getLongitude() { return longitude; }
 	public String getImageURL() { return image_url; }
+	public String getURL() { return url; }
 
 }

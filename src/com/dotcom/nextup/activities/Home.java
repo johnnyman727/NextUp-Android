@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -27,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -39,17 +39,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dotcom.nextup.yelp.Yelp;
-import com.dotcom.nextup.yelp.YelpVenue;
 import com.dotcom.nextup.R;
+import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
-import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.classes.RecommendationInput;
-import com.dotcom.nextup.oauth.AndroidOAuth;
+import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.datastoring.CategoryHistogramManager;
+import com.dotcom.nextup.oauth.AndroidOAuth;
+import com.dotcom.nextup.yelp.Yelp;
+import com.dotcom.nextup.yelp.YelpVenue;
 
 public class Home extends ListActivity {
 	/** Called when the activity is first created. */
@@ -345,10 +345,10 @@ public class Home extends ListActivity {
 		startActivity(toPreferences);
 	}
 
+	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Toast.makeText(this, my_venues.get(position).getName(),
-				Toast.LENGTH_SHORT).show();
-
+	    Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( my_venues.get(position).getURL() ) );
+	    startActivity( browse );
 	}
 
 	private Runnable returnRes = new Runnable() {
@@ -392,7 +392,7 @@ public class Home extends ListActivity {
 			for (int i = 0; i < venues.size(); i++) {
 				YelpVenue yven = venues.get(i);
 				Log.v("BACKGROUND_PROC", yven.getImageURL());
-				Venue ven = new Venue(yven.getName(), yven.getLatitude(), yven.getLongitude(), yven.getImageURL());
+				Venue ven = new Venue(yven.getName(), yven.getLatitude(), yven.getLongitude(), yven.getURL(), yven.getImageURL());
 				my_venues.add(ven);
 			}
 
