@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -35,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -373,6 +375,12 @@ public class Home extends ListActivity {
 		}
 		
 	}
+	
+	public boolean sameLocation(GeoPoint l1, GeoPoint l2) {
+		if ((l1.getLongitudeE6() == l2.getLongitudeE6()) && (l1.getLatitudeE6() == l2.getLatitudeE6()))
+				return true;
+		return false;
+	}
 
 	private void dealWithLocation() {
 		if (sameLocation(lastLocation, currentLocation) && lastLocation != null) {
@@ -450,6 +458,10 @@ public class Home extends ListActivity {
 			}
 			return v;
 		}
+
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+	    Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( my_venues.get(position).getUrl() ) );
+	    startActivity( browse );
 	}
 
 	private Runnable returnRes = new Runnable() {
@@ -478,15 +490,7 @@ public class Home extends ListActivity {
 			Thread.sleep(5000);
 			Log.i("ARRAY", "" + my_venues.size());
 			*/
-			/* version 2: basic yelp search for burritos
-			Yelp yelp = getYelp();
-	        ArrayList<YelpVenue> venues = yelp.venuesSearch("burritos", 42.2833333,-71.2333333);
-	        my_venues = new ArrayList<Venue>();
-	        my_venues.add(new Venue("option1", venues.get(0).toString()));
-	        my_venues.add(new Venue("option2", venues.get(1).toString()));
-	        my_venues.add(new Venue("option3", venues.get(2).toString()));
-	        */
-			/* version 3: yelp search based on RecommendationInput and filtering for best */
+			/* version 2: yelp search based on RecommendationInput and filtering for best */
 			Yelp yelp = getYelp();
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
@@ -496,7 +500,6 @@ public class Home extends ListActivity {
 			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
 			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
-			Log.v("BACKGROUND_PROC", "venues size: " + Integer.toString(venues.size()));
 			my_venues = new ArrayList<Venue>();
 			
 			for (int i = 0; i < venues.size(); i++) {
@@ -507,12 +510,90 @@ public class Home extends ListActivity {
 				Venue ven = new Venue(yven.getName(), gp);
 				my_venues.add(ven);
 			}
-	        //Thread.sleep(5000);
+
 		} catch (Exception e) {
 			Log.e("BACKGROUND_PROC", e.toString());
 		}
 		runOnUiThread(returnRes);
 	}
+	
+    private class VenueAdapter extends ArrayAdapter<Venue> {
+
+    	private Context context;
+    	private ArrayList<Venue> items;
+
+    	public VenueAdapter(Context context, int textViewResourceId, ArrayList<Venue> items) {
+    		super(context, textViewResourceId, items);
+    		this.items = items;
+    		this.context = context;
+    	}
+
+    	@Override
+    	public View getView(int position, View convertView, ViewGroup parent) {
+    		View v = convertView;
+    		if (v == null) {
+    			LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    			v = vi.inflate(R.layout.row, null);
+    		}
+    		Venue o = items.get(position);
+    		if (o != null) {
+    			TextView tt = (TextView) v.findViewById(R.id.toptext);
+    			TextView bt = (TextView) v.findViewById(R.id.bottomtext);
+    			ImageView iv = (ImageView) v.findViewById(R.id.icon);
+    			if (tt != null) {
+    				tt.setText(o.getName());
+    			}
+    			if (bt != null) {
+    				bt.setText(o.getName());
+    			}
+    			if (iv != null) {
+    	    		Drawable image = ImageOperations(context, items.get(position).getImageURL(), "item" + Integer.toString(position) + ".jpg");
+    	    		if (image == null) {
+    	    			/* supposed to display this when the image can't be gotten from the url
+    	    			 * but instead, no image displays, which is ok but doesn't look so good
+    	    			 * probably returning null because it's an incorrect path name
+    	    			 */
+    	    			image = Drawable.createFromPath("../../../../../res/drawable/default_venue_image.png");
+    	    		}
+
+    				iv.setImageDrawable(image);
+    			}
+    		}
+    		return v;
+    	}
+        
+        /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/ 
+         * returns a Drawable from a URL for an image
+         * an ImageView can set itself to display this Drawable as its image
+         * example usage:
+         * ArrayList<YelpVenue> venues; //already got them using yelp.getRecommendation(), see getVenues() method in Home
+         * Drawable image = ImageOperations(this,venues.get(0).rating_img_url_small,"image.jpg");
+           ImageView imgView = (ImageView)findViewById(R.id.image1);
+           imgView.setImageDrawable(image);
+         */
+    	private Drawable ImageOperations(Context ctx, String url, String saveFilename) {
+    		try {
+    			InputStream is = (InputStream) this.fetch(url);
+    			Drawable d = Drawable.createFromStream(is, saveFilename);
+    			return d;
+    		} catch (MalformedURLException e) {
+    			e.printStackTrace();
+    			return null;
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    			return null;
+    		}
+    	}
+
+        /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/
+         * used by ImageOperations to get an image from a URL
+         */
+    	public Object fetch(String address) throws MalformedURLException,IOException {
+    		URL url = new URL(address);
+    		Object content = url.getContent();
+    		return content;
+    	}
+    }
 	
 	/* like everything in Java, you need to make a Yelp object in order to actually do anything
 	 * (actually there's a reason for this:  it authorizes you with the Yelp API)
@@ -562,11 +643,5 @@ public class Home extends ListActivity {
 		Object content = url.getContent();
 		return content;
 	}
-
-	public boolean sameLocation(GeoPoint l1, GeoPoint l2) {
-		if ((l1.getLongitudeE6() == l2.getLongitudeE6()) && (l1.getLatitudeE6() == l2.getLatitudeE6()))
-				return true;
-		return false;
-	}
-
 }
+

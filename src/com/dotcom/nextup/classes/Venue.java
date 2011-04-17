@@ -8,6 +8,7 @@ public class Venue implements Comparable<Venue>{
     private GeoPoint latlong;
     private Integer distance;
     private String image_url;
+    private String url;
     private boolean mSelectable = true;
     
     public Venue (String name, String coordinates) {
@@ -17,9 +18,7 @@ public class Venue implements Comparable<Venue>{
     
     public Venue (String name, GeoPoint latlong) {
     	this.name = name;
-    	this.setLatlong(latlong);
-    	
-    }
+    	this.setLatlong(latlong);    }
     
     public Venue (String name, GeoPoint latlong, String url) {
     	this.name = name;
@@ -32,7 +31,7 @@ public class Venue implements Comparable<Venue>{
     	this.setLatlong(latlong);
     	this.distance = distance;
     }
-    
+
 	public void setDistance(int distance) {
 		this.distance = distance;
 	}
@@ -68,5 +67,13 @@ public class Venue implements Comparable<Venue>{
 
 		public String getVenueLocation() {
 			return venueLocation;
+		}
+
+		public void setUrl(String url) {
+			this.url = url;
+		}
+
+		public String getUrl() {
+			return url;
 		}
 }
