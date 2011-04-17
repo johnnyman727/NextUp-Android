@@ -55,6 +55,7 @@ import com.google.android.maps.GeoPoint;
 public class Home extends ListActivity {
 	/** Called when the activity is first created. */
 	private Boolean codeStored;
+	private Boolean receivedLocationUpdate;
 	private String token;
 	private String code;
 	private ArrayList<CheckIn> checkIns;
@@ -78,6 +79,7 @@ public class Home extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_checkedin);
+		receivedLocationUpdate = false;
 		nearbyLocations = new ArrayList<Venue>();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		oa = new AndroidOAuth(this);
@@ -87,13 +89,25 @@ public class Home extends ListActivity {
 		dialog = ProgressDialog.show(this, "Loading",
 				"Creating Personal Recommendations...");
 		dealWithCode(codeStored);
-		dialog.dismiss();
 		if (this.checkIns != null)
 			getLastLocation();
 			getLastLocationName();
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
+		/*
+
+		if (this.checkIns != null)
+			getLastLocation();
+		getCurrentLocation();
+		*/
+		
+		my_venues = new ArrayList<Venue>();
+		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
+		setListAdapter(this.m_adapter);
+		dialog.dismiss();
+		
+		/* @TODO: should only do this once location has been found */
 		/*
 		viewVenues = new Runnable() {
 			@Override
@@ -125,6 +139,9 @@ public class Home extends ListActivity {
 			@Override
 			public void onLocationChanged(Location location) {
 				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
+				if (!receivedLocationUpdate)
+					getCurrentLocationNameFromFoursquare(currentLocation);
+				receivedLocationUpdate = true;
 				dealWithLocation();
 				}
 		};
@@ -161,6 +178,10 @@ public class Home extends ListActivity {
 	        		getCurrentLocationNameFromFoursquare(currentLocation);
 	        	dealWithLocation();
 	        }
+	        /*
+		Log.v("Home", "about to start thread for getVenues");
+		thread.start(); */
+		
 	}
 	
 	 //pauses listener while app is inactive
@@ -170,21 +191,8 @@ public class Home extends ListActivity {
         locationManager.removeUpdates(locationListener);
     }
     
-    public void getLastLocation() {
-    	if (this.checkIns != null) {
-    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
-    		this.lastLocation = lastCheckIn.getLocation();
-    	}
-    }
-    
-    private void getLastLocationName() {
-    	if (this.checkIns != null) {
-    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
-    		this.lastLocationName = lastCheckIn.getName();
-    	}
-    }
 	/*----------------------- ACCESS TOKEN CODE BELOW --------------------*/
-	
+
 	private void dealWithCode(Boolean codeStored) {
 		if (codeStored) {
 			try {
@@ -199,7 +207,7 @@ public class Home extends ListActivity {
 					}
 				}
 			} catch (MalformedURLException e) {
-
+				//TODO: Deal with this error
 			}
 		}
 	}
@@ -240,11 +248,13 @@ public class Home extends ListActivity {
 					"There was an error connecting to Foursquare",
 					Toast.LENGTH_LONG).show();
 			e.printStackTrace();
+			//TODO: Deal with this error
 		} catch (IOException e) {
 			Toast.makeText(Home.this,
 					"There was an error connecting to Foursquare",
 					Toast.LENGTH_LONG).show();
 			e.printStackTrace();
+			//TODO: Deal with this error
 		} catch (JSONException e) {
 			// This means that they probably revoked the token
 			// We are going to clear the preferences and go back to
@@ -289,22 +299,25 @@ public class Home extends ListActivity {
 		return sb.toString();
 	}
 
-
 	/* ----------------LOCATION CODE BELOW --------------------- */
-
-	/*
-	private void getLastLocation() {
-		this.lastLocationName = this.checkIns.get(0).getName();
-		this.lastLocationCoord = this.checkIns.get(0).getLocation();
-	}		
-	*/
-
+    public void getLastLocation() {
+    	if (this.checkIns != null) {
+    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
+    		this.lastLocation = lastCheckIn.getLocation();
+    	}
+    }
+    
+    private void getLastLocationName() {
+    	if (this.checkIns != null) {
+    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
+    		this.lastLocationName = lastCheckIn.getName();
+    	}
+    }
 	private void getCurrentLocationNameFromFoursquare(GeoPoint location) {
 		if (this.token == null) {
 			return;
 		}
-		String url = "https://api.foursquare.com/v2/venues/search?ll=" + String.valueOf((location.getLatitudeE6()/1E6)) + "," + String.valueOf((location.getLongitudeE6()/1E6));		
-		//String url = "https://api.foursquare.com/v2/venues/search?ll=40.7,-74";
+		String url = "https://api.foursquare.com/v2/venues/search?ll=" + String.valueOf((location.getLatitudeE6()/1E6)) + "," + String.valueOf((location.getLongitudeE6()/1E6));
 		String authUrl = url + "&oauth_token=" + this.token;
 		HttpClient hc = new DefaultHttpClient();
 	
@@ -326,10 +339,13 @@ public class Home extends ListActivity {
 					getNearbyLocationsFromFoursquare(close);
 				} 
 			}catch (IllegalStateException e) {
+				//TODO: Deal with this error
 				e.printStackTrace();
 			} catch (IOException e) {
+				//TODO: Deal with this error
 				e.printStackTrace();
 			} catch (JSONException e) {
+				//TODO: Deal with this error
 				e.printStackTrace();
 			}
 	}
@@ -348,10 +364,10 @@ public class Home extends ListActivity {
 				newVenue = new Venue(nearbyPlace.getString("name"), locationGeoPoint, Integer.parseInt(location.getString("distance")));
 				this.nearbyLocations.add(newVenue);
 			} catch (NumberFormatException e) {
-				// TODO Auto-generated catch block
+				//TODO: Deal with this error
 				e.printStackTrace();
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
+				//TODO: Deal with this error
 				e.printStackTrace();
 			}
 		}
@@ -398,12 +414,12 @@ public class Home extends ListActivity {
 		startActivity(toPreferences);
 	}
 
+	
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Toast.makeText(this, my_venues.get(position).getVenueName(),
+		Toast.makeText(this, my_venues.get(position).getName(),
 				Toast.LENGTH_SHORT).show();
 
 	}
-
 	private class VenueAdapter extends ArrayAdapter<Venue> {
 
 		private ArrayList<Venue> items;
@@ -426,10 +442,10 @@ public class Home extends ListActivity {
 				TextView tt = (TextView) v.findViewById(R.id.toptext);
 				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
 				if (tt != null) {
-					tt.setText(o.getVenueName());
+					tt.setText(o.getName());
 				}
 				if (bt != null) {
-					bt.setText(o.getVenueLocation());
+					bt.setText(o.getName());
 				}
 			}
 			return v;
@@ -451,6 +467,7 @@ public class Home extends ListActivity {
 
 	private void getVenues() {
 		try {
+			Log.v("Home", "entering getVenues()");
 			/* version 1: just put in our own data
 			my_venues = new ArrayList<Venue>();
 			my_venues.add(new Venue("Craigie on Main", "123 Main, Cambridge"));
@@ -471,22 +488,26 @@ public class Home extends ListActivity {
 	        */
 			/* version 3: yelp search based on RecommendationInput and filtering for best */
 			Yelp yelp = getYelp();
-			Log.v("BACKGROUND PROC", "yelp: " + yelp.toString());
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
 			cats.add(new Category("dessert"));
 			cats.add(new Category("coffee"));
-			Log.v("BACKGROUND PROC", "cats: " + cats.toString());
+			// throws NullPointerException due to myLocation
 			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
 			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23);
-			Log.v("BACKGROUND PROC", "input: " + input.toString());
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
-			Log.v("BACKGROUND PROC", "venues: " + venues.toString());
+			Log.v("BACKGROUND_PROC", "venues size: " + Integer.toString(venues.size()));
 			my_venues = new ArrayList<Venue>();
-	        my_venues.add(new Venue("option1", venues.get(0).toString()));
-	        my_venues.add(new Venue("option2", venues.get(1).toString()));
-	        my_venues.add(new Venue("option3", venues.get(2).toString()));
-	        Thread.sleep(5000);
+			
+			for (int i = 0; i < venues.size(); i++) {
+				YelpVenue yven = venues.get(i);
+				int lat = (int)(yven.getLatitude() * 1E6);
+				int lon = (int)(yven.getLongitude() * 1E6);
+				GeoPoint gp = new GeoPoint(lat, lon);
+				Venue ven = new Venue(yven.getName(), gp);
+				my_venues.add(ven);
+			}
+	        //Thread.sleep(5000);
 		} catch (Exception e) {
 			Log.e("BACKGROUND_PROC", e.toString());
 		}
@@ -497,6 +518,7 @@ public class Home extends ListActivity {
 	 * (actually there's a reason for this:  it authorizes you with the Yelp API)
 	 */
     public Yelp getYelp() {
+    	Log.v("Yelp", "entering getYelp()");
         String consumerKey = getString( R.string.oauth_consumer_key );
         String consumerSecret = getString( R.string.oauth_consumer_secret);
         String token = getString(R.string.oauth_token);
@@ -512,9 +534,9 @@ public class Home extends ListActivity {
      * returns a Drawable from a URL for an image
      * an ImageView can set itself to display this Drawable as its image
      * example usage:
-     * Drawable image = ImageOperations(this,res.get(0).rating_img_url_small,"image.jpg");
-       ImageView imgView = new ImageView(this);
-       imgView = (ImageView)findViewById(R.id.image1);
+     * ArrayList<YelpVenue> venues; //already got them using yelp.getRecommendation(), see getVenues() method in Home
+     * Drawable image = ImageOperations(this,venues.get(0).rating_img_url_small,"image.jpg");
+       ImageView imgView = (ImageView)findViewById(R.id.image1);
        imgView.setImageDrawable(image);
      */
 	@SuppressWarnings("unused")
