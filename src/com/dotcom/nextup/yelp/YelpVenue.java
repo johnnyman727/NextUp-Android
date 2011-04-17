@@ -1,11 +1,16 @@
 package com.dotcom.nextup.yelp;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
-import org.json.JSONObject;
+import com.dotcom.nextup.R;
 
-import android.location.Location;
+import org.json.JSONObject;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 /* search by category (and your lat long) - 3 best things as YelpVenue.
@@ -141,4 +146,6 @@ public class YelpVenue {
 	public String getId() { return id; }
 	public double getLatitude() { return latitude; }
 	public double getLongitude() { return longitude; }
+	public String getImageURL() { return image_url; }
+
 }
