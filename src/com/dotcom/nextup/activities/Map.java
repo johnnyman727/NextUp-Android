@@ -53,6 +53,7 @@ public class Map extends MapActivity{
 	    mapOverlays.add(itemizedOverlay);
 	}
 	
+	/*
 	public boolean onCreateOptionsMenu(Menu menu) {
     	MenuInflater inflater = getMenuInflater();
     	inflater.inflate(R.menu.menu, menu);
@@ -61,7 +62,7 @@ public class Map extends MapActivity{
 
 
 		
-
+	
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.Friends:    Intent toFriends = new Intent(this, Friends.class);	
@@ -75,6 +76,6 @@ public class Map extends MapActivity{
             					break;
         }
         return true;
-    }
+    } */
 	
 }; 

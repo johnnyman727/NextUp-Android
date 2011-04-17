@@ -18,8 +18,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import android.util.Log;
+
+import com.google.android.maps.GeoPoint;
 
 public class CheckInManager {
 	public static ArrayList<CheckIn> getCheckins(String oauth_token,
@@ -59,22 +60,20 @@ public class CheckInManager {
 
 		for (int i = 0; i < checkins.length(); i++) {
 			ArrayList<Category> internalCategories = new ArrayList<Category>();
-			String lat = new String();
-			String lon = new String();
 			String name = new String();
 			JSONObject checkin = checkins.getJSONObject(i);
 			Integer time = Integer.parseInt(checkin.getString("createdAt"));
 			JSONObject venue = checkin.getJSONObject("venue");
-			lat = venue.getJSONObject("location").getString("lat");
-			lon = venue.getJSONObject("location").getString("lng");
+			int lat = (int) (Double.parseDouble(venue.getJSONObject("location").getString("lat")) * 1E6);
+			int lon = (int) (Double.parseDouble(venue.getJSONObject("location").getString("lng")) * 1E6);
+			GeoPoint checkInPoint = new GeoPoint(lat, lon);
 			name = venue.getString("name");
 			JSONArray cats = checkin.getJSONObject("venue").getJSONArray(
 					"categories");
 			for (int j = 0; j < cats.length(); j++) {
 				internalCategories.add(new Category(cats.getJSONObject(j).getString("name")));
 			}
-			CheckIn newCheckin = new CheckIn(time, internalCategories, lat,
-					lon, name);
+			CheckIn newCheckin = new CheckIn(time, internalCategories, checkInPoint, name);
 			Checkins.add(newCheckin);
 		}
 		return Checkins;
@@ -106,7 +105,7 @@ public class CheckInManager {
 		return checkins.get(checkins.size() - 1);
 	}
 	
-	public String getLastCheckInLocation(ArrayList<CheckIn> checkins) {
+	public GeoPoint getLastCheckInLocation(ArrayList<CheckIn> checkins) {
 		return getLastCheckIn(checkins).getLocation();
 	}
 }

@@ -14,6 +14,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,22 +35,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dotcom.nextup.yelp.Yelp;
-import com.dotcom.nextup.yelp.YelpVenue;
 import com.dotcom.nextup.R;
+import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
-import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.classes.RecommendationInput;
-import com.dotcom.nextup.oauth.AndroidOAuth;
+import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.datastoring.CategoryHistogramManager;
+import com.dotcom.nextup.oauth.AndroidOAuth;
+import com.dotcom.nextup.yelp.Yelp;
+import com.dotcom.nextup.yelp.YelpVenue;
+import com.google.android.maps.GeoPoint;
 
 public class Home extends ListActivity {
 	/** Called when the activity is first created. */
@@ -61,25 +62,23 @@ public class Home extends ListActivity {
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
 	private Runnable viewVenues;
-	private String currentLocation;
 	private SharedPreferences pref;
 	private AndroidOAuth oa;
-	@SuppressWarnings("unused")
 	private CheckInManager checkInManager;
 	private LocationManager locationManager;
 	private LocationListener locationListener;
-	public Location myLocation;
-	@SuppressWarnings("unused")
-	private String currentLocationName;
-	@SuppressWarnings("unused")
-	private String lastLocationName;
-	private String lastLocationCoord;
+	public GeoPoint currentLocation;
+	public GeoPoint lastLocation;
+	public String currentLocationName;
+	public String lastLocationName;
+	public ArrayList<Venue> nearbyLocations;
 	ProgressDialog dialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_checkedin);
+		nearbyLocations = new ArrayList<Venue>();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		oa = new AndroidOAuth(this);
 		ch = new CategoryHistogram();
@@ -89,9 +88,13 @@ public class Home extends ListActivity {
 				"Creating Personal Recommendations...");
 		dealWithCode(codeStored);
 		dialog.dismiss();
+		if (this.checkIns != null)
+			getLastLocation();
+			getLastLocationName();
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
+		/*
 		viewVenues = new Runnable() {
 			@Override
 			public void run() {
@@ -100,16 +103,86 @@ public class Home extends ListActivity {
 		};
 
 		Thread thread = new Thread(null, viewVenues, "MagentoBackground");
-		thread.start();
-	}
+		thread.start(); */
+		
+		locationManager = (LocationManager) this
+		.getSystemService(Context.LOCATION_SERVICE);
+
+		locationListener = new LocationListener() {
+			@Override
+			public void onStatusChanged(String provider, int status,
+					Bundle extras) {
+			}
+
+			@Override
+			public void onProviderEnabled(String provider) {
+			}
+
+			@Override
+			public void onProviderDisabled(String provider) {
+			}
+
+			@Override
+			public void onLocationChanged(Location location) {
+				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
+				dealWithLocation();
+				}
+		};
+
+		locationManager.requestLocationUpdates(
+				LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+				0, locationListener);
+		Location temp = null;
+		if (locationManager
+				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null)
+			temp = locationManager
+				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+				currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
+				if (currentLocationName == null)
+					getCurrentLocationNameFromFoursquare(currentLocation);
+				dealWithLocation();
+		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null)
+				temp = locationManager
+				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+				currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
+				if (currentLocationName == null)
+					getCurrentLocationNameFromFoursquare(currentLocation);
+				dealWithLocation();
+				
+		}
 
 	public void onResume() {
-		super.onResume();
-		if (this.checkIns != null)
-			getLastLocation();
-		getCurrentLocation();
+		 super.onResume();
+	        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+	        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+	        if (currentLocation != null) {
+	        	if (currentLocationName == null) 
+	        		getCurrentLocationNameFromFoursquare(currentLocation);
+	        	dealWithLocation();
+	        }
 	}
-
+	
+	 //pauses listener while app is inactive
+    @Override
+    public void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(locationListener);
+    }
+    
+    public void getLastLocation() {
+    	if (this.checkIns != null) {
+    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
+    		this.lastLocation = lastCheckIn.getLocation();
+    	}
+    }
+    
+    private void getLastLocationName() {
+    	if (this.checkIns != null) {
+    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
+    		this.lastLocationName = lastCheckIn.getName();
+    	}
+    }
 	/*----------------------- ACCESS TOKEN CODE BELOW --------------------*/
 	
 	private void dealWithCode(Boolean codeStored) {
@@ -219,101 +292,88 @@ public class Home extends ListActivity {
 
 	/* ----------------LOCATION CODE BELOW --------------------- */
 
+	/*
 	private void getLastLocation() {
 		this.lastLocationName = this.checkIns.get(0).getName();
 		this.lastLocationCoord = this.checkIns.get(0).getLocation();
-	}
+	}		
+	*/
 
-	private void getCurrentLocation() {
-		locationManager = (LocationManager) this
-				.getSystemService(Context.LOCATION_SERVICE);
-
-		locationListener = new LocationListener() {
-			@Override
-			public void onStatusChanged(String provider, int status,
-					Bundle extras) {
-			}
-
-			@Override
-			public void onProviderEnabled(String provider) {
-			}
-
-			@Override
-			public void onProviderDisabled(String provider) {
-			}
-
-			@Override
-			public void onLocationChanged(Location location) {
-				myLocation = location;
-				dealWithLocation(Home.this.lastLocationCoord,
-						Home.this.currentLocation);
-			}
-		};
-
-		locationManager.requestLocationUpdates(
-				LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-				0, locationListener);
-
-		// get last locations
-		if (locationManager
-				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null)
-			myLocation = locationManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null)
-			myLocation = locationManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		dealWithLocation(this.lastLocationCoord, this.currentLocation);
-
-	}
-
-	private void getCurrentLocationName(String location) {
-		String url = "https://api.foursquare.com/v2/venues/search?ll=" + location;		
+	private void getCurrentLocationNameFromFoursquare(GeoPoint location) {
+		if (this.token == null) {
+			return;
+		}
+		String url = "https://api.foursquare.com/v2/venues/search?ll=" + String.valueOf((location.getLatitudeE6()/1E6)) + "," + String.valueOf((location.getLongitudeE6()/1E6));		
+		//String url = "https://api.foursquare.com/v2/venues/search?ll=40.7,-74";
+		String authUrl = url + "&oauth_token=" + this.token;
 		HttpClient hc = new DefaultHttpClient();
 	
 			try {
-				HttpGet request = new HttpGet(url);
+				HttpGet request = new HttpGet(authUrl);
 				HttpResponse resp = hc.execute(request);
+				HttpEntity entity = resp.getEntity();
+				String contentString = CheckInManager.convertStreamToString(entity.getContent());
+				JSONObject responseObj = new JSONObject(contentString);
 				int responseCode = resp.getStatusLine().getStatusCode();
 
 				if (responseCode >= 200 && responseCode < 300) {
-
-					String response = responseToString(resp);
-					JSONObject jsonObj = new JSONObject(response);
-					JSONObject jsonObj2 = jsonObj.getJSONObject("groups");
-					
-					
+					JSONObject res = responseObj.getJSONObject("response");
+					JSONArray groups = res.getJSONArray("groups");
+					JSONObject nearby = groups.getJSONObject(1);
+					JSONArray close = nearby.getJSONArray("items");
+					JSONObject closest = close.getJSONObject(0);
+					this.currentLocationName = closest.getString("name");
+					getNearbyLocationsFromFoursquare(close);
 				} 
 			}catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	}
 
 	/*---------------- UI CODE BELOW *----------------------*/
 
-	private void dealWithLocation(String prev_loc, String cur_loc) {
-		if (prev_loc == cur_loc && prev_loc != "null") {
+	private void getNearbyLocationsFromFoursquare(JSONArray close) throws JSONException {
+		for (int i = 0; i < close.length(); i++) {
+			JSONObject nearbyPlace = close.getJSONObject(i);
+			JSONObject location = nearbyPlace.getJSONObject("location");
+			int lat = (int) (Double.parseDouble(location.getString("lat")) * 1E6);
+			int lon = (int) (Double.parseDouble(location.getString("lng")) * 1E6);
+			GeoPoint locationGeoPoint = new GeoPoint(lat, lon);
+			Venue newVenue;
+			try {
+				newVenue = new Venue(nearbyPlace.getString("name"), locationGeoPoint, Integer.parseInt(location.getString("distance")));
+				this.nearbyLocations.add(newVenue);
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	private void dealWithLocation() {
+		if (sameLocation(lastLocation, currentLocation) && lastLocation != null) {
 			// they checked in at a place and are still there
 			setContentView(R.layout.main_checkedin);
 		}
-		if (prev_loc != "null" && cur_loc == "null") {
+		if (lastLocation != null && currentLocation == null) {
 			// they checked in at a place, we don't know where they are now
 			// but we'll assume they're still there
 			setContentView(R.layout.main_checkedin);
 		}
-		if (prev_loc == "null" && cur_loc != "null") {
+		if (lastLocation == null && currentLocation != null) {
 			// we don't know their last check in, but we know where they are now
 			// prompt them to check in
 			setContentView(R.layout.main_notcheckedin);
 		}
-		if (prev_loc == cur_loc && prev_loc == "null") {
+		if (sameLocation(lastLocation, currentLocation) && lastLocation == null) {
 			// we dont know their last check in or where they are now
 			// this.getLocation();
 			setContentView(R.layout.main_notcheckedin); // need to change this
@@ -457,6 +517,7 @@ public class Home extends ListActivity {
        imgView = (ImageView)findViewById(R.id.image1);
        imgView.setImageDrawable(image);
      */
+	@SuppressWarnings("unused")
 	private Drawable ImageOperations(Context ctx, String url, String saveFilename) {
 		try {
 			InputStream is = (InputStream) this.fetch(url);
@@ -478,6 +539,12 @@ public class Home extends ListActivity {
 		URL url = new URL(address);
 		Object content = url.getContent();
 		return content;
+	}
+
+	public boolean sameLocation(GeoPoint l1, GeoPoint l2) {
+		if ((l1.getLongitudeE6() == l2.getLongitudeE6()) && (l1.getLatitudeE6() == l2.getLatitudeE6()))
+				return true;
+		return false;
 	}
 
 }
