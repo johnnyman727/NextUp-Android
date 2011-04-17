@@ -84,14 +84,22 @@ public class Home extends ListActivity {
 		oa = new AndroidOAuth(this);
 		ch = new CategoryHistogram();
 		checkInManager = new CheckInManager();
-		codeStored = getCode(getIntent());
+		/*codeStored = getCode(getIntent());
 		dialog = ProgressDialog.show(this, "Loading",
 				"Creating Personal Recommendations...");
 		dealWithCode(codeStored);
 		dialog.dismiss();
+
+		if (this.checkIns != null)
+			getLastLocation();
+		getCurrentLocation();
+		*/
+		
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
+		
+		/* @TODO: should only do this once location has been found */
 		viewVenues = new Runnable() {
 			@Override
 			public void run() {
@@ -100,18 +108,17 @@ public class Home extends ListActivity {
 		};
 
 		Thread thread = new Thread(null, viewVenues, "MagentoBackground");
+		Log.v("Home", "about to start thread for getVenues");
 		thread.start();
+		
 	}
 
 	public void onResume() {
 		super.onResume();
-		if (this.checkIns != null)
-			getLastLocation();
-		getCurrentLocation();
 	}
 
 	/*----------------------- ACCESS TOKEN CODE BELOW --------------------*/
-	
+
 	private void dealWithCode(Boolean codeStored) {
 		if (codeStored) {
 			try {
@@ -216,7 +223,6 @@ public class Home extends ListActivity {
 		return sb.toString();
 	}
 
-
 	/* ----------------LOCATION CODE BELOW --------------------- */
 
 	private void getLastLocation() {
@@ -247,6 +253,7 @@ public class Home extends ListActivity {
 				myLocation = location;
 				dealWithLocation(Home.this.lastLocationCoord,
 						Home.this.currentLocation);
+				//getVenues();
 			}
 		};
 
@@ -339,7 +346,7 @@ public class Home extends ListActivity {
 	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Toast.makeText(this, my_venues.get(position).getVenueName(),
+		Toast.makeText(this, my_venues.get(position).getName(),
 				Toast.LENGTH_SHORT).show();
 
 	}
@@ -366,10 +373,10 @@ public class Home extends ListActivity {
 				TextView tt = (TextView) v.findViewById(R.id.toptext);
 				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
 				if (tt != null) {
-					tt.setText(o.getVenueName());
+					tt.setText(o.getName());
 				}
 				if (bt != null) {
-					bt.setText(o.getVenueLocation());
+					bt.setText(o.getName());
 				}
 			}
 			return v;
@@ -391,6 +398,7 @@ public class Home extends ListActivity {
 
 	private void getVenues() {
 		try {
+			Log.v("Home", "entering getVenues()");
 			/* version 1: just put in our own data
 			my_venues = new ArrayList<Venue>();
 			my_venues.add(new Venue("Craigie on Main", "123 Main, Cambridge"));
@@ -411,22 +419,23 @@ public class Home extends ListActivity {
 	        */
 			/* version 3: yelp search based on RecommendationInput and filtering for best */
 			Yelp yelp = getYelp();
-			Log.v("BACKGROUND PROC", "yelp: " + yelp.toString());
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
 			cats.add(new Category("dessert"));
 			cats.add(new Category("coffee"));
-			Log.v("BACKGROUND PROC", "cats: " + cats.toString());
+			// throws NullPointerException due to myLocation
 			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
 			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23);
-			Log.v("BACKGROUND PROC", "input: " + input.toString());
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
-			Log.v("BACKGROUND PROC", "venues: " + venues.toString());
+			Log.v("BACKGROUND_PROC", "venues size: " + Integer.toString(venues.size()));
 			my_venues = new ArrayList<Venue>();
-	        my_venues.add(new Venue("option1", venues.get(0).toString()));
-	        my_venues.add(new Venue("option2", venues.get(1).toString()));
-	        my_venues.add(new Venue("option3", venues.get(2).toString()));
-	        Thread.sleep(5000);
+			
+			for (int i = 0; i < venues.size(); i++) {
+				YelpVenue yven = venues.get(i);
+				Venue ven = new Venue(yven.getName(), yven.getLatitude(), yven.getLongitude());
+				my_venues.add(ven);
+			}
+	        //Thread.sleep(5000);
 		} catch (Exception e) {
 			Log.e("BACKGROUND_PROC", e.toString());
 		}
@@ -437,6 +446,7 @@ public class Home extends ListActivity {
 	 * (actually there's a reason for this:  it authorizes you with the Yelp API)
 	 */
     public Yelp getYelp() {
+    	Log.v("Yelp", "entering getYelp()");
         String consumerKey = getString( R.string.oauth_consumer_key );
         String consumerSecret = getString( R.string.oauth_consumer_secret);
         String token = getString(R.string.oauth_token);
@@ -452,9 +462,9 @@ public class Home extends ListActivity {
      * returns a Drawable from a URL for an image
      * an ImageView can set itself to display this Drawable as its image
      * example usage:
-     * Drawable image = ImageOperations(this,res.get(0).rating_img_url_small,"image.jpg");
-       ImageView imgView = new ImageView(this);
-       imgView = (ImageView)findViewById(R.id.image1);
+     * ArrayList<YelpVenue> venues; //already got them using yelp.getRecommendation(), see getVenues() method in Home
+     * Drawable image = ImageOperations(this,venues.get(0).rating_img_url_small,"image.jpg");
+       ImageView imgView = (ImageView)findViewById(R.id.image1);
        imgView.setImageDrawable(image);
      */
 	private Drawable ImageOperations(Context ctx, String url, String saveFilename) {
