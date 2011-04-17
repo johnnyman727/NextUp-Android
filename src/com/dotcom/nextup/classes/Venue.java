@@ -7,7 +7,7 @@ public class Venue implements Comparable<Venue>{
 	private String name;
     double latitude;
     double longitude;
-    private Drawable picture;
+    private String image_url;
     private boolean mSelectable = true;
     
     public Venue (String nam, double lat, double lon) {
@@ -16,11 +16,11 @@ public class Venue implements Comparable<Venue>{
     	this.longitude = lon;
     }
     
-    public Venue (String nam, double lat, double lon, Drawable draw) {
+    public Venue (String nam, double lat, double lon, String image_url) {
     	this.name=nam;
     	this.latitude=lat;
     	this.longitude = lon;
-    	this.picture = draw;
+    	this.image_url = image_url;
     }
     
     public int compareTo(Venue other) {
@@ -32,8 +32,7 @@ public class Venue implements Comparable<Venue>{
     
     public String getName() { return this.name; }
     public void setName(String venueName) { this.name = venueName;}
-    public Drawable getDrawable() { return this.picture; }
-    public void setDrawable(Drawable draw) {this.picture = draw;}
     public boolean isSelectable() { return this.mSelectable; }
     public void setSelectable(boolean s) { this.mSelectable = s; }
+    public String getImageURL() { return image_url; }
 }
