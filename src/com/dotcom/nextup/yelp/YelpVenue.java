@@ -3,8 +3,9 @@ package com.dotcom.nextup.yelp;
 
 import java.util.ArrayList;
 
-import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.location.Location;
 import android.util.Log;
 
 /* search by category (and your lat long) - 3 best things as YelpVenue.
@@ -58,9 +59,8 @@ public class YelpVenue {
 		this.url = jbus.optString("url");
 		this.phone=jbus.optString("phone"); 
 		this.rating_img_url_small = jbus.optString("rating_img_url_small");
-		this.initializeAddressLatLong(jbus.optJSONObject("location"));
+		this.initializeAddressLocation(jbus.optJSONObject("location"));
 		this.distance = jbus.optDouble("distance");    // distance from search location if available
-		Log.v("Yelp", "distance: " + Double.toString(this.distance));
 		
 		/* web scraping makes it really slow and sometimes run out of memory
 		this.hours = YelpWebScrape.getYelpVenueInfo(this.url, "hours");
@@ -83,11 +83,13 @@ public class YelpVenue {
 		return "Yelp Venue " + this.name + "\n" + this.address;
 	}
 	
-	private void initializeAddressLatLong(JSONObject loc) {
+	private void initializeAddressLocation(JSONObject loc) {
 		this.address = this.stringToAddress(loc.optString("display_address"));
 		JSONObject coord = loc.optJSONObject("coordinate");
-		this.latitude = coord.optDouble("latitude");
-		this.longitude = coord.optDouble("longitude");
+		if (coord != null) {
+			latitude = coord.optDouble("latitude");
+			longitude = coord.optDouble("longitude");
+		}	
 	}
 	
 	private String stringToAddress(String loc) {
@@ -134,4 +136,9 @@ public class YelpVenue {
 		}
 		return clowder;
 	}
+	
+	public String getName() { return name; }
+	public String getId() { return id; }
+	public double getLatitude() { return latitude; }
+	public double getLongitude() { return longitude; }
 }

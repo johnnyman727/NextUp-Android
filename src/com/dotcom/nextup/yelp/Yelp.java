@@ -41,13 +41,15 @@ public class Yelp {
 * @param tokenSecret Token secret
 */
 	public Yelp(String consumerKey, String consumerSecret, String token, String tokenSecret) {
-		Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
+		Log.v("Yelp", "entering Yelp constructor");
+		//Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
 		this.service = new ServiceBuilder().provider(YelpApi2.class).apiKey(consumerKey).apiSecret(consumerSecret).build();
 		this.accessToken = new Token(token, tokenSecret);
 	}
 
 	public ArrayList<YelpVenue> getRecommendation(RecommendationInput input) {
 		/* THE RECOMMENDATION ENGINE */
+		Log.v("Yelp", "entering rec engine");
 		ArrayList<YelpVenue> all_venues = getManyPossibleVenues(input);
 		ArrayList<YelpVenue> rec = chooseBest(input, all_venues);
 		return rec;
@@ -59,11 +61,13 @@ public class Yelp {
 		 * returns all results
 		 * (note that right now the yelp search() limits itself to returning 3 venues to keep it from being too slow)
 		 */
+		Log.v("Yelp", "get many possible venues");
 		double lat = input.getLatitude();
 		double lon = input.getLongitude();
 		ArrayList<YelpVenue> all_venues = new ArrayList<YelpVenue>();
 		ArrayList<YelpVenue> one_search = new ArrayList<YelpVenue>();
 		for (Category cat : input.getCategories()) {
+			Log.v("Yelp", "cat: " + cat.getName());
 			one_search = venuesSearch(cat.getName(), lat, lon);
 			for (YelpVenue venue : one_search) {
 				all_venues.add(venue);
@@ -80,7 +84,7 @@ public class Yelp {
 		ArrayList<YelpVenue> best = new ArrayList<YelpVenue>();
 		int i = 0;
 		int len = all_venues.size();
-		while ( i < len && i <= 3 ) { 
+		while ( i < len && i < 3 ) { 
 			Log.v("Yelp", "about to add a venue to best. i ="+Integer.toString(i)+ ", len=" + Integer.toString(len));
 			best.add(all_venues.get(i)); 
 			i++;

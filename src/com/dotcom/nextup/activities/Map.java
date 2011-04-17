@@ -18,8 +18,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-
-
 public class Map extends MapActivity{
 	MapController mc;
     GeoPoint p;
@@ -32,7 +30,9 @@ public class Map extends MapActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-	    setContentView(R.layout.maps);	  
+	    setContentView(R.layout.maps);	
+	    
+	    /*
 	    MapView mapView = (MapView) findViewById(R.id.mapview);
 	    mapView.setBuiltInZoomControls(true);
 	    List<Overlay> mapOverlays = mapView.getOverlays();
@@ -51,16 +51,15 @@ public class Map extends MapActivity{
 	    OverlayItem overlayitem = new OverlayItem(p, "Olin", "our map sorta works");
 	    itemizedOverlay.addOverlay(overlayitem);
 	    mapOverlays.add(itemizedOverlay);
+	    */
 	}
-	
+
+/*
 	public boolean onCreateOptionsMenu(Menu menu) {
     	MenuInflater inflater = getMenuInflater();
     	inflater.inflate(R.menu.menu, menu);
     	return true; 
     }
-
-
-		
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -76,5 +75,5 @@ public class Map extends MapActivity{
         }
         return true;
     }
-	
+*/
 }; 
