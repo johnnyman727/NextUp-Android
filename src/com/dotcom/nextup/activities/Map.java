@@ -1,6 +1,10 @@
 package com.dotcom.nextup.activities;
 
 import java.util.List;
+
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.classes.VenuesMapOverlay;
 import com.google.android.maps.GeoPoint;
@@ -9,14 +13,6 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
-
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
 
 public class Map extends MapActivity{
 	MapController mc;

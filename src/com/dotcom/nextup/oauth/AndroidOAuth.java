@@ -1,14 +1,13 @@
 package com.dotcom.nextup.oauth;
 
-import com.dotcom.nextup.R;
-import com.dotcom.nextup.R.string;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.dotcom.nextup.R;
 
 public class AndroidOAuth {
 

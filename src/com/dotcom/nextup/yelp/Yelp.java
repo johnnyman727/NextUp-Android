@@ -128,7 +128,6 @@ public class Yelp {
 		 * (right now it just returns the first 3 in the list)
 		 */
 		ArrayList<YelpVenue> best = new ArrayList<YelpVenue>();
-		int len = all_venues.size();
 		YelpVenue venue;
 		ArrayList<RankVenuePair> options = new ArrayList<RankVenuePair>(); // will assign rank to each venue, then select venues with highest ranks
 		for ( int i = 0; i < all_venues.size(); i++ ) {

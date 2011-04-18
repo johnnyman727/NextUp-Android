@@ -64,6 +64,7 @@ public class Home extends ListActivity {
 	private CategoryHistogram ch;
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
+	@SuppressWarnings("unused")
 	private Runnable viewVenues;
 	private SharedPreferences pref;
 	private AndroidOAuth oa;
@@ -418,38 +419,7 @@ public class Home extends ListActivity {
 	    startActivity( browse );
 	}
 	
-	private class VenueAdapter extends ArrayAdapter<Venue> {
-
-		private ArrayList<Venue> items;
-
-		public VenueAdapter(Context context, int textViewResourceId,
-				ArrayList<Venue> items) {
-			super(context, textViewResourceId, items);
-			this.items = items;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View v = convertView;
-			if (v == null) {
-				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.row, null);
-			}
-			Venue o = items.get(position);
-			if (o != null) {
-				TextView tt = (TextView) v.findViewById(R.id.toptext);
-				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
-				if (tt != null) {
-					tt.setText(o.getName());
-				}
-				if (bt != null) {
-					bt.setText(o.getName());
-				}
-			}
-			return v;
-		}
-	}
-
+	
 	private Runnable returnRes = new Runnable() {
 
 		@Override
@@ -463,6 +433,7 @@ public class Home extends ListActivity {
 		}
 	};
 
+	@SuppressWarnings("unused")
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
