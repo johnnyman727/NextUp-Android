@@ -34,6 +34,8 @@ public class YelpVenue {
 	// id, name, url, phone, rating_img_url_small, image_url, address can be (null or empty string) on error
 	String id;          // Yelp ID for this business
 	String name;
+	double rating;
+	int review_count;
 	String mobile_url;
 	String url;
 	String phone; 
@@ -64,24 +66,35 @@ public class YelpVenue {
 		this.url = jbus.optString("url");
 		this.phone=jbus.optString("phone"); 
 		this.rating_img_url_small = jbus.optString("rating_img_url_small");
+		this.initializeRating();
 		this.initializeAddressLocation(jbus.optJSONObject("location"));
+		this.review_count = Integer.parseInt(jbus.optString("review_count"));
 		this.distance = jbus.optDouble("distance");    // distance from search location if available
 		
 		/* web scraping makes it really slow and sometimes run out of memory
 		this.hours = YelpWebScrape.getYelpVenueInfo(this.url, "hours");
 		this.price_range = YelpWebScrape.getYelpVenueInfo(this.url, "price range");
-		if (this.hours != null ){
-			Log.v("Yelp", "hours: " + this.hours);		
-		} else {
-			Log.v("Yelp", "hours: null");
-		}
-		if (this.price_range != null ){
-			Log.v("Yelp", "price_range: " + this.price_range);	
-		} else {
-			Log.v("Yelp", "price_range: null");
-		}
-		*/
-		
+		*/	
+	}
+	
+	private void initializeRating() {
+		/* rating_img_url_small is expected to be something like
+		 * http://media3.px.yelpcdn.com/static/muchmessiness/i/ico/stars/stars_small_4.png
+		 * or http://media3.px.yelpcdn.com/static/a;sldkjfasd;fkas;dfk/i/ico/stars/stars_small_4_half.png
+		 */
+		String[] pieces = this.rating_img_url_small.split("[\\Q[]\\E, \"]+");
+		String piece = pieces[pieces.length - 1]; // stars_small_x.png or stars_small_x_half.png
+		String rating_description = piece.substring(12); // x.png or x_half.png
+		String rating_num = rating_description.substring(0); // x
+		String maybe_half = rating_description.substring(2); // p or h
+		this.rating = 0;
+		if (maybe_half == "h") this.rating += .5;
+		if (rating_num == "0") return;
+		if (rating_num == "1") this.rating += 1;
+		if (rating_num == "2") this.rating += 2;
+		if (rating_num == "3") this.rating += 3;
+		if (rating_num == "4") this.rating += 4;
+		if (rating_num == "5") this.rating += 5;
 	}
 	
 	public String toString() {
@@ -148,5 +161,7 @@ public class YelpVenue {
 	public double getLongitude() { return longitude; }
 	public String getImageURL() { return image_url; }
 	public String getURL() { return url; }
+	public double getRating() { return rating; }
+	public int getReviewCount() { return review_count; }
 
 }

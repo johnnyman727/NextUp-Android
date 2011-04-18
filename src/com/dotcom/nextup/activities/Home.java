@@ -385,13 +385,12 @@ public class Home extends ListActivity {
 			cats.add(new Category("coffee"));
 			// throws NullPointerException due to myLocation
 			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
-			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23);
+			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
 			my_venues = new ArrayList<Venue>();
 			
 			for (int i = 0; i < venues.size(); i++) {
 				YelpVenue yven = venues.get(i);
-				Log.v("BACKGROUND_PROC", yven.getImageURL());
 				Venue ven = new Venue(yven.getName(), yven.getLatitude(), yven.getLongitude(), yven.getURL(), yven.getImageURL());
 				my_venues.add(ven);
 			}
