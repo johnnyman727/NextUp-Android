@@ -163,5 +163,7 @@ public class YelpVenue {
 	public String getURL() { return url; }
 	public double getRating() { return rating; }
 	public int getReviewCount() { return review_count; }
+	public double getDistance() { return distance; }
+	public void setDistance(double d) { distance = d; }
 
 }

@@ -2,18 +2,19 @@ package com.dotcom.nextup.categorymodels;
 
 import java.util.ArrayList;
 
+import com.google.android.maps.GeoPoint;
+
 public class CheckIn {
 
 	private Integer time;
 	private ArrayList<Category> categories;
 	private String name;
-	private String location;
+	private GeoPoint location;
 
-	public CheckIn(Integer time, ArrayList<Category> categories, String lat,
-			String lon, String name) {
+	public CheckIn(Integer time, ArrayList<Category> categories, GeoPoint loc, String name) {
 		this.time = time;
 		this.categories = categories;
-		this.location = lat + "," + lon;
+		this.setLocation(loc);
 		this.name = name;
 	}
 
@@ -41,11 +42,11 @@ public class CheckIn {
 		return name;
 	}
 
-	public void setLocation(String lat, String lon) {
-		this.location = lat + "," + lon;
+	public void setLocation(GeoPoint location) {
+		this.location = location;
 	}
 
-	public String getLocation() {
+	public GeoPoint getLocation() {
 		return location;
 	}
 }

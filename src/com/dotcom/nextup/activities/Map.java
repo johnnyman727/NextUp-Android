@@ -32,7 +32,6 @@ public class Map extends MapActivity{
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.maps);	
 	    
-	    /*
 	    MapView mapView = (MapView) findViewById(R.id.mapview);
 	    mapView.setBuiltInZoomControls(true);
 	    List<Overlay> mapOverlays = mapView.getOverlays();
@@ -51,8 +50,9 @@ public class Map extends MapActivity{
 	    OverlayItem overlayitem = new OverlayItem(p, "Olin", "our map sorta works");
 	    itemizedOverlay.addOverlay(overlayitem);
 	    mapOverlays.add(itemizedOverlay);
-	    */
 	}
+	
+
 
 /*
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -74,6 +74,5 @@ public class Map extends MapActivity{
             					break;
         }
         return true;
-    }
-*/
-}; 
+    } */
+}

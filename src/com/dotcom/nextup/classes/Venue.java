@@ -1,30 +1,23 @@
 package com.dotcom.nextup.classes;
 
-import android.graphics.drawable.Drawable;
-import android.location.Location;
+import com.google.android.maps.GeoPoint;
 
 public class Venue implements Comparable<Venue>{
 	private String name;
-    double latitude;
-    double longitude;
+    private GeoPoint latlong;
     private String image_url;
     private String url;
+    double distance; // distance in meters from current location
     private boolean mSelectable = true;
     
-    public Venue (String nam, double lat, double lon) {
-    	this.name = nam;
-    	this.latitude = lat;
-    	this.longitude = lon;
-    }
-    
-    public Venue (String nam, double lat, double lon, String url, String image_url) {
-    	this.name=nam;
-    	this.latitude=lat;
-    	this.longitude = lon;
+    public Venue (String name, String url, String imageURL, GeoPoint latlong, double d) {
+    	this.name = name;
     	this.url = url;
-    	this.image_url = image_url;
+    	this.image_url = imageURL;
+    	this.latlong = latlong;
+    	this.distance = d;
     }
-    
+        
     public int compareTo(Venue other) {
         if(this.name != null)
             return this.name.compareTo(other.getName());
@@ -32,10 +25,15 @@ public class Venue implements Comparable<Venue>{
             throw new IllegalArgumentException();
     }
     
-    public String getName() { return this.name; }
-    public void setName(String venueName) { this.name = venueName;}
-    public boolean isSelectable() { return this.mSelectable; }
-    public void setSelectable(boolean s) { this.mSelectable = s; }
-    public String getImageURL() { return image_url; }
+    public String getName() { return name; }
+    public void setName(String n) { name = n; }
+    public GeoPoint getLatlong() { return latlong; }
+    public void setGeoPoint(GeoPoint gp) {latlong = gp; }
     public String getURL() { return url; }
+    public void setURL(String URL) { url = URL; }
+    public String getImageURL() { return image_url; }
+    public void setImageURL(String URL) { image_url = URL; }
+    public double getDistance() { return distance; }
+    public void setDistance(double d) { distance = d; }
+    
 }

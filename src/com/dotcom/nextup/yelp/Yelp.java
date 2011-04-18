@@ -61,7 +61,7 @@ public class Yelp {
      */
 	public String search(String term, double latitude, double longitude, double max_distance) {
 		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.yelp.com/v2/search");
-		request.addQuerystringParameter("limit", limit);
+		request.addQuerystringParameter("limit", "3");
 		request.addQuerystringParameter("term", term);
 	    request.addQuerystringParameter("ll", latitude + "," + longitude);
 	    request.addQuerystringParameter("radius_filter", Double.toString(max_distance));
