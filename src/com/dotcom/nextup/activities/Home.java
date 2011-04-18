@@ -14,6 +14,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -39,21 +41,23 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dotcom.nextup.yelp.Yelp;
-import com.dotcom.nextup.yelp.YelpVenue;
 import com.dotcom.nextup.R;
+import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
-import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.classes.RecommendationInput;
-import com.dotcom.nextup.oauth.AndroidOAuth;
+import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.datastoring.CategoryHistogramManager;
+import com.dotcom.nextup.oauth.AndroidOAuth;
+import com.dotcom.nextup.yelp.Yelp;
+import com.dotcom.nextup.yelp.YelpVenue;
+import com.google.android.maps.GeoPoint;
 
 public class Home extends ListActivity {
 	/** Called when the activity is first created. */
 	private Boolean codeStored;
+	private Boolean receivedLocationUpdate;
 	private String token;
 	private String code;
 	private ArrayList<CheckIn> checkIns;
@@ -61,25 +65,24 @@ public class Home extends ListActivity {
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
 	private Runnable viewVenues;
-	private String currentLocation;
 	private SharedPreferences pref;
 	private AndroidOAuth oa;
-	@SuppressWarnings("unused")
 	private CheckInManager checkInManager;
 	private LocationManager locationManager;
 	private LocationListener locationListener;
-	public Location myLocation;
-	@SuppressWarnings("unused")
-	private String currentLocationName;
-	@SuppressWarnings("unused")
-	private String lastLocationName;
-	private String lastLocationCoord;
+	public GeoPoint currentLocation;
+	public GeoPoint lastLocation;
+	public String currentLocationName;
+	public String lastLocationName;
+	public ArrayList<Venue> nearbyLocations;
 	ProgressDialog dialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_checkedin);
+		receivedLocationUpdate = false;
+		nearbyLocations = new ArrayList<Venue>();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		oa = new AndroidOAuth(this);
 		ch = new CategoryHistogram();
@@ -88,10 +91,26 @@ public class Home extends ListActivity {
 		dialog = ProgressDialog.show(this, "Loading",
 				"Creating Personal Recommendations...");
 		dealWithCode(codeStored);
-		dialog.dismiss();
+		if (this.checkIns != null)
+			getLastLocation();
+			getLastLocationName();
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
+		/*
+
+		if (this.checkIns != null)
+			getLastLocation();
+		getCurrentLocation();
+		*/
+		
+		my_venues = new ArrayList<Venue>();
+		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
+		setListAdapter(this.m_adapter);
+		dialog.dismiss();
+		
+		/* @TODO: should only do this once location has been found */
+		/*
 		viewVenues = new Runnable() {
 			@Override
 			public void run() {
@@ -100,18 +119,75 @@ public class Home extends ListActivity {
 		};
 
 		Thread thread = new Thread(null, viewVenues, "MagentoBackground");
-		thread.start();
+		thread.start(); */
+		
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+		locationListener = new LocationListener() {
+			@Override
+			public void onStatusChanged(String provider, int status, Bundle extras) {
+			}
+
+			@Override
+			public void onProviderEnabled(String provider) {
+			}
+
+			@Override
+			public void onProviderDisabled(String provider) {
+			}
+
+			@Override
+			public void onLocationChanged(Location location) {
+				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
+				if (!receivedLocationUpdate)
+					getCurrentLocationNameFromFoursquare(currentLocation);
+				receivedLocationUpdate = true;
+				dealWithLocation();
+			}
+		};
+
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		Location temp = null;
+		if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
+			temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
+			if (currentLocationName == null)
+				getCurrentLocationNameFromFoursquare(currentLocation);
+			dealWithLocation();
+		}
+		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+			temp = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
+			if (currentLocationName == null)
+				getCurrentLocationNameFromFoursquare(currentLocation);
+			dealWithLocation();		
+		}
 	}
 
 	public void onResume() {
-		super.onResume();
-		if (this.checkIns != null)
-			getLastLocation();
-		getCurrentLocation();
+		 super.onResume();
+	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+	     if (currentLocation != null) {
+	       	if (currentLocationName == null) 
+	     		getCurrentLocationNameFromFoursquare(currentLocation);
+	        dealWithLocation();
+	     }
+	     /*
+		Log.v("Home", "about to start thread for getVenues");
+		thread.start(); */
 	}
-
-	/*----------------------- ACCESS TOKEN CODE BELOW --------------------*/
 	
+	 //pauses listener while app is inactive
+    @Override
+    public void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(locationListener);
+    }
+    
+	/*----------------------- ACCESS TOKEN CODE BELOW --------------------*/
+
 	private void dealWithCode(Boolean codeStored) {
 		if (codeStored) {
 			try {
@@ -121,12 +197,12 @@ public class Home extends ListActivity {
 				if (token != null) {
 					if ((this.checkIns =CheckInManager.getCheckins(this.token, this.checkIns)) != null) {
 						ch.createInitialHistogram(this.checkIns);
-						if (!CategoryHistogramManager.containsHistogram(pref, getString(R.string.histogramPreferenceName)));
+						if (!CategoryHistogramManager.containsHistogram(pref, getString(R.string.histogramPreferenceName)))
 							CategoryHistogramManager.storeHistogram(this.ch, this.pref, getString(R.string.histogramPreferenceName));
 					}
 				}
 			} catch (MalformedURLException e) {
-
+				//TODO: Deal with this error
 			}
 		}
 	}
@@ -167,11 +243,13 @@ public class Home extends ListActivity {
 					"There was an error connecting to Foursquare",
 					Toast.LENGTH_LONG).show();
 			e.printStackTrace();
+			//TODO: Deal with this error
 		} catch (IOException e) {
 			Toast.makeText(Home.this,
 					"There was an error connecting to Foursquare",
 					Toast.LENGTH_LONG).show();
 			e.printStackTrace();
+			//TODO: Deal with this error
 		} catch (JSONException e) {
 			// This means that they probably revoked the token
 			// We are going to clear the preferences and go back to
@@ -216,111 +294,108 @@ public class Home extends ListActivity {
 		return sb.toString();
 	}
 
-
 	/* ----------------LOCATION CODE BELOW --------------------- */
-
-	private void getLastLocation() {
-		this.lastLocationName = this.checkIns.get(0).getName();
-		this.lastLocationCoord = this.checkIns.get(0).getLocation();
-	}
-
-	private void getCurrentLocation() {
-		locationManager = (LocationManager) this
-				.getSystemService(Context.LOCATION_SERVICE);
-
-		locationListener = new LocationListener() {
-			@Override
-			public void onStatusChanged(String provider, int status,
-					Bundle extras) {
-			}
-
-			@Override
-			public void onProviderEnabled(String provider) {
-			}
-
-			@Override
-			public void onProviderDisabled(String provider) {
-			}
-
-			@Override
-			public void onLocationChanged(Location location) {
-				myLocation = location;
-				dealWithLocation(Home.this.lastLocationCoord,
-						Home.this.currentLocation);
-			}
-		};
-
-		locationManager.requestLocationUpdates(
-				LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-				0, locationListener);
-
-		// get last locations
-		if (locationManager
-				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null)
-			myLocation = locationManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null)
-			myLocation = locationManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		dealWithLocation(this.lastLocationCoord, this.currentLocation);
-
-	}
-
-	private void getCurrentLocationName(String location) {
-		String url = "https://api.foursquare.com/v2/venues/search?ll=" + location;		
+    public void getLastLocation() {
+    	if (this.checkIns != null) {
+    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
+    		this.lastLocation = lastCheckIn.getLocation();
+    	}
+    }
+    
+    private void getLastLocationName() {
+    	if (this.checkIns != null) {
+    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
+    		this.lastLocationName = lastCheckIn.getName();
+    	}
+    }
+	private void getCurrentLocationNameFromFoursquare(GeoPoint location) {
+		if (this.token == null) {
+			return;
+		}
+		String url = "https://api.foursquare.com/v2/venues/search?ll=" + String.valueOf((location.getLatitudeE6()/1E6)) + "," + String.valueOf((location.getLongitudeE6()/1E6));
+		String authUrl = url + "&oauth_token=" + this.token;
 		HttpClient hc = new DefaultHttpClient();
 	
-			try {
-				HttpGet request = new HttpGet(url);
-				HttpResponse resp = hc.execute(request);
-				int responseCode = resp.getStatusLine().getStatusCode();
+		try {
+			HttpGet request = new HttpGet(authUrl);
+			HttpResponse resp = hc.execute(request);
+			HttpEntity entity = resp.getEntity();
+			String contentString = CheckInManager.convertStreamToString(entity.getContent());
+			JSONObject responseObj = new JSONObject(contentString);
+			int responseCode = resp.getStatusLine().getStatusCode();
 
-				if (responseCode >= 200 && responseCode < 300) {
-
-					String response = responseToString(resp);
-					JSONObject jsonObj = new JSONObject(response);
-					JSONObject jsonObj2 = jsonObj.getJSONObject("groups");
-					
-					
-				} 
-			}catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			if (responseCode >= 200 && responseCode < 300) {
+				JSONObject res = responseObj.getJSONObject("response");
+				JSONArray groups = res.getJSONArray("groups");
+				JSONObject nearby = groups.getJSONObject(1);
+				JSONArray close = nearby.getJSONArray("items");
+				JSONObject closest = close.getJSONObject(0);
+				this.currentLocationName = closest.getString("name");
+				getNearbyLocationsFromFoursquare(close);
+			} 
+		}catch (IllegalStateException e) {
+			//TODO: Deal with this error
+			e.printStackTrace();
+		} catch (IOException e) {
+			//TODO: Deal with this error
+			e.printStackTrace();
+		} catch (JSONException e) {
+			//TODO: Deal with this error
+			e.printStackTrace();
+		}
 	}
 
 	/*---------------- UI CODE BELOW *----------------------*/
 
-	private void dealWithLocation(String prev_loc, String cur_loc) {
-		if (prev_loc == cur_loc && prev_loc != "null") {
+	private void getNearbyLocationsFromFoursquare(JSONArray close) throws JSONException {
+		for (int i = 0; i < close.length(); i++) {
+			JSONObject nearbyPlace = close.getJSONObject(i);
+			JSONObject location = nearbyPlace.getJSONObject("location");
+			int lat = (int) (Double.parseDouble(location.getString("lat")) * 1E6);
+			int lon = (int) (Double.parseDouble(location.getString("lng")) * 1E6);
+			GeoPoint locationGeoPoint = new GeoPoint(lat, lon);
+			Venue newVenue;
+			try {
+				newVenue = new Venue(nearbyPlace.getString("name"), "url", "image url", locationGeoPoint, Integer.parseInt(location.getString("distance")));
+				this.nearbyLocations.add(newVenue);
+			} catch (NumberFormatException e) {
+				//TODO: Deal with this error
+				e.printStackTrace();
+			} catch (JSONException e) {
+				//TODO: Deal with this error
+				e.printStackTrace();
+			}
+		}	
+	}
+	
+	public boolean sameLocation(GeoPoint l1, GeoPoint l2) {
+		if ((l1.getLongitudeE6() == l2.getLongitudeE6()) && (l1.getLatitudeE6() == l2.getLatitudeE6()))
+			return true;
+		return false;
+	}
+
+	private void dealWithLocation() {
+		if (sameLocation(lastLocation, currentLocation) && lastLocation != null) {
 			// they checked in at a place and are still there
 			setContentView(R.layout.main_checkedin);
 		}
-		if (prev_loc != "null" && cur_loc == "null") {
+		if (lastLocation != null && currentLocation == null) {
 			// they checked in at a place, we don't know where they are now
 			// but we'll assume they're still there
 			setContentView(R.layout.main_checkedin);
 		}
-		if (prev_loc == "null" && cur_loc != "null") {
+		if (lastLocation == null && currentLocation != null) {
 			// we don't know their last check in, but we know where they are now
 			// prompt them to check in
 			setContentView(R.layout.main_notcheckedin);
 		}
-		if (prev_loc == cur_loc && prev_loc == "null") {
+		if (sameLocation(lastLocation, currentLocation) && lastLocation == null) {
 			// we dont know their last check in or where they are now
 			// this.getLocation();
 			setContentView(R.layout.main_notcheckedin); // need to change this
 			// to main_wedontknow
 			// later
 		}
-
 	}
 
 	public void toFriends(View view) {
@@ -339,11 +414,10 @@ public class Home extends ListActivity {
 	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Toast.makeText(this, my_venues.get(position).getVenueName(),
-				Toast.LENGTH_SHORT).show();
-
+	    Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( my_venues.get(position).getURL() ) );
+	    startActivity( browse );
 	}
-
+	
 	private class VenueAdapter extends ArrayAdapter<Venue> {
 
 		private ArrayList<Venue> items;
@@ -366,10 +440,10 @@ public class Home extends ListActivity {
 				TextView tt = (TextView) v.findViewById(R.id.toptext);
 				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
 				if (tt != null) {
-					tt.setText(o.getVenueName());
+					tt.setText(o.getName());
 				}
 				if (bt != null) {
-					bt.setText(o.getVenueLocation());
+					bt.setText(o.getName());
 				}
 			}
 			return v;
@@ -391,6 +465,7 @@ public class Home extends ListActivity {
 
 	private void getVenues() {
 		try {
+			Log.v("Home", "entering getVenues()");
 			/* version 1: just put in our own data
 			my_venues = new ArrayList<Venue>();
 			my_venues.add(new Venue("Craigie on Main", "123 Main, Cambridge"));
@@ -401,32 +476,27 @@ public class Home extends ListActivity {
 			Thread.sleep(5000);
 			Log.i("ARRAY", "" + my_venues.size());
 			*/
-			/* version 2: basic yelp search for burritos
+			/* version 2: yelp search based on RecommendationInput and filtering for best */
 			Yelp yelp = getYelp();
-	        ArrayList<YelpVenue> venues = yelp.venuesSearch("burritos", 42.2833333,-71.2333333);
-	        my_venues = new ArrayList<Venue>();
-	        my_venues.add(new Venue("option1", venues.get(0).toString()));
-	        my_venues.add(new Venue("option2", venues.get(1).toString()));
-	        my_venues.add(new Venue("option3", venues.get(2).toString()));
-	        */
-			/* version 3: yelp search based on RecommendationInput and filtering for best */
-			Yelp yelp = getYelp();
-			Log.v("BACKGROUND PROC", "yelp: " + yelp.toString());
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
 			cats.add(new Category("dessert"));
 			cats.add(new Category("coffee"));
-			Log.v("BACKGROUND PROC", "cats: " + cats.toString());
+			// throws NullPointerException due to myLocation
 			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
-			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23);
-			Log.v("BACKGROUND PROC", "input: " + input.toString());
+			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
-			Log.v("BACKGROUND PROC", "venues: " + venues.toString());
 			my_venues = new ArrayList<Venue>();
-	        my_venues.add(new Venue("option1", venues.get(0).toString()));
-	        my_venues.add(new Venue("option2", venues.get(1).toString()));
-	        my_venues.add(new Venue("option3", venues.get(2).toString()));
-	        Thread.sleep(5000);
+			
+			for (int i = 0; i < venues.size(); i++) {
+				YelpVenue yven = venues.get(i);
+				int lat = (int)(yven.getLatitude() * 1E6);
+				int lon = (int)(yven.getLongitude() * 1E6);
+				GeoPoint gp = new GeoPoint(lat, lon);
+				Venue ven = new Venue(yven.getName(), yven.getURL(), yven.getImageURL(), gp, yven.getDistance());
+				my_venues.add(ven);
+			}
+
 		} catch (Exception e) {
 			Log.e("BACKGROUND_PROC", e.toString());
 		}
@@ -437,6 +507,7 @@ public class Home extends ListActivity {
 	 * (actually there's a reason for this:  it authorizes you with the Yelp API)
 	 */
     public Yelp getYelp() {
+    	Log.v("Yelp", "entering getYelp()");
         String consumerKey = getString( R.string.oauth_consumer_key );
         String consumerSecret = getString( R.string.oauth_consumer_secret);
         String token = getString(R.string.oauth_token);
@@ -446,38 +517,82 @@ public class Home extends ListActivity {
         
         return yelp;
     }
-
     
-    /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/ 
-     * returns a Drawable from a URL for an image
-     * an ImageView can set itself to display this Drawable as its image
-     * example usage:
-     * Drawable image = ImageOperations(this,res.get(0).rating_img_url_small,"image.jpg");
-       ImageView imgView = new ImageView(this);
-       imgView = (ImageView)findViewById(R.id.image1);
-       imgView.setImageDrawable(image);
-     */
-	private Drawable ImageOperations(Context ctx, String url, String saveFilename) {
-		try {
-			InputStream is = (InputStream) this.fetch(url);
-			Drawable d = Drawable.createFromStream(is, saveFilename);
-			return d;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    public class VenueAdapter extends ArrayAdapter<Venue> {
 
-    /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/
-     * used by ImageOperations to get an image from a URL
-     */
-	public Object fetch(String address) throws MalformedURLException,IOException {
-		URL url = new URL(address);
-		Object content = url.getContent();
-		return content;
-	}
+    	private Context context;
+    	private ArrayList<Venue> items;
 
+    	private VenueAdapter(Context context, int textViewResourceId, ArrayList<Venue> items) {
+    		super(context, textViewResourceId, items);
+    		this.items = items;
+    		this.context = context;
+    	}
+
+    	@Override
+    	public View getView(int position, View convertView, ViewGroup parent) {
+    		View v = convertView;
+    		if (v == null) {
+    			LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    			v = vi.inflate(R.layout.row, null);
+    		}
+    		Venue o = items.get(position);
+    		if (o != null) {
+    			TextView tt = (TextView) v.findViewById(R.id.toptext);
+    			TextView bt = (TextView) v.findViewById(R.id.bottomtext);
+    			ImageView iv = (ImageView) v.findViewById(R.id.icon);
+    			if (tt != null) {
+    				tt.setText(o.getName());
+    			}
+    			if (bt != null) {
+    				bt.setText(o.getName());
+    			}
+    			if (iv != null) {
+    	    		Drawable image = ImageOperations(context, items.get(position).getImageURL(), "item" + Integer.toString(position) + ".jpg");
+    	    		if (image == null) {
+    	    			/* supposed to display this when the image can't be gotten from the url
+    	    			 * but instead, no image displays, which is ok but doesn't look so good
+    	    			 * probably returning null because it's an incorrect path name
+    	    			 */
+    	    			image = Drawable.createFromPath("../../../../../res/drawable/default_venue_image.png");
+    	    		}
+    				iv.setImageDrawable(image);
+    			}
+    		}
+    		return v;
+    	}
+        
+        /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/ 
+         * returns a Drawable from a URL for an image
+         * an ImageView can set itself to display this Drawable as its image
+         * example usage:
+         * ArrayList<YelpVenue> venues; //already got them using yelp.getRecommendation(), see getVenues() method in Home
+         * Drawable image = ImageOperations(this,venues.get(0).rating_img_url_small,"image.jpg");
+           ImageView imgView = (ImageView)findViewById(R.id.image1);
+           imgView.setImageDrawable(image);
+         */
+    	private Drawable ImageOperations(Context ctx, String url, String saveFilename) {
+    		try {
+    			InputStream is = (InputStream) this.fetch(url);
+    			Drawable d = Drawable.createFromStream(is, saveFilename);
+    			return d;
+    		} catch (MalformedURLException e) {
+    			e.printStackTrace();
+    			return null;
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    			return null;
+    		}
+    	}
+
+        /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/
+         * used by ImageOperations to get an image from a URL
+         */
+    	public Object fetch(String address) throws MalformedURLException,IOException {
+    		URL url = new URL(address);
+    		Object content = url.getContent();
+    		return content;
+    	}
+    }
 }
+

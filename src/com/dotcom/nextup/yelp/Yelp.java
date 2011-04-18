@@ -3,9 +3,8 @@ package com.dotcom.nextup.yelp;
 Example code based on code from Nicholas Smith at http://imnes.blogspot.com/2011/01/how-to-use-yelp-v2-from-java-including.html
 For a more complete example (how to integrate with GSON, etc) see the blog post above.
 */
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Collections;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,62 +29,21 @@ public class Yelp {
 	OAuthService service;
 	Token accessToken;
 
-  /**
-* Setup the Yelp API OAuth credentials.
-*
-* OAuth credentials are available from the developer site, under Manage API access (version 2 API).
-*
-* @param consumerKey Consumer key
-* @param consumerSecret Consumer secret
-* @param token Token
-* @param tokenSecret Token secret
-*/
+   /**
+	* Setup the Yelp API OAuth credentials.
+	*
+	* OAuth credentials are available from the developer site, under Manage API access (version 2 API).
+	*
+	* @param consumerKey Consumer key
+	* @param consumerSecret Consumer secret
+	* @param token Token
+	* @param tokenSecret Token secret
+	*/
 	public Yelp(String consumerKey, String consumerSecret, String token, String tokenSecret) {
-		Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
+		Log.v("Yelp", "entering Yelp constructor");
+		//Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
 		this.service = new ServiceBuilder().provider(YelpApi2.class).apiKey(consumerKey).apiSecret(consumerSecret).build();
 		this.accessToken = new Token(token, tokenSecret);
-	}
-
-	public ArrayList<YelpVenue> getRecommendation(RecommendationInput input) {
-		/* THE RECOMMENDATION ENGINE */
-		ArrayList<YelpVenue> all_venues = getManyPossibleVenues(input);
-		ArrayList<YelpVenue> rec = chooseBest(input, all_venues);
-		return rec;
-	}
-	
-	public ArrayList<YelpVenue> getManyPossibleVenues(RecommendationInput input) {
-		/* part of the recommendation engine:
-		 * does a yelp search() for each given category
-		 * returns all results
-		 * (note that right now the yelp search() limits itself to returning 3 venues to keep it from being too slow)
-		 */
-		double lat = input.getLatitude();
-		double lon = input.getLongitude();
-		ArrayList<YelpVenue> all_venues = new ArrayList<YelpVenue>();
-		ArrayList<YelpVenue> one_search = new ArrayList<YelpVenue>();
-		for (Category cat : input.getCategories()) {
-			one_search = venuesSearch(cat.getName(), lat, lon);
-			for (YelpVenue venue : one_search) {
-				all_venues.add(venue);
-			}
-		}
-		return all_venues;
-	}
-	
-	public ArrayList<YelpVenue> chooseBest(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
-		/* part of the recommendation engine
-		 * given a lot of yelp venues to consider, returns the best 3
-		 * (right now it just returns the first 3 in the list)
-		 */
-		ArrayList<YelpVenue> best = new ArrayList<YelpVenue>();
-		int i = 0;
-		int len = all_venues.size();
-		while ( i < len && i <= 3 ) { 
-			Log.v("Yelp", "about to add a venue to best. i ="+Integer.toString(i)+ ", len=" + Integer.toString(len));
-			best.add(all_venues.get(i)); 
-			i++;
-		}
-		return best;
 	}
 		
 	public int min (int a, int b) {
@@ -93,27 +51,27 @@ public class Yelp {
 		else { return b; }
 	}
 	
-	
-  /**
-* Search with term and location.
-*
-* @param term Search term
-* @param latitude Latitude
-* @param longitude Longitude
-* @return JSON string response
-*/
-	public String search(String term, double latitude, double longitude) {
+    /**
+     * Search with term and location.
+     *
+     * @param term Search term
+     * @param latitude Latitude
+     * @param longitude Longitude
+     * @return JSON string response
+     */
+	public String search(String term, double latitude, double longitude, double max_distance) {
 		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.yelp.com/v2/search");
 		request.addQuerystringParameter("limit", "3");
 		request.addQuerystringParameter("term", term);
 	    request.addQuerystringParameter("ll", latitude + "," + longitude);
+	    request.addQuerystringParameter("radius_filter", Double.toString(max_distance));
 	    this.service.signRequest(this.accessToken, request);
 	    Response response = request.send();
 	    return response.getBody();
 	}
   
-	public ArrayList<YelpVenue> venuesSearch(String term, double latitude, double longitude) {
-		String response = this.search(term, latitude, longitude);
+	public ArrayList<YelpVenue> venuesSearch(String term, double latitude, double longitude, double max_distance) {
+		String response = this.search(term, latitude, longitude, max_distance);
 		return this.searchResponseToYelpVenues(response);
 	}
 	
@@ -134,5 +92,80 @@ public class Yelp {
 		}
 		return venues;
 	}
+	
+	public ArrayList<YelpVenue> getRecommendation(RecommendationInput input) {
+			/* THE RECOMMENDATION ENGINE */
+			ArrayList<YelpVenue> all_venues = getManyPossibleVenues(input);
+			ArrayList<YelpVenue> rec = chooseBest(input, all_venues);
+			return rec;
+	}
+		
+	public ArrayList<YelpVenue> getManyPossibleVenues(RecommendationInput input) {
+		/* part of the recommendation engine:
+		 * does a yelp search() for each given category
+		 * returns all results
+		 * (note that right now the yelp search() limits itself to returning 3 venues to keep it from being too slow)
+		 */
+		Log.v("Yelp", "get many possible venues");
+		double lat = input.getLatitude();
+		double lon = input.getLongitude();
+		double maxd = input.getMaxDistance();
+		ArrayList<YelpVenue> all_venues = new ArrayList<YelpVenue>();
+		ArrayList<YelpVenue> one_search = new ArrayList<YelpVenue>();
+		for (Category cat : input.getCategories()) {
+			Log.v("Yelp", "cat: " + cat.getName());
+			one_search = venuesSearch(cat.getName(), lat, lon, maxd);
+			for (YelpVenue venue : one_search) {
+				all_venues.add(venue);
+			}
+		}
+		return all_venues;
+	}
+		
+	public ArrayList<YelpVenue> chooseBest(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
+		/* part of the recommendation engine
+		 * given a lot of yelp venues to consider, returns the best 3
+		 * (right now it just returns the first 3 in the list)
+		 */
+		ArrayList<YelpVenue> best = new ArrayList<YelpVenue>();
+		int len = all_venues.size();
+		YelpVenue venue;
+		ArrayList<RankVenuePair> options = new ArrayList<RankVenuePair>(); // will assign rank to each venue, then select venues with highest ranks
+		for ( int i = 0; i < all_venues.size(); i++ ) {
+			venue = all_venues.get(i);
+			options.add(new RankVenuePair(rank(venue), venue));
+		}
+		Collections.sort(options); // I think the ones at the end have higher ranks
+		for ( int i = options.size(); i >= 0 && i <= 3; i--) {
+			best.add((YelpVenue)options.get(i).getVenue());
+		}
+		return best;
+	}
 
+	private double rank(YelpVenue venue) {
+		return venue.getRating() * venue.getReviewCount();
+	}
+	
+	public class RankVenuePair implements Comparable<RankVenuePair> {
+		/* for comparing venues by their rank */
+		private double rank;
+		private YelpVenue venue;
+		
+		public RankVenuePair(double rank, YelpVenue venue) {
+			this.rank = rank;
+			this.venue = venue;
+		}
+
+		public Object getRank() { return rank; }
+		public Object getVenue() { return venue; }
+		
+		public int equals(RankVenuePair another) {
+			return Double.compare((Double) this.getRank(), (Double) another.getRank());
+		}
+
+		@Override
+		public int compareTo(RankVenuePair another) {
+			return Double.compare((Double) this.getRank(), (Double) another.getRank());
+		}
+	}
 }

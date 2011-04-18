@@ -18,6 +18,11 @@ public class CategoryHistogram implements Comparator<Category>{
 	public CategoryHistogram() {
 		super();
 	}
+	
+	public CategoryHistogram(HashMap<Category, ArrayList<Category>> map) {
+		this();
+		this.map = map;
+	}
 	public Set<Category> getPrefixes() {
 		return map.keySet();
 	}
