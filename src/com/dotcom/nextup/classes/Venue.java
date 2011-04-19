@@ -35,5 +35,13 @@ public class Venue implements Comparable<Venue>{
     public void setImageURL(String URL) { image_url = URL; }
     public double getDistance() { return distance; }
     public void setDistance(double d) { distance = d; }
+
+	public void setmSelectable(boolean mSelectable) {
+		this.mSelectable = mSelectable;
+	}
+
+	public boolean ismSelectable() {
+		return mSelectable;
+	}
     
 }

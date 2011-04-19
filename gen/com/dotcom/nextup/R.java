@@ -15,36 +15,40 @@ public final class R {
         public static final int foursquarelogo=0x7f020001;
         public static final int icon=0x7f020002;
         public static final int images=0x7f020003;
+        public static final int mapspointer=0x7f020004;
     }
     public static final class id {
-        public static final int Button01=0x7f050009;
-        public static final int CheckBox01=0x7f050008;
-        public static final int Comfortable=0x7f050015;
-        public static final int EditText01=0x7f050006;
-        public static final int EditText02=0x7f050007;
-        public static final int FoursquareLogo=0x7f050004;
-        public static final int ImageView01=0x7f050012;
-        public static final int Location=0x7f05000c;
-        public static final int Logo=0x7f05000a;
-        public static final int New=0x7f050017;
-        public static final int Recommend=0x7f050016;
-        public static final int SignInButton=0x7f050003;
-        public static final int SignInLayout=0x7f050002;
-        public static final int TextView01=0x7f050005;
-        public static final int TopSectionCheckedIn=0x7f05000b;
-        public static final int atextview=0x7f05000e;
-        public static final int bottomtext=0x7f05001b;
-        public static final int button02=0x7f050013;
-        public static final int button03=0x7f050014;
-        public static final int button04=0x7f05000d;
-        public static final int icon=0x7f050019;
-        public static final int loginbutton=0x7f050000;
-        public static final int mapview=0x7f050018;
-        public static final int nothanksbutton=0x7f050001;
-        public static final int toFriends=0x7f050011;
-        public static final int toMap=0x7f050010;
-        public static final int toPreferences=0x7f05000f;
-        public static final int toptext=0x7f05001a;
+        public static final int Button01=0x7f060009;
+        public static final int CheckBox01=0x7f060008;
+        public static final int Comfortable=0x7f060015;
+        public static final int EditText01=0x7f060006;
+        public static final int EditText02=0x7f060007;
+        public static final int FoursquareLogo=0x7f060004;
+        public static final int Friends=0x7f06001e;
+        public static final int Home=0x7f06001d;
+        public static final int ImageView01=0x7f060012;
+        public static final int Location=0x7f06000c;
+        public static final int Logo=0x7f06000a;
+        public static final int New=0x7f060017;
+        public static final int Preferences=0x7f06001c;
+        public static final int Recommend=0x7f060016;
+        public static final int SignInButton=0x7f060003;
+        public static final int SignInLayout=0x7f060002;
+        public static final int TextView01=0x7f060005;
+        public static final int TopSectionCheckedIn=0x7f06000b;
+        public static final int atextview=0x7f06000e;
+        public static final int bottomtext=0x7f06001b;
+        public static final int button02=0x7f060013;
+        public static final int button03=0x7f060014;
+        public static final int button04=0x7f06000d;
+        public static final int icon=0x7f060019;
+        public static final int loginbutton=0x7f060000;
+        public static final int mapview=0x7f060018;
+        public static final int nothanksbutton=0x7f060001;
+        public static final int toFriends=0x7f060011;
+        public static final int toMap=0x7f060010;
+        public static final int toPreferences=0x7f06000f;
+        public static final int toptext=0x7f06001a;
     }
     public static final class layout {
         public static final int foursquareloginprompt=0x7f030000;
@@ -57,6 +61,9 @@ public final class R {
         public static final int preferences=0x7f030007;
         public static final int row=0x7f030008;
         public static final int string=0x7f030009;
+    }
+    public static final class menu {
+        public static final int menu=0x7f050000;
     }
     public static final class string {
         public static final int accessCodePreferenceName=0x7f04000b;
