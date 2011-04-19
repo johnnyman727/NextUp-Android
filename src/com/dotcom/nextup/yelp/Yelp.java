@@ -125,10 +125,14 @@ public class Yelp {
 	public ArrayList<YelpVenue> chooseBest(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
 		/* part of the recommendation engine
 		 * given a lot of yelp venues to consider, returns the best 3
-		 * (right now it just returns the first 3 in the list)
 		 */
 		ArrayList<YelpVenue> best = new ArrayList<YelpVenue>();
 		YelpVenue venue;
+		/* a list of (rank, venue) pairs is for the decorate, sort, undecorate sort method
+		 * decorate: put each venue with its rank
+		 * sort: list of (rank, venue) pairs by their rank
+		 * undecorate: from list of venues sorted by rank, choose the highest-ranked venue
+		 */
 		ArrayList<RankVenuePair> options = new ArrayList<RankVenuePair>(); // will assign rank to each venue, then select venues with highest ranks
 		for ( int i = 0; i < all_venues.size(); i++ ) {
 			venue = all_venues.get(i);
@@ -142,7 +146,9 @@ public class Yelp {
 	}
 
 	private double rank(YelpVenue venue) {
-		return venue.getRating() * venue.getReviewCount();
+		/* if a venue has too few reviews, its rating doesn't mean much */
+		if ( venue.getReviewCount() > 3 ) { return venue.getRating(); }
+		else { return venue.getRating()/2; }
 	}
 	
 	public class RankVenuePair implements Comparable<RankVenuePair> {
