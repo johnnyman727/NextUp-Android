@@ -95,9 +95,7 @@ public class Home extends ListActivity {
 		if (this.checkIns != null)
 			getLastLocation();
 			getLastLocationName();
-		my_venues = new ArrayList<Venue>();
-		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
-		setListAdapter(this.m_adapter);
+			
 		/*
 
 		if (this.checkIns != null)
@@ -108,6 +106,7 @@ public class Home extends ListActivity {
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
+		getVenues();
 		dialog.dismiss();
 		
 		/* @TODO: should only do this once location has been found */
@@ -421,7 +420,6 @@ public class Home extends ListActivity {
 	
 	
 	private Runnable returnRes = new Runnable() {
-
 		@Override
 		public void run() {
 			if (my_venues != null && my_venues.size() > 0) {
@@ -437,17 +435,6 @@ public class Home extends ListActivity {
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
-			/* version 1: just put in our own data
-			my_venues = new ArrayList<Venue>();
-			my_venues.add(new Venue("Craigie on Main", "123 Main, Cambridge"));
-			my_venues.add(new Venue("Stephanie's on Newbury",
-					"755 Newbury Street, Boston"));
-			my_venues.add(new Venue("Falafel Palace",
-					"75 Green Street, Cambridge"));
-			Thread.sleep(5000);
-			Log.i("ARRAY", "" + my_venues.size());
-			*/
-			/* version 2: yelp search based on RecommendationInput and filtering for best */
 			Yelp yelp = getYelp();
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
@@ -457,7 +444,7 @@ public class Home extends ListActivity {
 			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
 			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
-			my_venues = new ArrayList<Venue>();
+			//my_venues = new ArrayList<Venue>();
 			
 			for (int i = 0; i < venues.size(); i++) {
 				YelpVenue yven = venues.get(i);
@@ -465,6 +452,7 @@ public class Home extends ListActivity {
 				int lon = (int)(yven.getLongitude() * 1E6);
 				GeoPoint gp = new GeoPoint(lat, lon);
 				Venue ven = new Venue(yven.getName(), yven.getURL(), yven.getImageURL(), gp, yven.getDistance());
+				ven.setRating(yven.getRating());
 				my_venues.add(ven);
 			}
 
@@ -516,7 +504,7 @@ public class Home extends ListActivity {
     				tt.setText(o.getName());
     			}
     			if (bt != null) {
-    				bt.setText(o.getName());
+    				bt.setText(Double.toString(o.getRating()));
     			}
     			if (iv != null) {
     	    		Drawable image = ImageOperations(context, items.get(position).getImageURL(), "item" + Integer.toString(position) + ".jpg");
