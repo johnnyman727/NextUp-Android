@@ -2,8 +2,12 @@ package com.dotcom.nextup.activities;
 
 import java.util.List;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.classes.VenuesMapOverlay;
@@ -50,7 +54,7 @@ public class Map extends MapActivity{
 	
 
 
-/*
+
 	public boolean onCreateOptionsMenu(Menu menu) {
     	MenuInflater inflater = getMenuInflater();
     	inflater.inflate(R.menu.menu, menu);
@@ -70,5 +74,5 @@ public class Map extends MapActivity{
             					break;
         }
         return true;
-    } */
+    } 
 }
