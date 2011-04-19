@@ -523,7 +523,7 @@ public class Home extends ListActivity {
     	private Context context;
     	private ArrayList<Venue> items;
 
-    	private VenueAdapter(Context context, int textViewResourceId, ArrayList<Venue> items) {
+    	public VenueAdapter(Context context, int textViewResourceId, ArrayList<Venue> items) {
     		super(context, textViewResourceId, items);
     		this.items = items;
     		this.context = context;
