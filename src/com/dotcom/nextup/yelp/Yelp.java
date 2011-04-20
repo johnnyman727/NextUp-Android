@@ -45,61 +45,14 @@ public class Yelp {
 		this.service = new ServiceBuilder().provider(YelpApi2.class).apiKey(consumerKey).apiSecret(consumerSecret).build();
 		this.accessToken = new Token(token, tokenSecret);
 	}
-		
-	public int min (int a, int b) {
-		if (a < b) { return a; }
-		else { return b; }
-	}
-	
-    /**
-     * Search with term and location.
-     *
-     * @param term Search term
-     * @param latitude Latitude
-     * @param longitude Longitude
-     * @return JSON string response
-     */
-	public String search(String term, double latitude, double longitude, double max_distance) {
-		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.yelp.com/v2/search");
-		request.addQuerystringParameter("limit", "3");
-		request.addQuerystringParameter("term", term);
-	    request.addQuerystringParameter("ll", latitude + "," + longitude);
-	    request.addQuerystringParameter("radius_filter", Double.toString(max_distance));
-	    this.service.signRequest(this.accessToken, request);
-	    Response response = request.send();
-	    return response.getBody();
-	}
-  
-	public ArrayList<YelpVenue> venuesSearch(String term, double latitude, double longitude, double max_distance) {
-		String response = this.search(term, latitude, longitude, max_distance);
-		return this.searchResponseToYelpVenues(response);
-	}
-	
-	private ArrayList<YelpVenue> searchResponseToYelpVenues(String response) {
-		ArrayList<YelpVenue> venues = new ArrayList<YelpVenue>();
-		try {
-			JSONObject jresponse = new JSONObject(response);
-			Log.v(TAG, jresponse.toString());
-			JSONArray jbusinesses = new JSONArray(jresponse.getString("businesses"));
-			JSONObject jbus = new JSONObject();
-			for (int i = 0; i < jbusinesses.length(); i++) {
-				jbus = jbusinesses.getJSONObject(i);
-				YelpVenue venue = new YelpVenue(jbus);
-				venues.add(venue);
-			}
-		} catch (JSONException e) {
-			Log.e(TAG, e.toString());
-		}
-		return venues;
-	}
 	
 	public ArrayList<YelpVenue> getRecommendation(RecommendationInput input) {
-			/* THE RECOMMENDATION ENGINE */
-			ArrayList<YelpVenue> all_venues = getManyPossibleVenues(input);
-			ArrayList<YelpVenue> rec = chooseBest(input, all_venues);
-			return rec;
+		/* THE RECOMMENDATION ENGINE */
+		ArrayList<YelpVenue> all_venues = getManyPossibleVenues(input);
+		ArrayList<YelpVenue> rec = chooseBest(input, all_venues);
+		return rec;
 	}
-		
+	
 	public ArrayList<YelpVenue> getManyPossibleVenues(RecommendationInput input) {
 		/* part of the recommendation engine:
 		 * does a yelp search() for each given category
@@ -121,6 +74,49 @@ public class Yelp {
 		}
 		return all_venues;
 	}
+	
+	public ArrayList<YelpVenue> venuesSearch(String term, double latitude, double longitude, double max_distance) {
+		String response = this.search(term, latitude, longitude, max_distance);
+		return this.searchResponseToYelpVenues(response);
+	}
+	
+    /**
+     * Search with term and location.
+     *
+     * @param term Search term
+     * @param latitude Latitude
+     * @param longitude Longitude
+     * @return JSON string response
+     */
+	public String search(String term, double latitude, double longitude, double max_distance) {
+		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.yelp.com/v2/search");
+		request.addQuerystringParameter("limit", "3");
+		request.addQuerystringParameter("term", term);
+	    request.addQuerystringParameter("ll", latitude + "," + longitude);
+	    request.addQuerystringParameter("radius_filter", Double.toString(max_distance));
+	    this.service.signRequest(this.accessToken, request);
+	    Response response = request.send();
+	    return response.getBody();
+	}
+	
+	private ArrayList<YelpVenue> searchResponseToYelpVenues(String response) {
+		ArrayList<YelpVenue> venues = new ArrayList<YelpVenue>();
+		try {
+			JSONObject jresponse = new JSONObject(response);
+			Log.v(TAG, jresponse.toString());
+			JSONArray jbusinesses = new JSONArray(jresponse.getString("businesses"));
+			JSONObject jbus = new JSONObject();
+			for (int i = 0; i < jbusinesses.length(); i++) {
+				jbus = jbusinesses.getJSONObject(i);
+				YelpVenue venue = new YelpVenue(jbus);
+				venues.add(venue);
+			}
+		} catch (JSONException e) {
+			Log.e(TAG, e.toString());
+		}
+		return venues;
+	}
+
 		
 	public ArrayList<YelpVenue> chooseBest(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
 		/* part of the recommendation engine
@@ -139,7 +135,7 @@ public class Yelp {
 			options.add(new RankVenuePair(rank(venue), venue));
 		}
 		Collections.sort(options); // I think the ones at the end have higher ranks
-		for ( int i = options.size(); i >= 0 && i <= 3; i--) {
+		for ( int i = options.size() - 1; i >= options.size() - 3; i--) {
 			best.add((YelpVenue)options.get(i).getVenue());
 		}
 		return best;
@@ -161,8 +157,8 @@ public class Yelp {
 			this.venue = venue;
 		}
 
-		public Object getRank() { return rank; }
-		public Object getVenue() { return venue; }
+		public double getRank() { return rank; }
+		public YelpVenue getVenue() { return venue; }
 		
 		public int equals(RankVenuePair another) {
 			return Double.compare((Double) this.getRank(), (Double) another.getRank());
@@ -172,5 +168,14 @@ public class Yelp {
 		public int compareTo(RankVenuePair another) {
 			return Double.compare((Double) this.getRank(), (Double) another.getRank());
 		}
+		
+		public String toString() {
+			return "RankVenuePair rank " + Double.toString(rank) + " venue " + venue.toString();
+		}
+	}
+	
+	public int min (int a, int b) {
+		if (a < b) { return a; }
+		else { return b; }
 	}
 }
