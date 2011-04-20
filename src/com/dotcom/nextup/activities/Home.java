@@ -199,7 +199,7 @@ public class Home extends ListActivity {
 					if ((this.checkIns =CheckInManager.getCheckins(this.token, this.checkIns)) != null) {
 						ch.createInitialHistogram(this.checkIns);
 						if (!CategoryHistogramManager.containsHistogram(pref, getString(R.string.histogramPreferenceName)))
-							CategoryHistogramManager.storeHistogram(this.ch, this.pref, getString(R.string.histogramPreferenceName));
+							CategoryHistogramManager.storeHistogramToPhone(this.ch, this.pref, getString(R.string.histogramPreferenceName));
 					}
 				}
 			} catch (MalformedURLException e) {
