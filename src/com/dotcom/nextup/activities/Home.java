@@ -62,10 +62,7 @@ public class Home extends ListActivity {
 	private String code;
 	private ArrayList<CheckIn> checkIns;
 	private CategoryHistogram ch;
-	private ArrayList<Venue> my_venues = null;
-	private VenueAdapter m_adapter;
 	@SuppressWarnings("unused")
-	private Runnable viewVenues;
 	private SharedPreferences pref;
 	private AndroidOAuth oa;
 	private CheckInManager checkInManager;
@@ -76,7 +73,11 @@ public class Home extends ListActivity {
 	public String currentLocationName;
 	public String lastLocationName;
 	public ArrayList<Venue> nearbyLocations;
-	ProgressDialog dialog;
+
+	private ArrayList<Venue> my_venues = null;
+	private VenueAdapter m_adapter;
+	ProgressDialog dialog = null;
+	private Runnable viewVenues;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -89,28 +90,26 @@ public class Home extends ListActivity {
 		ch = new CategoryHistogram();
 		checkInManager = new CheckInManager();
 		codeStored = getCode(getIntent());
+
 		dialog = ProgressDialog.show(this, "Loading",
 				"Creating Personal Recommendations...");
+
 		dealWithCode(codeStored);
 		if (this.checkIns != null)
 			getLastLocation();
 			getLastLocationName();
 			
-		/*
 
 		if (this.checkIns != null)
 			getLastLocation();
 		getCurrentLocation();
-		*/
+		
 		
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
-		getVenues();
-		dialog.dismiss();
 		
-		/* @TODO: should only do this once location has been found */
-		/*
+		/** @TODO: should only do this once location has been found */
 		viewVenues = new Runnable() {
 			@Override
 			public void run() {
@@ -118,8 +117,9 @@ public class Home extends ListActivity {
 			}
 		};
 
-		Thread thread = new Thread(null, viewVenues, "MagentoBackground");
-		thread.start(); */
+		Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
+		thread.start();
+		dialog = ProgressDialog.show(Home.this, "Please wait...", "Pulling up cool places...", true);
 		
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -163,6 +163,7 @@ public class Home extends ListActivity {
 				getCurrentLocationNameFromFoursquare(currentLocation);
 			dealWithLocation();		
 		}
+
 	}
 
 	public void onResume() {
@@ -174,9 +175,10 @@ public class Home extends ListActivity {
 	     		getCurrentLocationNameFromFoursquare(currentLocation);
 	        dealWithLocation();
 	     }
-	     /*
-		Log.v("Home", "about to start thread for getVenues");
-		thread.start(); */
+
+		 if (m_adapter != null && m_adapter.getItems().size() > 0) {
+			 m_adapter.notifyDataSetChanged();
+		 }
 	}
 	
 	 //pauses listener while app is inactive
@@ -427,6 +429,7 @@ public class Home extends ListActivity {
 				for (int i = 0; i < my_venues.size(); i++)
 					m_adapter.add(my_venues.get(i));
 			}
+			dialog.dismiss();
 			m_adapter.notifyDataSetChanged();
 		}
 	};
@@ -435,6 +438,7 @@ public class Home extends ListActivity {
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
+			/* uses up limited actual Yelp queries */
 			Yelp yelp = getYelp();
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
@@ -444,8 +448,7 @@ public class Home extends ListActivity {
 			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
 			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
-			//my_venues = new ArrayList<Venue>();
-			
+			my_venues = new ArrayList<Venue>();			
 			for (int i = 0; i < venues.size(); i++) {
 				YelpVenue yven = venues.get(i);
 				int lat = (int)(yven.getLatitude() * 1E6);
@@ -455,9 +458,28 @@ public class Home extends ListActivity {
 				ven.setRating(yven.getRating());
 				my_venues.add(ven);
 			}
+			
+			
+			/* for debugging, just use made up venues
+			my_venues = new ArrayList<Venue>();
+			String name = "Lotus Spa";
+			String url = "http://www.lotusspaeauclaire.com/";
+			String img_url = "http://www.teachenglishinasia.net/files/u2/purple_lotus_flower.jpg";
+			int lat = 42283000;
+			int lon = -71230000;
+			GeoPoint gp = new GeoPoint(lat, lon);
+			int distance = 2000;
+			int rating = 4;
+			for (int i = 0; i < 3; i++) {
+				Venue ven = new Venue(name, url, img_url, gp, distance);
+				ven.setRating(rating);
+				my_venues.add(ven);
+			}
+			Thread.sleep(2000);
+			*/
 
 		} catch (Exception e) {
-			Log.e("BACKGROUND_PROC", e.toString());
+			Log.e("getVenues()", e.toString());
 		}
 		runOnUiThread(returnRes);
 	}
@@ -520,6 +542,8 @@ public class Home extends ListActivity {
     		}
     		return v;
     	}
+    	
+    	public ArrayList<Venue> getItems() { return items; }
         
         /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/ 
          * returns a Drawable from a URL for an image
