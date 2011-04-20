@@ -1,21 +1,21 @@
 package com.dotcom.nextup.datastoring;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.io.StreamCorruptedException;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
-import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
+import com.dotcom.nextup.categorymodels.Category;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CategoryHistogramManager {
 	
@@ -28,34 +28,11 @@ public class CategoryHistogramManager {
 			}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static HashMap<Category, ArrayList<Category>> convertStreamToMap(InputStream is) {
-		HashMap<Category, ArrayList<Category>> newMap = new HashMap<Category, ArrayList<Category>>();
-		try {
-			ObjectInputStream oi = new ObjectInputStream(is);
-			newMap = (HashMap<Category, ArrayList<Category>>)(oi.readObject());
-			oi.close();
-			return newMap;
-			
-		} catch (StreamCorruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-		
-	}
-	
 	public static byte[] convertCategoryHistogramTobytes(CategoryHistogram map) {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ObjectOutput oo = new ObjectOutputStream(baos);
-			oo.writeObject(map);
+			oo.writeObject(map.getMap());
 			return baos.toByteArray();
 		} catch (Exception e) {
 			Log.e("Home.java", "Error storing Histogram");
@@ -63,6 +40,26 @@ public class CategoryHistogramManager {
 		return null;
 	}
 	
+	public static CategoryHistogram getHistogramFromPhone(SharedPreferences pref, String prefName) {
+		String map = pref.getString(prefName, null);
+		CategoryHistogram ch = convertBytesToCategoryHistogram(map);
+		return ch;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static CategoryHistogram convertBytesToCategoryHistogram(String map) {
+		try {
+			byte[] mapBytes = map.getBytes();
+			ByteArrayInputStream bais = new ByteArrayInputStream(mapBytes);
+			ObjectInput oi = new ObjectInputStream(bais);
+			CategoryHistogram ret = new CategoryHistogram();
+			ret.setMap((HashMap<Category, ArrayList<Category>>) oi.readObject());
+			return ret;
+		}catch (Exception e) {
+			return null;
+		}
+	}
+
 	public static Boolean containsHistogram(SharedPreferences pref, String prefLocation) {
 		return pref.contains(prefLocation);
 	}

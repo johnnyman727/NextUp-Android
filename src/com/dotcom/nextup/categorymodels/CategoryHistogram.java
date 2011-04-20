@@ -13,7 +13,7 @@ public class CategoryHistogram implements Comparator<Category>{
 	private HashMap<Category, ArrayList<Category>> map = 
 		new HashMap<Category, ArrayList<Category>>();
 	//Amount of time which defines one event is "after" another (in seconds (4 hrs))
-	private final Integer followTime = 14400;
+	public static final Integer followTime = 3;
 	
 	public CategoryHistogram() {
 		super();
@@ -31,14 +31,17 @@ public class CategoryHistogram implements Comparator<Category>{
 		return map.containsKey(prefix);
 	}
 
-	public void createInitialHistogram(ArrayList<CheckIn> checkins) {
+	public static Boolean areSerial(CheckIn c1, CheckIn c2) {
+		return ((c1.getCreatedAt() - c2.getCreatedAt()) <= followTime);
+	}
+	public void addCheckInsToHistogram(ArrayList<CheckIn> checkins) {
 		int last = checkins.size() - 1;
 		int index;
 		for (CheckIn checkin : checkins) {
 			index = checkins.indexOf(checkin);
 			if (index != last) {
 				CheckIn otherCheckin = checkins.get(index + 1);
-				if ((checkin.getTime() - otherCheckin.getTime()) <= this.followTime) {
+				if (areSerial(checkin, otherCheckin)) {
 					for (Category category : checkin.getCategories()) {
 						for (Category otherCat : otherCheckin.getCategories()) {
 							addToCategoryHistogram(category, otherCat);
@@ -47,6 +50,10 @@ public class CategoryHistogram implements Comparator<Category>{
 				}
 			}
 		}
+	}
+	
+	public void addToHistogram(ArrayList<CheckIn> checkins) {
+		
 	}
 	public Boolean containsSuffix(Category suffix) {
 		for (Category prefix: map.keySet()) {
@@ -127,10 +134,10 @@ public class CategoryHistogram implements Comparator<Category>{
 		return object1.getFrequency() - object2.getFrequency();
 	}
 	
-	public void storeHistogram() {
-			
+	public HashMap<Category, ArrayList<Category>> getMap() {
+		return this.map;
 	}
-	
-	public void containsHistogram() {
+	public void setMap(HashMap<Category, ArrayList<Category>> map) {
+		this.map = map;
 	}
 }

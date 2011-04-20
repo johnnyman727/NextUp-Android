@@ -13,6 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.dotcom.nextup.categorymodels.Category;
+import com.dotcom.nextup.categorymodels.CategoryHistogram;
+import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 
 public class BackendManager {
@@ -45,6 +47,28 @@ public class BackendManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	public static void sendToCloud(ArrayList<CheckIn> checkins) {
+		ArrayList<Category> prefixes = new ArrayList<Category>();
+		ArrayList<Category> suffixes = new ArrayList<Category>();
+		
+		int last = checkins.size() - 1;
+		int index;
+		for (CheckIn checkin : checkins) {
+			index = checkins.indexOf(checkin);
+			if (index != last) {
+				CheckIn otherCheckin = checkins.get(index + 1);
+				if (CategoryHistogram.areSerial(checkin, otherCheckin)) {
+					for (Category category : checkin.getCategories()) {
+						for (Category otherCat : otherCheckin.getCategories()) {
+								prefixes.add(category);
+								suffixes.add(otherCat);
+						}
+					}
+				}
+			}
+		}
+		sendToCloud(prefixes, suffixes);
 	}
 	
 	public static ArrayList<Category> getSuggestionsFromCloud(Category prefix) {

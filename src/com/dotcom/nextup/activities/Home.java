@@ -50,6 +50,7 @@ import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.datastoring.BackendManager;
 import com.dotcom.nextup.datastoring.CategoryHistogramManager;
+import com.dotcom.nextup.datastoring.Update;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.dotcom.nextup.yelp.Yelp;
 import com.dotcom.nextup.yelp.YelpVenue;
@@ -93,25 +94,9 @@ public class Home extends ListActivity {
 		dialog = ProgressDialog.show(this, "Loading",
 				"Creating Personal Recommendations...");
 		dealWithCode(codeStored);
-		/* Testing Code Only */
-		Category prefix = new Category("Camelot");
-		Category suffix = new Category("Hogwarts");
-		ArrayList<Category> prefixes = new ArrayList<Category>();
-		prefixes.add(prefix);
-		ArrayList<Category> suffixes = new ArrayList<Category>();
-		suffix.setAverageTime(14);
-		suffixes.add(suffix);
-		BackendManager.sendToCloud(prefixes, suffixes);
 		if (this.checkIns != null)
 			getLastLocation();
 			getLastLocationName();
-			
-		/*
-
-		if (this.checkIns != null)
-			getLastLocation();
-		getCurrentLocation();
-		*/
 		
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
@@ -206,9 +191,10 @@ public class Home extends ListActivity {
 				}
 				if (token != null) {
 					if ((this.checkIns =CheckInManager.getCheckins(this.token, this.checkIns)) != null) {
-						ch.createInitialHistogram(this.checkIns);
-						if (!CategoryHistogramManager.containsHistogram(pref, getString(R.string.histogramPreferenceName)))
-							CategoryHistogramManager.storeHistogramToPhone(this.ch, this.pref, getString(R.string.histogramPreferenceName));
+						/*
+						 * This function does so much work! It's awesome!
+						 */
+						Update.update(pref, getString(R.string.updateTimePreferenceName), this.checkIns, Home.this);
 					}
 				}
 			} catch (MalformedURLException e) {
