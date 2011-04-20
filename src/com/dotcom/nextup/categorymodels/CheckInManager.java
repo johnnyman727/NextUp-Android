@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -62,7 +63,9 @@ public class CheckInManager {
 			ArrayList<Category> internalCategories = new ArrayList<Category>();
 			String name = new String();
 			JSONObject checkin = checkins.getJSONObject(i);
-			Integer time = Integer.parseInt(checkin.getString("createdAt"));
+			Integer milliSinceEpoch = Integer.parseInt(checkin.getString("createdAt"))/1000;
+			Date date = new Date(milliSinceEpoch);
+			int time = date.getHours();
 			JSONObject venue = checkin.getJSONObject("venue");
 			int lat = (int) (Double.parseDouble(venue.getJSONObject("location").getString("lat")) * 1E6);
 			int lon = (int) (Double.parseDouble(venue.getJSONObject("location").getString("lng")) * 1E6);

@@ -431,7 +431,6 @@ public class Home extends ListActivity {
 		}
 	};
 
-	@SuppressWarnings("unused")
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
