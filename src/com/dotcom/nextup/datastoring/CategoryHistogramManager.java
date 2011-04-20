@@ -10,12 +10,6 @@ import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
@@ -32,59 +26,6 @@ public class CategoryHistogramManager {
 				edit.putString(prefName, new String(ret));
 				edit.commit();
 			}
-	}
-	public static void storeHistogramToCloud(CategoryHistogram ch, SharedPreferences pref, String prefName) {
-		/*try {
-			
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ObjectOutput oo = new ObjectOutputStream(baos);
-			oo.writeObject(ch);
-			baos.toByteArray();
-			
-			String url = "https://nextup-android.appspot.com/nextupbackend/gethistogram";
-			HttpPost post = new HttpPost(url);
-			List<NameValuePair> form = new ArrayList<NameValuePair>();
-			HttpClient hc = new DefaultHttpClient();
-		
-			try {
-				HttpGet request = new HttpGet(authUrl);
-				HttpResponse resp = hc.execute(request);
-				HttpEntity entity = resp.getEntity();
-				String contentString = CheckInManager.convertStreamToString(entity.getContent());
-				JSONObject responseObj = new JSONObject(contentString);
-				int responseCode = resp.getStatusLine().getStatusCode();
-
-				if (responseCode >= 200 && responseCode < 300) {
-					
-				} 
-			}catch (IllegalStateException e) {
-				//TODO: Deal with this error
-				e.printStackTrace();
-			} catch (IOException e) {
-				//TODO: Deal with this error
-				e.printStackTrace();
-			} catch (JSONException e) {
-				//TODO: Deal with this error
-				e.printStackTrace();
-			}
-		} catch (Exception e) {
-			Log.e("Home.java", "Error storing Histogram");
-		}		
-		*/		
-	}
-		
-	public static HashMap<Category, ArrayList<Category>> getMapFromCloud() {
-		String url = "https://nextup-android.appspot.com/nextupbackend/gethistogram";
-		HttpClient hc = new DefaultHttpClient();
-		try {
-			HttpGet request = new HttpGet(url);
-			HttpResponse resp = hc.execute(request);
-			HttpEntity entity = resp.getEntity();
-			return convertStreamToMap(entity.getContent());
-		} catch (IOException e) {
-			
-		}
-		return null;
 	}
 	
 	@SuppressWarnings("unchecked")

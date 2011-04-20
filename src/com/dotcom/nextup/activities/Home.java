@@ -48,6 +48,7 @@ import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
+import com.dotcom.nextup.datastoring.BackendManager;
 import com.dotcom.nextup.datastoring.CategoryHistogramManager;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.dotcom.nextup.yelp.Yelp;
@@ -92,6 +93,15 @@ public class Home extends ListActivity {
 		dialog = ProgressDialog.show(this, "Loading",
 				"Creating Personal Recommendations...");
 		dealWithCode(codeStored);
+		/* Testing Code Only */
+		Category prefix = new Category("Camelot");
+		Category suffix = new Category("Hogwarts");
+		ArrayList<Category> prefixes = new ArrayList<Category>();
+		prefixes.add(prefix);
+		ArrayList<Category> suffixes = new ArrayList<Category>();
+		suffix.setAverageTime(14);
+		suffixes.add(suffix);
+		BackendManager.sendToCloud(prefixes, suffixes);
 		if (this.checkIns != null)
 			getLastLocation();
 			getLastLocationName();

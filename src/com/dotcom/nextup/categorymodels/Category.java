@@ -46,8 +46,4 @@ public class Category implements Comparator<Category> {
 	public Integer getAverageTime() {
 		return averageTime;
 	}
-	
-	public void setCategoryFromCurrentLocation(Location location) {
-		//TODO: Httpget to foursquare to find place for current location. convert to category and return
-	}
 }
