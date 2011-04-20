@@ -22,6 +22,10 @@ public class Venue implements Comparable<Venue>{
     public void setRating(double rating) { this.rating = rating; }
     public double getRating() { return rating; }
     
+    public String toString() {
+    	return "Venue " + this.name;
+    }
+    
     public int compareTo(Venue other) {
         if(this.name != null)
             return this.name.compareTo(other.getName());
