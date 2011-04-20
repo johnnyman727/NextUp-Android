@@ -26,12 +26,12 @@ public class BackendManager {
 		for (Category prefix: prefixes) {
 			if (prefixes.indexOf(prefix) > 0)
 				prefixMessage += ",";
-			prefixMessage+= prefix.getName();
+			prefixMessage+= prefix.getName().replace(" ", "%20");
 		}
 		for (Category suffix: suffixes) {
 			if (suffixes.indexOf(suffix) > 0)
 				suffixMessage += ",";
-			suffixMessage+= suffix.getName() + ":" + suffix.getAverageTime();
+			suffixMessage+= suffix.getName().replace(" ", "%20") + ":" + suffix.getAverageTime();
 		}
 		
 		String finalUrl = baseUrl + prefixMessage + suffixMessage;
@@ -73,7 +73,7 @@ public class BackendManager {
 	
 	public static ArrayList<Category> getSuggestionsFromCloud(Category prefix) {
 		String baseUrl = "http://nextupandroid.appspot.com/backend/suggestions";
-		String prefixMessage = "?prefix=" + prefix.getName();
+		String prefixMessage = "?prefix=" + prefix.getName().replace(" ", "%20");
 		ArrayList<Category> suggs = new ArrayList<Category>();
 		String finalUrl = baseUrl + prefixMessage;
 		
@@ -82,6 +82,7 @@ public class BackendManager {
 		HttpResponse response;
 		HttpEntity entity;
 		try {
+			//TODO CHECK FOR NO SUGGESTION
 			response = hc.execute(request);
 			entity = response.getEntity();
 			String resp = CheckInManager.convertStreamToString(entity.getContent());
