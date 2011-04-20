@@ -9,6 +9,7 @@ public class Venue implements Comparable<Venue>{
     private String url;
     double distance; // distance in meters from current location
     private boolean mSelectable = true;
+    double rating; // some venues have a five star rating, some don't
     
     public Venue (String name, String url, String imageURL, GeoPoint latlong, double d) {
     	this.name = name;
@@ -17,7 +18,10 @@ public class Venue implements Comparable<Venue>{
     	this.latlong = latlong;
     	this.distance = d;
     }
-        
+     
+    public void setRating(double rating) { this.rating = rating; }
+    public double getRating() { return rating; }
+    
     public int compareTo(Venue other) {
         if(this.name != null)
             return this.name.compareTo(other.getName());
