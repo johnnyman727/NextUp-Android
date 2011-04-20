@@ -76,23 +76,33 @@ public class YelpVenue {
 		 * http://media3.px.yelpcdn.com/static/muchmessiness/i/ico/stars/stars_small_4.png
 		 * or http://media3.px.yelpcdn.com/static/a;sldkjfasd;fkas;dfk/i/ico/stars/stars_small_4_half.png
 		 */
-		String[] pieces = this.rating_img_url_small.split("[\\Q[]\\E, \"]+");
-		String piece = pieces[pieces.length - 1]; // stars_small_x.png or stars_small_x_half.png
-		String rating_description = piece.substring(12); // x.png or x_half.png
-		String rating_num = rating_description.substring(0); // x
-		String maybe_half = rating_description.substring(2); // p or h
-		this.rating = 0;
-		if (maybe_half == "h") this.rating += .5;
-		if (rating_num == "0") return;
-		if (rating_num == "1") this.rating += 1;
-		if (rating_num == "2") this.rating += 2;
-		if (rating_num == "3") this.rating += 3;
-		if (rating_num == "4") this.rating += 4;
-		if (rating_num == "5") this.rating += 5;
+		int len = rating_img_url_small.length();
+		String piece = this.rating_img_url_small.substring(len - 10); // x_half.png or mall_x.png
+		Log.v("Yelp", "rating piece " + piece);
+		rating = 0;
+		String x = null;
+		Log.v("Yelp", "maybe half " + piece.substring(2,3));
+		if ( piece.substring(2, 3).equals("h") ) {
+			Log.v("Yelp", "case: half");
+			rating += 0.5;
+			x = piece.substring(0, 1);
+		}
+		else {
+			Log.v("Yelp", "case: not half");
+			x = piece.substring(5, 6);
+		}
+		Log.v("Yelp", "x " + x);
+		if ( x.equals("0") ) rating += 0;
+		if ( x.equals("1") ) rating += 1;
+		if ( x.equals("2") ) rating += 2;
+		if ( x.equals("3") ) rating += 3;
+		if ( x.equals("4") ) rating += 4;
+		if ( x.equals("5") ) rating += 5;
+		Log.v("Yelp", "rating " + Double.toString(rating));
 	}
 	
 	public String toString() {
-		return "Yelp Venue " + this.name + "\n" + this.address;
+		return "Yelp Venue " + this.name;
 	}
 	
 	private void initializeAddressLocation(JSONObject loc) {
