@@ -48,7 +48,8 @@ import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
-import com.dotcom.nextup.datastoring.CategoryHistogramManager;
+import com.dotcom.nextup.datastoring.BackendManager;
+import com.dotcom.nextup.datastoring.Update;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.dotcom.nextup.yelp.Yelp;
 import com.dotcom.nextup.yelp.YelpVenue;
@@ -61,7 +62,9 @@ public class Home extends ListActivity {
 	private String token;
 	private String code;
 	private ArrayList<CheckIn> checkIns;
+
 	private CategoryHistogram ch;
+
 	@SuppressWarnings("unused")
 	private SharedPreferences pref;
 	private AndroidOAuth oa;
@@ -87,7 +90,6 @@ public class Home extends ListActivity {
 		nearbyLocations = new ArrayList<Venue>();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		oa = new AndroidOAuth(this);
-		ch = new CategoryHistogram();
 		checkInManager = new CheckInManager();
 		codeStored = getCode(getIntent());
 
@@ -105,6 +107,9 @@ public class Home extends ListActivity {
 		getCurrentLocation();
 		
 		
+		ArrayList<Category> suggestions = BackendManager.getSuggestionsFromCloud(new Category(this.lastLocationName));
+		System.out.println(suggestions.get(0).getName());
+
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
@@ -198,9 +203,10 @@ public class Home extends ListActivity {
 				}
 				if (token != null) {
 					if ((this.checkIns =CheckInManager.getCheckins(this.token, this.checkIns)) != null) {
-						ch.createInitialHistogram(this.checkIns);
-						if (!CategoryHistogramManager.containsHistogram(pref, getString(R.string.histogramPreferenceName)))
-							CategoryHistogramManager.storeHistogram(this.ch, this.pref, getString(R.string.histogramPreferenceName));
+						/*
+						 * This function does so much work! It's awesome!
+						 */
+						Update.update(pref, getString(R.string.updateTimePreferenceName), this.checkIns, Home.this);
 					}
 				}
 			} catch (MalformedURLException e) {
@@ -434,7 +440,6 @@ public class Home extends ListActivity {
 		}
 	};
 
-	@SuppressWarnings("unused")
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");

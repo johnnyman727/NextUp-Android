@@ -1,11 +1,14 @@
 package com.dotcom.nextup.categorymodels;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-import android.location.Location;
+public class Category implements Comparator<Category>, Serializable {
 
-public class Category implements Comparator<Category> {
-
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3131950815409215218L;
 	private String name;
 	private Integer frequency;
 	private Integer averageTime;
@@ -45,9 +48,5 @@ public class Category implements Comparator<Category> {
 	
 	public Integer getAverageTime() {
 		return averageTime;
-	}
-	
-	public void setCategoryFromCurrentLocation(Location location) {
-		//TODO: Httpget to foursquare to find place for current location. convert to category and return
 	}
 }

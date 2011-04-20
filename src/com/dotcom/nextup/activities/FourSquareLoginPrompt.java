@@ -1,7 +1,6 @@
 package com.dotcom.nextup.activities;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -25,11 +24,9 @@ public class FourSquareLoginPrompt extends Activity {
 	private static String LOG_TAG;
 	private AndroidOAuth oauth;
 	private SharedPreferences prefs;
-	private ProgressDialog pd;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		pd = ProgressDialog.show(this, "Loading", "Retreiving Foursquare Login Info...");
 		setContentView(R.layout.foursquareloginprompt);
 		login = (Button)findViewById(R.id.loginbutton);
 		login.setOnClickListener(loginClick);
@@ -39,7 +36,6 @@ public class FourSquareLoginPrompt extends Activity {
 		oauth= new AndroidOAuth(this);
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		if (checkIfCodeAlreadyExists()) {
-			pd.dismiss();
 			sendCode(retrieveCodeFromPreferences(), Home.class);
 		}
 	}
@@ -47,7 +43,6 @@ public class FourSquareLoginPrompt extends Activity {
 	public void onResume() {
 		super.onResume();
 		if (checkIfCodeAlreadyExists()) {
-			pd.dismiss();
 			sendCode(retrieveCodeFromPreferences(), Home.class);
 		}
 	}
@@ -55,7 +50,6 @@ public class FourSquareLoginPrompt extends Activity {
 	private void loginToFourSquare() {
 			// Call the webbrowser with the Foursquare OAuth login URL
 			String authUrl = oauth.getAuthenticationURL();
-			pd.dismiss();
 			this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
 					.parse(authUrl)));
 	}
@@ -64,7 +58,6 @@ public class FourSquareLoginPrompt extends Activity {
 		
 		@Override
 		public void onClick(View v) {
-			pd.dismiss();
 			loginToFourSquare();			
 		}
 	};
@@ -73,7 +66,6 @@ public class FourSquareLoginPrompt extends Activity {
 		
 		@Override
 		public void onClick(View v) {
-			pd.dismiss();
 			setCodePreference("-1");
 		}
 	};

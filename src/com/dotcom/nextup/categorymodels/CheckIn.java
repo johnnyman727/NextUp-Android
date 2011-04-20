@@ -10,12 +10,18 @@ public class CheckIn {
 	private ArrayList<Category> categories;
 	private String name;
 	private GeoPoint location;
+	private Integer createdAt;
 
-	public CheckIn(Integer time, ArrayList<Category> categories, GeoPoint loc, String name) {
+	public CheckIn(Integer time, ArrayList<Category> categories, GeoPoint loc, String name, Integer createdAt) {
 		this.time = time;
 		this.categories = categories;
 		this.setLocation(loc);
 		this.name = name;
+		this.createdAt = createdAt;
+		
+		for (Category c: categories) {
+			c.setAverageTime(this.time);
+		}
 	}
 
 	public void setTime(Integer time) {
@@ -48,5 +54,13 @@ public class CheckIn {
 
 	public GeoPoint getLocation() {
 		return location;
+	}
+
+	public void setCreatedAt(Integer createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Integer getCreatedAt() {
+		return createdAt;
 	}
 }
