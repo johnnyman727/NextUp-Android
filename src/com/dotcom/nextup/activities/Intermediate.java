@@ -27,7 +27,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -62,11 +61,12 @@ public class Intermediate extends Activity {
 	private SharedPreferences pref;
 	private Button selectLocation;
 	private Boolean checkinsUpdated = false;
+	Categories categories = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.intermediate2);
-		selectLocation = (Button)findViewById(R.id.selectLocation);
 		nearby_locations = new ArrayList<Venue>();
 		oa = new AndroidOAuth(this);
 		checkInManager = new CheckInManager();
@@ -155,7 +155,6 @@ public class Intermediate extends Activity {
 		}
 		adapter.notifyDataSetChanged();
 	}
-	
 	
 	/* -------------TOKEN/CODE STUFF BELOW------------*/
 	private void dealWithCode(Boolean codeStored) {
@@ -345,6 +344,18 @@ public class Intermediate extends Activity {
 		if ((l1.getLongitudeE6() == l2.getLongitudeE6()) && (l1.getLatitudeE6() == l2.getLatitudeE6()))
 			return true;
 		return false;
+	}
+	
+	public void toHome(View view) {
+		Intent gotoHome = new Intent(this, Home.class);
+		
+		// pass it the categories to search for
+		ArrayList<String> keys = categories.getKeys();
+		ArrayList<String> values = categories.getValues();
+		for (int i = 0; i < keys.size(); i++) {
+			gotoHome.putExtra(keys.get(i), values.get(i));
+		}
+		startActivity(gotoHome);
 	}
 
 }

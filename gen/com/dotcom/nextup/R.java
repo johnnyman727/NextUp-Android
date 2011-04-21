@@ -27,6 +27,7 @@ public final class R {
         public static final int Friends=0x7f060021;
         public static final int Home=0x7f060020;
         public static final int ImageView01=0x7f060015;
+        public static final int Intermediate2Button=0x7f060007;
         public static final int Intermediate2Spinner=0x7f060006;
         public static final int Intermediate2Text=0x7f060005;
         public static final int Location=0x7f06000f;
@@ -47,7 +48,6 @@ public final class R {
         public static final int loginbutton=0x7f060000;
         public static final int mapview=0x7f06001b;
         public static final int nothanksbutton=0x7f060001;
-        public static final int selectLocation=0x7f060007;
         public static final int toFriends=0x7f060014;
         public static final int toMap=0x7f060013;
         public static final int toPreferences=0x7f060012;

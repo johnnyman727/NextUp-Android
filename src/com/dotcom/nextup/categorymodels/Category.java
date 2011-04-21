@@ -1,6 +1,7 @@
 package com.dotcom.nextup.categorymodels;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 public class Category implements Comparator<Category>, Serializable {
@@ -11,7 +12,7 @@ public class Category implements Comparator<Category>, Serializable {
 	private static final long serialVersionUID = 3131950815409215218L;
 	private String name;
 	private Integer frequency;
-	private Integer averageTime;
+	private Integer averageTime; //hour of day, 0 - 23
 	
 	public Category() {
 		super();
@@ -49,4 +50,25 @@ public class Category implements Comparator<Category>, Serializable {
 	public Integer getAverageTime() {
 		return averageTime;
 	}
+	
+	//helps Categories encode data into key value pairs for passing in bundle between activities
+	//getAttributes() and getAttributeValues() have to correspond
+	public ArrayList<String> getAttributes() {
+		ArrayList<String> attrs = new ArrayList<String>();
+		attrs.add("name");
+		attrs.add("frequency");
+		attrs.add("averageTime");
+		return attrs;
+	}
+	public ArrayList<String> getAttributeValues() {
+		ArrayList<String> vals = new ArrayList<String>();
+		if (name == null) { vals.add(""); }
+		else { vals.add(name); }
+		if (frequency == null) { vals.add("none"); }
+		else { vals.add(Integer.toString(frequency)); }
+		if (averageTime == null) { vals.add("none"); }
+		else { vals.add(Integer.toString(averageTime)); }
+		return vals;
+	}
+	
 }
