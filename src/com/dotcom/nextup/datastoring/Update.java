@@ -64,10 +64,10 @@ public class Update {
 		 */
 		if (CategoryHistogramManager.containsHistogram(pref, context.getString(R.string.histogramPreferenceName))) {
 			CategoryHistogram storedMap = CategoryHistogramManager.getHistogramFromPhone(pref, context.getString(R.string.histogramPreferenceName));
-			storedMap.addCheckInsToHistogram(checkins);
+			storedMap.addCheckInsToHistogram(newCheckins);
 		} else {
 			CategoryHistogram newMap = new CategoryHistogram();
-			newMap.addCheckInsToHistogram(checkins);
+			newMap.addCheckInsToHistogram(newCheckins);
 			CategoryHistogramManager.storeHistogramToPhone(newMap, pref, context.getString(R.string.histogramPreferenceName));
 		}
 				
@@ -75,6 +75,6 @@ public class Update {
 		/*
 		 * Update cloud histogram with new checkins
 		 */
-		BackendManager.sendToCloud(checkins);
+		BackendManager.sendToCloud(newCheckins);
 	}
 }
