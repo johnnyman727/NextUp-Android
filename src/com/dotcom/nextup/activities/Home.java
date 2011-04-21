@@ -61,6 +61,8 @@ public class Home extends ListActivity {
 	private ArrayList<CheckIn> checkIns;
 	private SharedPreferences pref;
 	private AndroidOAuth oa;
+	
+	
 	private CheckInManager checkInManager;
 	private LocationManager locationManager;
 	private LocationListener locationListener;
