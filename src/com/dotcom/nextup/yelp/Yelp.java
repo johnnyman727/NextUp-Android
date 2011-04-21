@@ -135,12 +135,27 @@ public class Yelp {
 			options.add(new RankVenuePair(rank(venue), venue));
 		}
 		Collections.sort(options); // I think the ones at the end have higher ranks
-		for ( int i = options.size() - 1; i >= options.size() - 3; i--) {
+		/*for ( int i = options.size() - 1; i >= options.size() - 3; i--) {
 			best.add((YelpVenue)options.get(i).getVenue());
+		}*/
+		
+		int i = options.size() -1;
+		while ( best.size() < 3 && i >= 0) {
+			YelpVenue ven = options.get(i).getVenue();
+			if ( ! isIn(ven, best) ) best.add(ven);
+			i--;
 		}
 		return best;
 	}
 
+	private boolean isIn(YelpVenue venue, ArrayList<YelpVenue> venues) {
+		boolean res = false;
+		for (YelpVenue ven : venues) {
+			if ( venue.hasSameNameAs(ven)) res = true;
+		}
+		return res;
+	}
+	
 	private double rank(YelpVenue venue) {
 		/* if a venue has too few reviews, its rating doesn't mean much */
 		if ( venue.getReviewCount() > 3 ) { return venue.getRating(); }
