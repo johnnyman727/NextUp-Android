@@ -18,6 +18,20 @@ public class Venue implements Comparable<Venue>{
     	this.latlong = latlong;
     	this.distance = d;
     }
+    
+    public Venue (String name, String url, GeoPoint latlong, double d) {
+    	this.name = name;
+    	this.url = url;
+    	this.latlong = latlong;
+    	this.distance = d;
+    }
+    
+    public Venue (String name, GeoPoint latlong, double d) {
+    	this.name = name;
+    	this.url = url;
+    	this.latlong = latlong;
+    	this.distance = d;
+    }
      
     public void setRating(double rating) { this.rating = rating; }
     public double getRating() { return rating; }
