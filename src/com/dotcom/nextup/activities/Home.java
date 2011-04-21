@@ -1,36 +1,18 @@
 package com.dotcom.nextup.activities;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,42 +21,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.categorymodels.CategoryHistogram;
-import com.dotcom.nextup.categorymodels.CheckIn;
-import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
-import com.dotcom.nextup.datastoring.BackendManager;
-import com.dotcom.nextup.datastoring.Update;
-import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.dotcom.nextup.yelp.Yelp;
 import com.dotcom.nextup.yelp.YelpVenue;
 import com.google.android.maps.GeoPoint;
 
 public class Home extends ListActivity {
 	/** Called when the activity is first created. */
-	private Boolean codeStored;
-	private Boolean receivedLocationUpdate;
-	private String token;
-	private String code;
-	private ArrayList<CheckIn> checkIns;
-	private SharedPreferences pref;
-	private AndroidOAuth oa;
-	
-	
-	private CheckInManager checkInManager;
-	private LocationManager locationManager;
-	private LocationListener locationListener;
-	public GeoPoint currentLocation;
-	public GeoPoint lastLocation;
-	public String currentLocationName;
-	public String lastLocationName;
-	public ArrayList<Venue> nearbyLocations;
-
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
 	ProgressDialog dialog = null;
@@ -84,317 +41,11 @@ public class Home extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_checkedin);
-		receivedLocationUpdate = false;
-		nearbyLocations = new ArrayList<Venue>();
-		pref = PreferenceManager.getDefaultSharedPreferences(this);
-		oa = new AndroidOAuth(this);
-		checkInManager = new CheckInManager();
-		codeStored = getCode(getIntent());
-
-		dealWithCode(codeStored);
-		if (this.checkIns != null)
-			getLastLocation();
-			getLastLocationName();
-		
-		
-		ArrayList<Category> suggestions = BackendManager.getSuggestionsFromCloud(new Category(this.lastLocationName));
-		System.out.println(suggestions.get(0).getName());
-
-		my_venues = new ArrayList<Venue>();
-		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
-		setListAdapter(this.m_adapter);
-		
-		/** @TODO: should only do this once location has been found */
-		viewVenues = new Runnable() {
-			@Override
-			public void run() {
-				getVenues();
-			}
-		};
-
 		Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
 		thread.start();
-		dialog = ProgressDialog.show(Home.this, "Please wait...", "Pulling up cool places...", true);
-		
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-		locationListener = new LocationListener() {
-			@Override
-			public void onStatusChanged(String provider, int status, Bundle extras) {
-			}
-
-			@Override
-			public void onProviderEnabled(String provider) {
-			}
-
-			@Override
-			public void onProviderDisabled(String provider) {
-			}
-
-			@Override
-			public void onLocationChanged(Location location) {
-				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
-				if (!receivedLocationUpdate)
-					getCurrentLocationNameFromFoursquare(currentLocation);
-				receivedLocationUpdate = true;
-				dealWithLocation();
-			}
-		};
-
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-		Location temp = null;
-		if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
-			temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
-			if (currentLocationName == null)
-				getCurrentLocationNameFromFoursquare(currentLocation);
-			dealWithLocation();
-		}
-		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
-			temp = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
-			if (currentLocationName == null)
-				getCurrentLocationNameFromFoursquare(currentLocation);
-			dealWithLocation();		
-		}
-
-	}
-
-	public void onResume() {
-		 super.onResume();
-	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-	     if (currentLocation != null) {
-	       	if (currentLocationName == null) 
-	     		getCurrentLocationNameFromFoursquare(currentLocation);
-	        dealWithLocation();
-	     }
-
-		 if (m_adapter != null && m_adapter.getItems().size() > 0) {
-			 m_adapter.notifyDataSetChanged();
-		 }
-	}
-	
-	 //pauses listener while app is inactive
-    @Override
-    public void onPause() {
-        super.onPause();
-        locationManager.removeUpdates(locationListener);
-    }
-    
-	/*----------------------- ACCESS TOKEN CODE BELOW --------------------*/
-
-	private void dealWithCode(Boolean codeStored) {
-		if (codeStored) {
-			try {
-				if (!getTokenFromPreferences()) {
-					retrieveToken();
-				}
-				if (token != null) {
-					if ((this.checkIns =CheckInManager.getCheckins(this.token, this.checkIns)) != null) {
-						/*
-						 * This function does so much work! It's awesome!
-						 */
-						Update.update(pref, getString(R.string.updateTimePreferenceName), this.checkIns, Home.this);
-					}
-				}
-			} catch (MalformedURLException e) {
-				//TODO: Deal with this error
-			}
-		}
-	}
-
-	private boolean getTokenFromPreferences() {
-		if (this.pref.contains(getString(R.string.accessTokenPreferenceName))) {
-			this.token = this.pref.getString(
-					getString(R.string.accessTokenPreferenceName), "Unknown");
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private void retrieveToken() {
-		HttpGet request = new HttpGet(oa.getAccessTokenUrl(this.code));
-
-		DefaultHttpClient client = new DefaultHttpClient();
-		Editor edit = this.pref.edit();
-		try {
-
-			HttpResponse resp = client.execute(request);
-			int responseCode = resp.getStatusLine().getStatusCode();
-
-			if (responseCode >= 200 && responseCode < 300) {
-
-				String response = responseToString(resp);
-				JSONObject jsonObj = new JSONObject(response);
-				this.token = jsonObj.getString("access_token");
-				edit.putString(getString(R.string.accessTokenPreferenceName),
-						this.token);
-				edit.putString(getString(R.string.accessCodePreferenceName),
-						this.code);
-				edit.commit();
-			}
-		} catch (ClientProtocolException e) {
-			Toast.makeText(Home.this,
-					"There was an error connecting to Foursquare",
-					Toast.LENGTH_LONG).show();
-			e.printStackTrace();
-			//TODO: Deal with this error
-		} catch (IOException e) {
-			Toast.makeText(Home.this,
-					"There was an error connecting to Foursquare",
-					Toast.LENGTH_LONG).show();
-			e.printStackTrace();
-			//TODO: Deal with this error
-		} catch (JSONException e) {
-			// This means that they probably revoked the token
-			// We are going to clear the preferences and go back to
-			// The login prompt
-			e.printStackTrace();
-			edit.remove(getString(R.string.accessCodePreferenceName));
-			edit.remove(getString(R.string.accessTokenPreferenceName));
-			edit.commit();
-			Intent i = new Intent(Home.this, FourSquareLoginPrompt.class);
-			startActivity(i);
-		}
-	}
-
-	private Boolean getCode(Intent i) {
-		if (i.getData() != null) {
-			this.code = i.getData().getQueryParameter("code");
-			return true;
-		} else {
-			if (i.getStringExtra(getString(R.string.accessCodePreferenceName)) != "None") {
-				this.code = i
-						.getStringExtra(getString(R.string.accessCodePreferenceName));
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static String responseToString(HttpResponse resp)
-			throws IllegalStateException, IOException {
-		BufferedReader in = new BufferedReader(new InputStreamReader(resp
-				.getEntity().getContent()));
-
-		StringBuffer sb = new StringBuffer();
-
-		String line = "";
-
-		while ((line = in.readLine()) != null) {
-			sb.append(line);
-		}
-		in.close();
-
-		return sb.toString();
-	}
-
-	/* ----------------LOCATION CODE BELOW --------------------- */
-    public void getLastLocation() {
-    	if (this.checkIns != null) {
-    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
-    		this.lastLocation = lastCheckIn.getLocation();
-    	}
-    }
-    
-    private void getLastLocationName() {
-    	if (this.checkIns != null) {
-    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
-    		this.lastLocationName = lastCheckIn.getName();
-    	}
-    }
-	private void getCurrentLocationNameFromFoursquare(GeoPoint location) {
-		if (this.token == null) {
-			return;
-		}
-		String url = "https://api.foursquare.com/v2/venues/search?ll=" + String.valueOf((location.getLatitudeE6()/1E6)) + "," + String.valueOf((location.getLongitudeE6()/1E6));
-		String authUrl = url + "&oauth_token=" + this.token;
-		HttpClient hc = new DefaultHttpClient();
-	
-		try {
-			HttpGet request = new HttpGet(authUrl);
-			HttpResponse resp = hc.execute(request);
-			HttpEntity entity = resp.getEntity();
-			String contentString = CheckInManager.convertStreamToString(entity.getContent());
-			JSONObject responseObj = new JSONObject(contentString);
-			int responseCode = resp.getStatusLine().getStatusCode();
-
-			if (responseCode >= 200 && responseCode < 300) {
-				JSONObject res = responseObj.getJSONObject("response");
-				JSONArray groups = res.getJSONArray("groups");
-				JSONObject nearby = groups.getJSONObject(1);
-				JSONArray close = nearby.getJSONArray("items");
-				JSONObject closest = close.getJSONObject(0);
-				this.currentLocationName = closest.getString("name");
-				getNearbyLocationsFromFoursquare(close);
-			} 
-		}catch (IllegalStateException e) {
-			//TODO: Deal with this error
-			e.printStackTrace();
-		} catch (IOException e) {
-			//TODO: Deal with this error
-			e.printStackTrace();
-		} catch (JSONException e) {
-			//TODO: Deal with this error
-			e.printStackTrace();
-		}
 	}
 
 	/*---------------- UI CODE BELOW *----------------------*/
-
-	private void getNearbyLocationsFromFoursquare(JSONArray close) throws JSONException {
-		for (int i = 0; i < close.length(); i++) {
-			JSONObject nearbyPlace = close.getJSONObject(i);
-			JSONObject location = nearbyPlace.getJSONObject("location");
-			int lat = (int) (Double.parseDouble(location.getString("lat")) * 1E6);
-			int lon = (int) (Double.parseDouble(location.getString("lng")) * 1E6);
-			GeoPoint locationGeoPoint = new GeoPoint(lat, lon);
-			Venue newVenue;
-			try {
-				newVenue = new Venue(nearbyPlace.getString("name"), "url", "image url", locationGeoPoint, Integer.parseInt(location.getString("distance")));
-				this.nearbyLocations.add(newVenue);
-			} catch (NumberFormatException e) {
-				//TODO: Deal with this error
-				e.printStackTrace();
-			} catch (JSONException e) {
-				//TODO: Deal with this error
-				e.printStackTrace();
-			}
-		}	
-	}
-	
-	public boolean sameLocation(GeoPoint l1, GeoPoint l2) {
-		if ((l1.getLongitudeE6() == l2.getLongitudeE6()) && (l1.getLatitudeE6() == l2.getLatitudeE6()))
-			return true;
-		return false;
-	}
-
-	private void dealWithLocation() {
-		if (sameLocation(lastLocation, currentLocation) && lastLocation != null) {
-			// they checked in at a place and are still there
-			setContentView(R.layout.main_checkedin);
-		}
-		if (lastLocation != null && currentLocation == null) {
-			// they checked in at a place, we don't know where they are now
-			// but we'll assume they're still there
-			setContentView(R.layout.main_checkedin);
-		}
-		if (lastLocation == null && currentLocation != null) {
-			// we don't know their last check in, but we know where they are now
-			// prompt them to check in
-			setContentView(R.layout.main_notcheckedin);
-		}
-		if (sameLocation(lastLocation, currentLocation) && lastLocation == null) {
-			// we dont know their last check in or where they are now
-			// this.getLocation();
-			setContentView(R.layout.main_notcheckedin); // need to change this
-			// to main_wedontknow
-			// later
-		}
-	}
 
 	public void toFriends(View view) {
 		Intent toFriends = new Intent(this, Friends.class);
@@ -430,6 +81,7 @@ public class Home extends ListActivity {
 		}
 	};
 
+	@SuppressWarnings("unused")
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");

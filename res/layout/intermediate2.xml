@@ -13,5 +13,10 @@
 	<Spinner android:id="@+id/Intermediate2Spinner" 
 		android:layout_width="fill_parent" 
 		android:layout_height="wrap_content"/>
+	<Button android:id="@+id/selectLocation"
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content"
+			android:text = "I am here!">
+		</Button>
   
 </LinearLayout>
