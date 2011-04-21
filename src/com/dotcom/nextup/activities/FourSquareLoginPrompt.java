@@ -36,14 +36,14 @@ public class FourSquareLoginPrompt extends Activity {
 		oauth= new AndroidOAuth(this);
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		if (checkIfCodeAlreadyExists()) {
-			sendCode(retrieveCodeFromPreferences(), Home.class);
+			sendCode(retrieveCodeFromPreferences(), Intermediate.class);
 		}
 	}
 	
 	public void onResume() {
 		super.onResume();
 		if (checkIfCodeAlreadyExists()) {
-			sendCode(retrieveCodeFromPreferences(), Home.class);
+			sendCode(retrieveCodeFromPreferences(), Intermediate.class);
 		}
 	}
 	
@@ -83,7 +83,7 @@ public class FourSquareLoginPrompt extends Activity {
 		Editor edit = this.prefs.edit();
 		edit.putString(getString(R.string.accessCodePreferenceName), nullCode);
 		edit.commit();
-		sendCode(nullCode, Home.class);
+		sendCode(nullCode, Intermediate.class);
 	}
 	
 	@SuppressWarnings("unchecked")
