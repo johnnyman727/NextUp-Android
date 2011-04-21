@@ -51,6 +51,7 @@ public class Category implements Comparator<Category>, Serializable {
 		return averageTime;
 	}
 	
+	//helps Categories encode data into key value pairs for passing in bundle between activities
 	//getAttributes() and getAttributeValues() have to correspond
 	public ArrayList<String> getAttributes() {
 		ArrayList<String> attrs = new ArrayList<String>();
@@ -69,4 +70,5 @@ public class Category implements Comparator<Category>, Serializable {
 		else { vals.add(Integer.toString(averageTime)); }
 		return vals;
 	}
+	
 }
