@@ -21,6 +21,7 @@ public class Categories {
 		cats.addAll(i, morecats);
 	}
 	
+	/* ENCODING INTO KEY VALUE PAIRS */
 	// also has special encoding to key value pairs
 	// for convenient bundle passing between activities
 	// cat-1-name
@@ -34,8 +35,7 @@ public class Categories {
 			String ii = Integer.toString(i);
 			ArrayList<String> attrs = cats.get(i).getAttributes();
 			for (int j = 0; j < attrs.size(); j++) {
-				String key = "cat-" + ii + "-" + attrs.get(j);
-				res.add(key);
+				res.add(encodeKey(ii, attrs.get(j)));
 			}
 		}
 		return res;
@@ -52,13 +52,11 @@ public class Categories {
 			ArrayList<String> vals = cats.get(i).getAttributeValues();
 			for (int j = 0; j < vals.size(); j++) {
 				String desc = this.crappyConverter(j);
-				String key = "cat-" + ii + "-" + vals.get(j);
-				res.add(key);
+				res.add(encodeValue(ii, desc, vals.get(i)));
 			}
 		}
 		return res;
 	}
-	
 	private String crappyConverter(int j) {
 		/* depends completely on Category.getAttributes()
 		 * because I'm too lazy to do real data abstraction
@@ -67,5 +65,22 @@ public class Categories {
 		if (j == 1) return "frequency";
 		if (j == 2) return "averageTime";
 		else return "";
+	}
+
+	
+	/* DECODING FROM KEY VALUE PAIRS BACK INTO CATEGORIES */
+	public Categories decode(ArrayList<String> keys, ArrayList<String> values) {
+		Categories clowder = new Categories(); // a herd of horses, a clowder of cats
+		
+		return clowder;
+	}
+	
+	/* THE ACTUAL ENCODE / DECODE OF CATEGORY / STRING */
+	private String encodeKey(String index, String attr) {
+		return "cat-" + index + "-" + attr;
+	}
+	
+	private String encodeValue(String index, String desc, String val) {
+		return "cat-" + index + "-" + desc + "-" + val;
 	}
 }
