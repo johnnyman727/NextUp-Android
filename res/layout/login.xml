@@ -7,20 +7,20 @@
 	<TextView 
 		android:text="You're not logged in!" 
 		android:id="@+id/TextView01" 
-		android:layout_width="match_parent" 
+		android:layout_width="fill_parent" 
 		android:layout_height="wrap_content">
 	</TextView>
 	<EditText 
 		android:hint="E-mail Address" 
 		android:id="@+id/EditText01" 
-		android:layout_width="match_parent" 
+		android:layout_width="fill_parent" 
 		android:layout_height="wrap_content">
 	</EditText>
 
 	<EditText 
 		android:hint="password" 
 		android:id="@+id/EditText02" 
-		android:layout_width="match_parent" 
+		android:layout_width="fill_parent" 
 		android:layout_height="wrap_content"/>
 	
 	<CheckBox 
