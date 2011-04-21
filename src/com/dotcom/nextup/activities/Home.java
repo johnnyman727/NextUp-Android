@@ -84,7 +84,7 @@ public class Home extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_checkedin);
-/*		receivedLocationUpdate = false;
+		receivedLocationUpdate = false;
 		nearbyLocations = new ArrayList<Venue>();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		oa = new AndroidOAuth(this);
@@ -99,7 +99,7 @@ public class Home extends ListActivity {
 		
 		ArrayList<Category> suggestions = BackendManager.getSuggestionsFromCloud(new Category(this.lastLocationName));
 		System.out.println(suggestions.get(0).getName());
-*/
+
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
@@ -116,7 +116,7 @@ public class Home extends ListActivity {
 		thread.start();
 		dialog = ProgressDialog.show(Home.this, "Please wait...", "Pulling up cool places...", true);
 		
-/*		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
 		locationListener = new LocationListener() {
 			@Override
@@ -158,19 +158,19 @@ public class Home extends ListActivity {
 				getCurrentLocationNameFromFoursquare(currentLocation);
 			dealWithLocation();		
 		}
-*/
+
 	}
 
 	public void onResume() {
 		 super.onResume();
-/*	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	     if (currentLocation != null) {
 	       	if (currentLocationName == null) 
 	     		getCurrentLocationNameFromFoursquare(currentLocation);
 	        dealWithLocation();
 	     }
-*/
+
 		 if (m_adapter != null && m_adapter.getItems().size() > 0) {
 			 m_adapter.notifyDataSetChanged();
 		 }
