@@ -40,13 +40,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dotcom.nextup.R;
+import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
+import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.datastoring.Update;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.dotcom.nextup.yelp.Yelp;
+import com.dotcom.nextup.yelp.YelpVenue;
 import com.google.android.maps.GeoPoint;
 
 public class Home extends ListActivity {
@@ -80,15 +83,12 @@ public class Home extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_checkedin);
-		receivedLocationUpdate = false;
+/*		receivedLocationUpdate = false;
 		nearbyLocations = new ArrayList<Venue>();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		oa = new AndroidOAuth(this);
 		checkInManager = new CheckInManager();
 		codeStored = getCode(getIntent());
-
-		dialog = ProgressDialog.show(this, "Loading",
-				"Creating Personal Recommendations...");
 
 		dealWithCode(codeStored);
 		if (this.checkIns != null)
@@ -103,7 +103,7 @@ public class Home extends ListActivity {
 		
 		ArrayList<Category> suggestions = BackendManager.getSuggestionsFromCloud(new Category(this.lastLocationName));
 		System.out.println(suggestions.get(0).getName());
-
+*/
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
@@ -120,7 +120,7 @@ public class Home extends ListActivity {
 		thread.start();
 		dialog = ProgressDialog.show(Home.this, "Please wait...", "Pulling up cool places...", true);
 		
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+/*		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
 		locationListener = new LocationListener() {
 			@Override
@@ -162,19 +162,19 @@ public class Home extends ListActivity {
 				getCurrentLocationNameFromFoursquare(currentLocation);
 			dealWithLocation();		
 		}
-
+*/
 	}
 
 	public void onResume() {
 		 super.onResume();
-	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+/*	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	     if (currentLocation != null) {
 	       	if (currentLocationName == null) 
 	     		getCurrentLocationNameFromFoursquare(currentLocation);
 	        dealWithLocation();
 	     }
-
+*/
 		 if (m_adapter != null && m_adapter.getItems().size() > 0) {
 			 m_adapter.notifyDataSetChanged();
 		 }
@@ -437,7 +437,7 @@ public class Home extends ListActivity {
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
-			/* uses up limited actual Yelp queries 
+			/* uses up limited actual Yelp queries */
 			Yelp yelp = getYelp();
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
@@ -456,10 +456,10 @@ public class Home extends ListActivity {
 				Venue ven = new Venue(yven.getName(), yven.getURL(), yven.getImageURL(), gp, yven.getDistance());
 				ven.setRating(yven.getRating());
 				my_venues.add(ven);
-			} */
+			} 
 			
 			
-			/* for debugging, just use made up venues */
+			/* for debugging, just use made up venues 
 			my_venues = new ArrayList<Venue>();
 			String name = "Lotus Spa";
 			String url = "http://www.lotusspaeauclaire.com/";
@@ -475,7 +475,7 @@ public class Home extends ListActivity {
 				my_venues.add(ven);
 			}
 			Thread.sleep(2000);
-			
+			*/
 
 		} catch (Exception e) {
 			Log.e("getVenues()", e.toString());
