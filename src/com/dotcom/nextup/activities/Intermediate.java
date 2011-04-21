@@ -10,7 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.dotcom.nextup.R;
-import com.dotcom.nextup.categorymodels.Categories;
+import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.classes.Venue;
 import com.google.android.maps.GeoPoint;
 
@@ -19,7 +19,7 @@ public class Intermediate extends Activity {
 	Venue nearest_location = null;
 	ArrayAdapter<CharSequence> adapter;
 	ArrayList<CharSequence> spinner_locations = null;
-	Categories categories = null;
+	ArrayList<Category> categories = new ArrayList<Category>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -66,11 +66,11 @@ public class Intermediate extends Activity {
 		Intent gotoHome = new Intent(this, Home.class);
 		
 		// pass it the categories to search for
-		ArrayList<String> keys = categories.getKeys();
-		ArrayList<String> values = categories.getValues();
-		for (int i = 0; i < keys.size(); i++) {
-			gotoHome.putExtra(keys.get(i), values.get(i));
+		for (int i = 0; i < categories.size(); i++) {
+			String ii = Integer.toString(i);
+			gotoHome.putExtra("cat"+ii, categories.get(i));
 		}
+		gotoHome.putExtra("num_categories", categories.size());
 		startActivity(gotoHome);
 	}
 	

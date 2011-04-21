@@ -43,7 +43,6 @@ import android.widget.Toast;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.RecommendationInput;
@@ -75,6 +74,9 @@ public class Home extends ListActivity {
 	public String lastLocationName;
 	public ArrayList<Venue> nearbyLocations;
 
+	ArrayList<Category> categories = new ArrayList<Category>();
+	Bundle bundle;
+	
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
 	ProgressDialog dialog = null;
@@ -100,6 +102,9 @@ public class Home extends ListActivity {
 		ArrayList<Category> suggestions = BackendManager.getSuggestionsFromCloud(new Category(this.lastLocationName));
 		System.out.println(suggestions.get(0).getName());
 
+		bundle = this.getIntent().getExtras();
+		getCategories();
+		
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 		setListAdapter(this.m_adapter);
@@ -416,6 +421,15 @@ public class Home extends ListActivity {
 	    startActivity( browse );
 	}
 	
+	private void getCategories() {
+		if (bundle == null) return;
+		int n = bundle.getInt("num_categories");
+		if (n == 0) return;
+		for (int i = n; i < n; i++) {
+			String ii = Integer.toString(i);
+			categories.add((Category)bundle.get("cat"+ii));
+		}
+	}
 	
 	private Runnable returnRes = new Runnable() {
 		@Override
