@@ -78,27 +78,21 @@ public class YelpVenue {
 		 */
 		int len = rating_img_url_small.length();
 		String piece = this.rating_img_url_small.substring(len - 10); // x_half.png or mall_x.png
-		Log.v("Yelp", "rating piece " + piece);
 		rating = 0;
 		String x = null;
-		Log.v("Yelp", "maybe half " + piece.substring(2,3));
 		if ( piece.substring(2, 3).equals("h") ) {
-			Log.v("Yelp", "case: half");
 			rating += 0.5;
 			x = piece.substring(0, 1);
 		}
 		else {
-			Log.v("Yelp", "case: not half");
 			x = piece.substring(5, 6);
 		}
-		Log.v("Yelp", "x " + x);
 		if ( x.equals("0") ) rating += 0;
 		if ( x.equals("1") ) rating += 1;
 		if ( x.equals("2") ) rating += 2;
 		if ( x.equals("3") ) rating += 3;
 		if ( x.equals("4") ) rating += 4;
 		if ( x.equals("5") ) rating += 5;
-		Log.v("Yelp", "rating " + Double.toString(rating));
 	}
 	
 	public String toString() {
@@ -129,7 +123,7 @@ public class YelpVenue {
 		String piece;
 		for (int i = 0; i < pieces.length; i++) {
 			piece = pieces[i];
-			if (!piece.isEmpty()) {
+			if (piece.length() > 0) {
 				better.add(piece);
 			}
 		}
@@ -169,5 +163,10 @@ public class YelpVenue {
 	public int getReviewCount() { return review_count; }
 	public double getDistance() { return distance; }
 	public void setDistance(double d) { distance = d; }
+	
+	public boolean hasSameNameAs(YelpVenue other) {
+		/* distinctly NOT trying to override the equals method here */
+		return this.getName().equals(other.getName());
+	}
 
 }
