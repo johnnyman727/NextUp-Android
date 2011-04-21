@@ -28,11 +28,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.dotcom.nextup.R;
+import com.dotcom.nextup.categorymodels.Categories;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.Venue;
@@ -59,7 +59,6 @@ public class Intermediate extends Activity {
 	private CheckInManager checkInManager;
 	private ArrayList<CheckIn> checkIns;
 	private SharedPreferences pref;
-	private Button selectLocation;
 	private Boolean checkinsUpdated = false;
 	Categories categories = null;
 
