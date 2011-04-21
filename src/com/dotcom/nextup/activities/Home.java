@@ -25,10 +25,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,10 +42,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dotcom.nextup.R;
-import com.dotcom.nextup.categorymodels.CategoryHistogram;
+import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.Venue;
+import com.dotcom.nextup.datastoring.BackendManager;
 import com.dotcom.nextup.datastoring.Update;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.dotcom.nextup.yelp.Yelp;
@@ -56,10 +59,6 @@ public class Home extends ListActivity {
 	private String token;
 	private String code;
 	private ArrayList<CheckIn> checkIns;
-
-	private CategoryHistogram ch;
-
-	@SuppressWarnings("unused")
 	private SharedPreferences pref;
 	private AndroidOAuth oa;
 	private CheckInManager checkInManager;
@@ -94,11 +93,6 @@ public class Home extends ListActivity {
 		if (this.checkIns != null)
 			getLastLocation();
 			getLastLocationName();
-			
-
-		if (this.checkIns != null)
-			getLastLocation();
-		getCurrentLocation();
 		
 		
 		ArrayList<Category> suggestions = BackendManager.getSuggestionsFromCloud(new Category(this.lastLocationName));

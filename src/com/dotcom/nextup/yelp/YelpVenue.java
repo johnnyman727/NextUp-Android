@@ -129,7 +129,7 @@ public class YelpVenue {
 		String piece;
 		for (int i = 0; i < pieces.length; i++) {
 			piece = pieces[i];
-			if (!piece.isEmpty()) {
+			if (!(piece.length() == 0)) {
 				better.add(piece);
 			}
 		}
