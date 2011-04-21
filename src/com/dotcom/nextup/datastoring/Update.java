@@ -33,22 +33,25 @@ public class Update {
 		long updateTime = 0;
 		if (containsUpdateTime(pref, updateTimeLocation)){
 			updateTime = getLastUpdateTime(pref, updateTimeLocation);
+			long newUpdateTime = updateTime;
 			for (CheckIn c: checkins) {
 				if (updateTime > c.getCreatedAt())
 					continue;
 				else {
-					updateTime = c.getCreatedAt();
+					if (newUpdateTime < c.getCreatedAt())
+						newUpdateTime = c.getCreatedAt();
 					newCheckins.add(c);
 				}
 			}
+			updateTime = newUpdateTime;
 			
 		} else {
 			updateTime = 0;
 			for (CheckIn c: checkins) {
 				if (c.getCreatedAt() > updateTime) {
 					updateTime = c.getCreatedAt();
-					newCheckins.add(c);
-				}				
+				}	
+				newCheckins.add(c);
 			}			
 		}
 		
