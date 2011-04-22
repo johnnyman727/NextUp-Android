@@ -356,6 +356,11 @@ public class Intermediate extends Activity {
 			gotoHome.putExtra("cat"+ii, categories.get(i));
 		}
 		gotoHome.putExtra("num_categories", categories.size());
+		
+		// pass it current location
+		gotoHome.putExtra("latitude", currentLocation.getLatitudeE6());
+		gotoHome.putExtra("longitude", currentLocation.getLongitudeE6());
+		
 		startActivity(gotoHome);
 	}
 
