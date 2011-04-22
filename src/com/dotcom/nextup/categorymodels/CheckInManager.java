@@ -71,7 +71,7 @@ public class CheckInManager {
 			int lon = (int) (Double.parseDouble(venue.getJSONObject("location").getString("lng")) * 1E6);
 			GeoPoint checkInPoint = new GeoPoint(lat, lon);
 			name = venue.getString("name");
-			JSONArray cats = checkin.getJSONObject("venue").getJSONArray(
+			JSONArray cats = venue.getJSONArray(
 					"categories");
 			for (int j = 0; j < cats.length(); j++) {
 				internalCategories.add(new Category(cats.getJSONObject(j).getString("name")));

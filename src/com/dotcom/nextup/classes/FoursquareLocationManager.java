@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.google.android.maps.GeoPoint;
@@ -70,30 +71,34 @@ public class FoursquareLocationManager {
 		return null;
 	}
     
-    public static Venue getNearestLocationFromFoursquare(ArrayList<Venue> venues) {
+    public static NearbyLocation getNearestLocationFromFoursquare(ArrayList<NearbyLocation> venues) {
     	if (venues == null) 
     		return null;
     	return venues.get(0);
     }
     
-	public static ArrayList<Venue> getNearbyLocationsFromFoursquare(JSONArray close, ArrayList<Venue> nearby_locations) throws JSONException {
+	public static ArrayList<NearbyLocation> getNearbyLocationsFromFoursquare(JSONArray close, ArrayList<NearbyLocation> nearby_locations) throws JSONException {
 		if (nearby_locations == null || close == null)
 			return null;
 		nearby_locations.clear();
+		ArrayList<Category> cats = new ArrayList<Category>();
 		for (int i = 0; i < close.length(); i++) {
 			JSONObject nearbyPlace = close.getJSONObject(i);
 			JSONObject location = nearbyPlace.getJSONObject("location");
+			JSONArray categories = nearbyPlace.getJSONArray("categories");
+			String name = nearbyPlace.getString("name");
+			for (int j = 0; j < categories.length(); j++) {
+				Category newCat = new Category(categories.getJSONObject(j).getString("name"));
+				cats.add(newCat);
+			}
 			int lat = (int) (Double.parseDouble(location.getString("lat")) * 1E6);
 			int lon = (int) (Double.parseDouble(location.getString("lng")) * 1E6);
 			GeoPoint locationGeoPoint = new GeoPoint(lat, lon);
-			Venue newVenue;
+			NearbyLocation nearbyLocation;
 			try {
-				newVenue = new Venue(nearbyPlace.getString("name"), "url", "image url", locationGeoPoint, Integer.parseInt(location.getString("distance")));
-				nearby_locations.add(newVenue);
+				nearbyLocation = new NearbyLocation(locationGeoPoint, cats, name);
+				nearby_locations.add(nearbyLocation);
 			} catch (NumberFormatException e) {
-				//TODO: Deal with this error
-				e.printStackTrace();
-			} catch (JSONException e) {
 				//TODO: Deal with this error
 				e.printStackTrace();
 			}

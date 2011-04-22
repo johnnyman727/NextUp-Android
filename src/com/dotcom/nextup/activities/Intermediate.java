@@ -15,22 +15,25 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.FoursquareLocationManager;
+import com.dotcom.nextup.classes.NearbyLocation;
 import com.dotcom.nextup.classes.TokenManager;
-import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.google.android.maps.GeoPoint;
 
 public class Intermediate extends Activity {
-	ArrayList<Venue> nearby_locations = null;
-	Venue nearest_location = null;
+	ArrayList<NearbyLocation> nearby_locations = null;
+	NearbyLocation nearest_location = null;
 	ArrayAdapter<CharSequence> adapter;
 	ArrayList<CharSequence> spinner_locations = null;
 
@@ -43,16 +46,17 @@ public class Intermediate extends Activity {
 	public GeoPoint lastLocation;
 	public String currentLocationName;
 	public String lastLocationName;
+	private String token;
+	private String code;
 	private Boolean receivedLocationUpdate = false;
 	private Boolean checkinsUpdated = false;
 	private Boolean locationRegistered = false;
 	private Boolean codeStored = false;
-	private String token;
-	private String code;
 	private CheckInManager checkInManager;
 	private ArrayList<CheckIn> checkIns;
 	private SharedPreferences pref;
 	private Context context;
+	private int currentSelectedVenue = -1;
 
 
 	@Override
@@ -60,7 +64,7 @@ public class Intermediate extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.intermediate2);
 		context = this;
-		nearby_locations = new ArrayList<Venue>();
+		nearby_locations = new ArrayList<NearbyLocation>();
 		oa = new AndroidOAuth(this);
 		checkInManager = new CheckInManager();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -117,6 +121,22 @@ public class Intermediate extends Activity {
 		}
 		adapter.notifyDataSetChanged();
 	}
+	
+	OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
+
+		@Override
+		public void onItemSelected(AdapterView<?> arg0, View arg1, int position,
+				long id) {
+			Intermediate.this.currentSelectedVenue = position;
+			Button button = (Button)findViewById(R.id.Intermediate2Button);
+			button.requestFocus();
+		}
+
+		@Override
+		public void onNothingSelected(AdapterView<?> arg0) {
+			
+		}
+	};
 	
 	/* -------------TOKEN/CODE STUFF BELOW------------*/
 	
@@ -194,6 +214,12 @@ public class Intermediate extends Activity {
 	public void toHome(View view) {
 		Intent gotoHome = new Intent(this, Home.class);
 		
+		if (currentSelectedVenue == -1) {
+			gotoHome.putExtra("currentLocation", this.categories.get(currentSelectedVenue));
+			startActivity(gotoHome);
+		}
+		
+		
 		// pass it the categories to search for
 		for (int i = 0; i < categories.size(); i++) {
 			String ii = Integer.toString(i);
@@ -206,6 +232,7 @@ public class Intermediate extends Activity {
 		gotoHome.putExtra("longitude", currentLocation.getLongitudeE6());
 		
 		startActivity(gotoHome);
+		
 	}
 
 }
