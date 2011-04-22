@@ -1,14 +1,10 @@
 package com.dotcom.nextup.activities;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -20,7 +16,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -29,13 +24,13 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
+
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
+import com.dotcom.nextup.classes.TokenManager;
 import com.dotcom.nextup.classes.Venue;
-import com.dotcom.nextup.datastoring.Update;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.google.android.maps.GeoPoint;
 
@@ -55,29 +50,83 @@ public class Intermediate extends Activity {
 	public String currentLocationName;
 	public String lastLocationName;
 	private Boolean receivedLocationUpdate = false;
-	private Boolean codeStored;
+	private Boolean checkinsUpdated = false;
+	private Boolean locationRegistered = false;
+	private Boolean codeStored = false;
 	private String token;
 	private String code;
 	private CheckInManager checkInManager;
 	private ArrayList<CheckIn> checkIns;
 	private SharedPreferences pref;
-	private Boolean checkinsUpdated = false;
+	private Context context;
 
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.intermediate2);
+		context = this;
 		nearby_locations = new ArrayList<Venue>();
 		oa = new AndroidOAuth(this);
 		checkInManager = new CheckInManager();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
-		codeStored = getCode(getIntent());
-		dealWithCode(codeStored);
-		if (this.checkIns != null)
-			getLastLocation();
-			getLastLocationName();
 		
+		if (code == null)
+			code = TokenManager.getCode(getIntent(), this);
+			if (code != null)
+				codeStored = true;
+		
+		if (this.checkIns != null && !code.equals("-1"))
+			initializeCheckIns();
+		
+		if (!locationRegistered)
+			initializeLocationListener();
+	}
+
+	public void onResume() {
+		 super.onResume();
+	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+	     if (currentLocation != null && currentLocationName == null)
+	     		getCurrentLocationDataFromFoursquare(currentLocation);
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		locationManager.removeUpdates(locationListener);
+	}
+	
+	/* ---------------- UI CODE BELOW -------------------*/
+	
+	@SuppressWarnings("unchecked")
+	public void updateSpinner() {
+		Spinner spinner = (Spinner)findViewById(R.id.Intermediate2Spinner);
+		spinner_locations = new ArrayList<CharSequence>();
+		adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_locations);
+		spinner.setAdapter(adapter);
+		
+		if (nearby_locations != null && nearby_locations.size() > 0) {
+			adapter.notifyDataSetChanged();
+			for (int i = 0; i < nearby_locations.size(); i++)
+				adapter.add(nearby_locations.get(i).getName());
+		}
+		adapter.notifyDataSetChanged();
+	}
+	
+	/* -------------TOKEN/CODE STUFF BELOW------------*/
+	
+	private void initializeCheckIns() {
+			this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
+			this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
+			this.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
+			getLastLocation();
+			getLastLocationName();		
+	}
+	
+
+	/* ----------------LOCATION CODE BELOW --------------------- */
+	private void initializeLocationListener() {
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
 		locationListener = new LocationListener() {
@@ -123,152 +172,10 @@ public class Intermediate extends Activity {
 				updateSpinner();
 		}
 		
+		locationRegistered = true;
 		
 	}
 
-	public void onResume() {
-		 super.onResume();
-	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-	     if (currentLocation != null && currentLocationName == null)
-	     		getCurrentLocationDataFromFoursquare(currentLocation);
-	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-		locationManager.removeUpdates(locationListener);
-	}
-	
-	/* ---------------- UI CODE BELOW -------------------*/
-	
-	@SuppressWarnings("unchecked")
-	public void updateSpinner() {
-		Spinner spinner = (Spinner)findViewById(R.id.Intermediate2Spinner);
-		spinner_locations = new ArrayList<CharSequence>();
-		adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_locations);
-		spinner.setAdapter(adapter);
-		
-		if (nearby_locations != null && nearby_locations.size() > 0) {
-			adapter.notifyDataSetChanged();
-			for (int i = 0; i < nearby_locations.size(); i++)
-				adapter.add(nearby_locations.get(i).getName());
-		}
-		adapter.notifyDataSetChanged();
-	}
-	
-	/* -------------TOKEN/CODE STUFF BELOW------------*/
-	private void dealWithCode(Boolean codeStored) {
-		if (codeStored) {
-			try {
-				if (!getTokenFromPreferences()) {
-					retrieveToken();
-				}
-				if (token != null) {
-					if ((this.checkIns =CheckInManager.getCheckins(this.token, this.checkIns)) != null) {
-						/*
-						 * This function does so much work! It's awesome!
-						 */
-						if (!checkinsUpdated) {
-							Update.update(pref, getString(R.string.updateTimePreferenceName), this.checkIns, Intermediate.this);
-							checkinsUpdated = true;
-						}
-					}
-				}
-			} catch (MalformedURLException e) {
-				//TODO: Deal with this error
-			}
-		}
-	}
-
-	private boolean getTokenFromPreferences() {
-		if (this.pref.contains(getString(R.string.accessTokenPreferenceName))) {
-			this.token = this.pref.getString(
-					getString(R.string.accessTokenPreferenceName), "Unknown");
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private void retrieveToken() {
-		HttpGet request = new HttpGet(oa.getAccessTokenUrl(this.code));
-
-		DefaultHttpClient client = new DefaultHttpClient();
-		Editor edit = this.pref.edit();
-		try {
-
-			HttpResponse resp = client.execute(request);
-			int responseCode = resp.getStatusLine().getStatusCode();
-
-			if (responseCode >= 200 && responseCode < 300) {
-
-				String response = responseToString(resp);
-				JSONObject jsonObj = new JSONObject(response);
-				this.token = jsonObj.getString("access_token");
-				edit.putString(getString(R.string.accessTokenPreferenceName),
-						this.token);
-				edit.putString(getString(R.string.accessCodePreferenceName),
-						this.code);
-				edit.commit();
-			}
-		} catch (ClientProtocolException e) {
-			Toast.makeText(Intermediate.this,
-					"There was an error connecting to Foursquare",
-					Toast.LENGTH_LONG).show();
-			e.printStackTrace();
-			//TODO: Deal with this error
-		} catch (IOException e) {
-			Toast.makeText(Intermediate.this,
-					"There was an error connecting to Foursquare",
-					Toast.LENGTH_LONG).show();
-			e.printStackTrace();
-			//TODO: Deal with this error
-		} catch (JSONException e) {
-			// This means that they probably revoked the token
-			// We are going to clear the preferences and go back to
-			// The login prompt
-			e.printStackTrace();
-			edit.remove(getString(R.string.accessCodePreferenceName));
-			edit.remove(getString(R.string.accessTokenPreferenceName));
-			edit.commit();
-			Intent i = new Intent(Intermediate.this, FourSquareLoginPrompt.class);
-			startActivity(i);
-		}
-	}
-
-	private Boolean getCode(Intent i) {
-		if (i.getData() != null) {
-			this.code = i.getData().getQueryParameter("code");
-			return true;
-		} else {
-			if (i.getStringExtra(getString(R.string.accessCodePreferenceName)) != "None") {
-				this.code = i
-						.getStringExtra(getString(R.string.accessCodePreferenceName));
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static String responseToString(HttpResponse resp)
-			throws IllegalStateException, IOException {
-		BufferedReader in = new BufferedReader(new InputStreamReader(resp
-				.getEntity().getContent()));
-
-		StringBuffer sb = new StringBuffer();
-
-		String line = "";
-
-		while ((line = in.readLine()) != null) {
-			sb.append(line);
-		}
-		in.close();
-
-		return sb.toString();
-	}
-
-	/* ----------------LOCATION CODE BELOW --------------------- */
     public void getLastLocation() {
     	if (this.checkIns != null) {
     		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
