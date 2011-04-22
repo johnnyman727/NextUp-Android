@@ -1,8 +1,6 @@
 package com.dotcom.nextup.classes;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import com.dotcom.nextup.categorymodels.Category;
 

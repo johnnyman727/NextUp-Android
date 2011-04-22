@@ -1,6 +1,7 @@
 package com.dotcom.nextup.categorymodels;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 public class Category implements Comparator<Category>, Serializable {
@@ -34,6 +35,20 @@ public class Category implements Comparator<Category>, Serializable {
 	@Override
 	public int compare(Category c1, Category c2) {
 		return c1.getFrequency() - c2.getFrequency();
+	}
+	public ArrayList<String> getAttributeValues() {
+		ArrayList<String> attrs = new ArrayList<String>();
+		attrs.add(name);
+		attrs.add(frequency.toString());
+		attrs.add(averageTime.toString());
+		return attrs;
+	}
+	public ArrayList<String> getAttributes() {
+		ArrayList<String> attrs = new ArrayList<String>();
+		attrs.add("name");
+		attrs.add("frequency");
+		attrs.add("averageTime");
+		return attrs;
 	}
 	
 }
