@@ -1,16 +1,9 @@
 package com.dotcom.nextup.activities;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
@@ -29,6 +22,7 @@ import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
+import com.dotcom.nextup.classes.FoursquareLocationManager;
 import com.dotcom.nextup.classes.TokenManager;
 import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.oauth.AndroidOAuth;
@@ -76,19 +70,29 @@ public class Intermediate extends Activity {
 			if (code != null)
 				codeStored = true;
 		
-		if (this.checkIns != null && !code.equals("-1"))
+		if (this.checkIns == null && !code.equals("-1"))
 			initializeCheckIns();
 		
 		if (!locationRegistered)
-			initializeLocationListener();
+			try {
+				initializeLocationListener();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 
 	public void onResume() {
 		 super.onResume();
 	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-	     if (currentLocation != null && currentLocationName == null)
-	     		getCurrentLocationDataFromFoursquare(currentLocation);
+	     if (currentLocation != null && currentLocationName == null && !receivedLocationUpdate)
+			try {
+				updateLocationInfo();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 
 	@Override
@@ -120,13 +124,13 @@ public class Intermediate extends Activity {
 			this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
 			this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
 			this.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
-			getLastLocation();
-			getLastLocationName();		
+			FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
+			FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);		
 	}
 	
 
 	/* ----------------LOCATION CODE BELOW --------------------- */
-	private void initializeLocationListener() {
+	private void initializeLocationListener() throws JSONException {
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
 		locationListener = new LocationListener() {
@@ -146,7 +150,12 @@ public class Intermediate extends Activity {
 			public void onLocationChanged(Location location) {
 				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
 				if (!receivedLocationUpdate) {
-					getCurrentLocationDataFromFoursquare(currentLocation);
+					try {
+						updateLocationInfo();
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					updateSpinner();
 					receivedLocationUpdate = true;
 				}
@@ -160,7 +169,7 @@ public class Intermediate extends Activity {
 			temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
 			if (currentLocationName == null) {
-				getCurrentLocationDataFromFoursquare(currentLocation);
+				updateLocationInfo();
 				updateSpinner();
 			}
 		}
@@ -168,93 +177,18 @@ public class Intermediate extends Activity {
 			temp = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
 			if (currentLocationName == null)
-				getCurrentLocationDataFromFoursquare(currentLocation);
+				updateLocationInfo();
 				updateSpinner();
 		}
 		
 		locationRegistered = true;
 		
 	}
-
-    public void getLastLocation() {
-    	if (this.checkIns != null) {
-    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
-    		this.lastLocation = lastCheckIn.getLocation();
-    	}
-    }
-    
-    private void getLastLocationName() {
-    	if (this.checkIns != null) {
-    		CheckIn lastCheckIn = this.checkInManager.getLastCheckIn(this.checkIns);
-    		this.lastLocationName = lastCheckIn.getName();
-    	}
-    }
-	private void getCurrentLocationDataFromFoursquare(GeoPoint location) {
-		if (this.token == null) {
-			return;
-		}
-		String url = "https://api.foursquare.com/v2/venues/search?ll=" + String.valueOf((location.getLatitudeE6()/1E6)) + "," + String.valueOf((location.getLongitudeE6()/1E6));
-		String authUrl = url + "&oauth_token=" + this.token;
-		HttpClient hc = new DefaultHttpClient();
 	
-		try {
-			HttpGet request = new HttpGet(authUrl);
-			HttpResponse resp = hc.execute(request);
-			HttpEntity entity = resp.getEntity();
-			String contentString = CheckInManager.convertStreamToString(entity.getContent());
-			JSONObject responseObj = new JSONObject(contentString);
-			int responseCode = resp.getStatusLine().getStatusCode();
-
-			if (responseCode >= 200 && responseCode < 300) {
-				JSONObject res = responseObj.getJSONObject("response");
-				JSONArray groups = res.getJSONArray("groups");
-				JSONObject nearby = groups.getJSONObject(1);
-				JSONArray close = nearby.getJSONArray("items");
-				JSONObject closest = close.getJSONObject(0);
-				this.currentLocationName = closest.getString("name");
-				getNearbyLocationsFromFoursquare(close);
-			} 
-		}catch (IllegalStateException e) {
-			//TODO: Deal with this error
-			e.printStackTrace();
-		} catch (IOException e) {
-			//TODO: Deal with this error
-			e.printStackTrace();
-		} catch (JSONException e) {
-			//TODO: Deal with this error
-			e.printStackTrace();
-		}
-	}
-	
-	private void getNearbyLocationsFromFoursquare(JSONArray close) throws JSONException {
-		this.nearby_locations.clear();
-		for (int i = 0; i < close.length(); i++) {
-			JSONObject nearbyPlace = close.getJSONObject(i);
-			JSONObject location = nearbyPlace.getJSONObject("location");
-			int lat = (int) (Double.parseDouble(location.getString("lat")) * 1E6);
-			int lon = (int) (Double.parseDouble(location.getString("lng")) * 1E6);
-			GeoPoint locationGeoPoint = new GeoPoint(lat, lon);
-			Venue newVenue;
-			try {
-				newVenue = new Venue(nearbyPlace.getString("name"), "url", "image url", locationGeoPoint, Integer.parseInt(location.getString("distance")));
-				this.nearby_locations.add(newVenue);
-				if (i == 0) {
-					this.nearest_location = newVenue;
-				}
-			} catch (NumberFormatException e) {
-				//TODO: Deal with this error
-				e.printStackTrace();
-			} catch (JSONException e) {
-				//TODO: Deal with this error
-				e.printStackTrace();
-			}
-		}	
-	}
-	
-	public boolean sameLocation(GeoPoint l1, GeoPoint l2) {
-		if ((l1.getLongitudeE6() == l2.getLongitudeE6()) && (l1.getLatitudeE6() == l2.getLatitudeE6()))
-			return true;
-		return false;
+	public void updateLocationInfo() throws JSONException {
+		JSONArray nearest = FoursquareLocationManager.getCurrentLocationDataFromFoursquare(currentLocation, token);
+		nearby_locations = FoursquareLocationManager.getNearbyLocationsFromFoursquare(nearest, nearby_locations);
+		nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
 	}
 	
 	public void toHome(View view) {
