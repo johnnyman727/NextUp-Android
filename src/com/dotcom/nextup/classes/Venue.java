@@ -27,7 +27,7 @@ public class Venue implements Comparable<Venue>{
     }
     
     public Venue (String name, GeoPoint latlong, double d) {
-    	this.name = name;
+    	this.name = name; 
     	this.latlong = latlong;
     	this.distance = d;
     }
