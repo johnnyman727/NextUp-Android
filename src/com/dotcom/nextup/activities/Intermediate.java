@@ -52,7 +52,7 @@ public class Intermediate extends Activity {
 	public GeoPoint lastLocation;
 	public String currentLocationName;
 	public String lastLocationName;
-	private Boolean receivedLocationUpdate;
+	private Boolean receivedLocationUpdate = false;
 	private Boolean codeStored;
 	private String token;
 	private String code;
@@ -95,7 +95,7 @@ public class Intermediate extends Activity {
 			public void onLocationChanged(Location location) {
 				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
 				if (!receivedLocationUpdate) {
-					getCurrentLocationNameFromFoursquare(currentLocation);
+					getCurrentLocationDataFromFoursquare(currentLocation);
 					updateSpinner();
 					receivedLocationUpdate = true;
 				}
@@ -109,7 +109,7 @@ public class Intermediate extends Activity {
 			temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
 			if (currentLocationName == null) {
-				getCurrentLocationNameFromFoursquare(currentLocation);
+				getCurrentLocationDataFromFoursquare(currentLocation);
 				updateSpinner();
 			}
 		}
@@ -117,7 +117,7 @@ public class Intermediate extends Activity {
 			temp = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
 			if (currentLocationName == null)
-				getCurrentLocationNameFromFoursquare(currentLocation);
+				getCurrentLocationDataFromFoursquare(currentLocation);
 				updateSpinner();
 		}
 		
@@ -129,7 +129,7 @@ public class Intermediate extends Activity {
 	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	     if (currentLocation != null && currentLocationName == null)
-	     		getCurrentLocationNameFromFoursquare(currentLocation);
+	     		getCurrentLocationDataFromFoursquare(currentLocation);
 	}
 
 	@Override
@@ -280,7 +280,7 @@ public class Intermediate extends Activity {
     		this.lastLocationName = lastCheckIn.getName();
     	}
     }
-	private void getCurrentLocationNameFromFoursquare(GeoPoint location) {
+	private void getCurrentLocationDataFromFoursquare(GeoPoint location) {
 		if (this.token == null) {
 			return;
 		}
@@ -329,6 +329,9 @@ public class Intermediate extends Activity {
 			try {
 				newVenue = new Venue(nearbyPlace.getString("name"), "url", "image url", locationGeoPoint, Integer.parseInt(location.getString("distance")));
 				this.nearby_locations.add(newVenue);
+				if (i == 0) {
+					this.nearest_location = newVenue;
+				}
 			} catch (NumberFormatException e) {
 				//TODO: Deal with this error
 				e.printStackTrace();

@@ -31,11 +31,12 @@ public class Update {
 		 */
 		ArrayList<CheckIn> newCheckins = new ArrayList<CheckIn>();
 		long updateTime = 0;
+		long newUpdateTime;
 		if (containsUpdateTime(pref, updateTimeLocation)){
 			updateTime = getLastUpdateTime(pref, updateTimeLocation);
-			long newUpdateTime = updateTime;
+			newUpdateTime = updateTime;
 			for (CheckIn c: checkins) {
-				if (updateTime > c.getCreatedAt())
+				if (updateTime >= c.getCreatedAt())
 					continue;
 				else {
 					if (newUpdateTime < c.getCreatedAt())
@@ -43,41 +44,52 @@ public class Update {
 					newCheckins.add(c);
 				}
 			}
-			updateTime = newUpdateTime;
+			/*
+			 * Set new updatetime
+			 */
+			if ((updateTime < newUpdateTime)) {
+				updateTime = newUpdateTime;
+				Editor e = pref.edit();
+				e.putLong(updateTimeLocation, updateTime);
+				e.commit();
+			}
 			
 		} else {
 			updateTime = 0;
 			for (CheckIn c: checkins) {
-				if (c.getCreatedAt() > updateTime) {
+				if (c.getCreatedAt() >= updateTime) {
 					updateTime = c.getCreatedAt();
 				}	
 				newCheckins.add(c);
-			}			
+			}		
+			/*
+			 * Set new updatetime
+			 */
+			Editor e = pref.edit();
+			e.putLong(updateTimeLocation, updateTime);
+			e.commit();
 		}
 		
-		/*
-		 * Set new lastupdatetime
-		 */
-		Editor e = pref.edit();
-		e.putLong(updateTimeLocation, updateTime);
-		e.commit();
+
+
 		
 		/*
 		 * Update phone histogram with new checkins
 		 */
-		if (CategoryHistogramManager.containsHistogram(pref, context.getString(R.string.histogramPreferenceName))) {
-			CategoryHistogram storedMap = CategoryHistogramManager.getHistogramFromPhone(pref, context.getString(R.string.histogramPreferenceName));
-			storedMap.addCheckInsToHistogram(newCheckins);
-		} else {
-			CategoryHistogram newMap = new CategoryHistogram();
-			newMap.addCheckInsToHistogram(newCheckins);
-			CategoryHistogramManager.storeHistogramToPhone(newMap, pref, context.getString(R.string.histogramPreferenceName));
+		if (newCheckins.size() != 0) {
+			if (CategoryHistogramManager.containsHistogram(pref, context.getString(R.string.histogramPreferenceName))) {
+				CategoryHistogram storedMap = CategoryHistogramManager.getHistogramFromPhone(pref, context.getString(R.string.histogramPreferenceName));
+				storedMap.addCheckInsToHistogram(newCheckins);
+			} else {
+				CategoryHistogram newMap = new CategoryHistogram();
+				newMap.addCheckInsToHistogram(newCheckins);
+				CategoryHistogramManager.storeHistogramToPhone(newMap, pref, context.getString(R.string.histogramPreferenceName));
+			}
+			
+			/*
+			 * Update cloud histogram with new checkins
+			 */
+			BackendManager.sendToCloud(newCheckins);
 		}
-				
-		
-		/*
-		 * Update cloud histogram with new checkins
-		 */
-		BackendManager.sendToCloud(newCheckins);
 	}
 }
