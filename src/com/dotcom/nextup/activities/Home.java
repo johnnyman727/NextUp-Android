@@ -33,6 +33,9 @@ import com.google.android.maps.GeoPoint;
 public class Home extends ListActivity {
 	Bundle bundle;
 	ArrayList<Category> categories = new ArrayList<Category>();
+	double latitude;
+	double longitude;
+	double max_distance = 3000;
 	
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
@@ -46,6 +49,7 @@ public class Home extends ListActivity {
 
 		bundle = this.getIntent().getExtras();
 		getCategories();
+		getLatLong();
 		
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
@@ -93,6 +97,12 @@ public class Home extends ListActivity {
 		}
 	}
 	
+	private void getLatLong() {
+		if (bundle == null) return;
+		latitude = bundle.getInt("latitude")/1E6;
+		longitude = bundle.getInt("longitude")/1E6;
+	}
+	
 	private Runnable returnRes = new Runnable() {
 		@Override
 		public void run() {
@@ -111,13 +121,13 @@ public class Home extends ListActivity {
 			Log.v("Home", "entering getVenues()");
 			/* uses up limited actual Yelp queries */
 			Yelp yelp = getYelp();
+			/*
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
 			cats.add(new Category("dessert"));
-			cats.add(new Category("coffee"));
-			// throws NullPointerException due to myLocation
-			//RecommendationInput input = new RecommendationInput(cats, myLocation.getLatitude(), myLocation.getLongitude());
-			RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
+			cats.add(new Category("coffee"));*/
+			RecommendationInput input = new RecommendationInput(categories, latitude, longitude, max_distance);
+			//RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
 			my_venues = new ArrayList<Venue>();			
 			for (int i = 0; i < venues.size(); i++) {
@@ -129,25 +139,6 @@ public class Home extends ListActivity {
 				ven.setRating(yven.getRating());
 				my_venues.add(ven);
 			} 
-			
-			
-			/* for debugging, just use made up venues 
-			my_venues = new ArrayList<Venue>();
-			String name = "Lotus Spa";
-			String url = "http://www.lotusspaeauclaire.com/";
-			String img_url = "http://www.teachenglishinasia.net/files/u2/purple_lotus_flower.jpg";
-			int lat = 42283000;
-			int lon = -71230000;
-			GeoPoint gp = new GeoPoint(lat, lon);
-			int distance = 2000;
-			int rating = 4;
-			for (int i = 0; i < 3; i++) {
-				Venue ven = new Venue(name, url, img_url, gp, distance);
-				ven.setRating(rating);
-				my_venues.add(ven);
-			}
-			Thread.sleep(2000);
-			*/
 
 		} catch (Exception e) {
 			Log.e("getVenues()", e.toString());
