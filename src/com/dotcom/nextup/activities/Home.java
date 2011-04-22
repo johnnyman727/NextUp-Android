@@ -24,16 +24,19 @@ import android.widget.TextView;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
+import com.dotcom.nextup.categorymodels.CategoryManager;
 import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
+import com.dotcom.nextup.yelp.Yelp;
 import com.dotcom.nextup.yelp.YelpVenue;
 import com.google.android.maps.GeoPoint;
-/*
+
 public class Home extends ListActivity {
 	Bundle bundle;
 	ArrayList<Category> categories = new ArrayList<Category>();
 	double latitude;
 	double longitude;
+	String name;
 	double max_distance = 3000;
 	
 	private ArrayList<Venue> my_venues = null;
@@ -45,10 +48,15 @@ public class Home extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_checkedin);
-
-		bundle = this.getIntent().getExtras();
-		getCategories();
-		getLatLong();
+		try {
+			extractLocationData(getIntent());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		my_venues = new ArrayList<Venue>();
 		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
@@ -63,6 +71,25 @@ public class Home extends ListActivity {
 
 		Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
 		thread.start();
+	}
+
+
+	private void extractLocationData(Intent intent) throws IOException, ClassNotFoundException {
+		//Pull location data
+		String[] latlong = intent.getStringExtra("location").split(",");
+		this.latitude = Double.parseDouble(latlong[0]);
+		this.longitude = Double.parseDouble(latlong[1]);
+		
+		//Pull name
+		this.name = intent.getStringExtra("name");
+		
+		//Pull Categories
+		int iter = intent.getIntExtra("numCats", 0);
+		
+		for (int i = 0; i < iter; i++) {
+			Category category = (Category)intent.getParcelableExtra("Category" + new Integer(i).toString());
+			this.categories.add(category);
+		}		
 	}
 
 
@@ -118,9 +145,9 @@ public class Home extends ListActivity {
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
-			/* uses up limited actual Yelp queries 
+			/* uses up limited actual Yelp queries */
 			Yelp yelp = getYelp();
-			/*
+			
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
 			cats.add(new Category("dessert"));
@@ -134,7 +161,7 @@ public class Home extends ListActivity {
 				int lat = (int)(yven.getLatitude() * 1E6);
 				int lon = (int)(yven.getLongitude() * 1E6);
 				GeoPoint gp = new GeoPoint(lat, lon);
-				Venue ven = new Venue(yven.getName(), yven.getURL(), yven.getImageURL(), gp, yven.getDistance());
+				Venue ven = new Venue(yven.getName(), yven.getURL(), yven.getImageURL(), gp, yven.getDistance(), null);
 				ven.setRating(yven.getRating());
 				my_venues.add(ven);
 			} 
@@ -146,7 +173,7 @@ public class Home extends ListActivity {
 	}
 	
 	/* like everything in Java, you need to make a Yelp object in order to actually do anything
-	 * (actually there's a reason for this:  it authorizes you with the Yelp API)
+	 * (actually there's a reason for this:  it authorizes you with the Yelp API) */
 	 
     public Yelp getYelp() {
     	Log.v("Yelp", "entering getYelp()");
@@ -194,7 +221,7 @@ public class Home extends ListActivity {
     	    		if (image == null) {
     	    			/* supposed to display this when the image can't be gotten from the url
     	    			 * but instead, no image displays, which is ok but doesn't look so good
-    	    			 * probably returning null because it's an incorrect path name
+    	    			 * probably returning null because it's an incorrect path name */
     	    			 
     	    			image = Drawable.createFromPath("../../../../../res/drawable/default_venue_image.png");
     	    		}
@@ -213,7 +240,7 @@ public class Home extends ListActivity {
          * ArrayList<YelpVenue> venues; //already got them using yelp.getRecommendation(), see getVenues() method in Home
          * Drawable image = ImageOperations(this,venues.get(0).rating_img_url_small,"image.jpg");
            ImageView imgView = (ImageView)findViewById(R.id.image1);
-           imgView.setImageDrawable(image);
+           imgView.setImageDrawable(image); */
          
     	private Drawable ImageOperations(Context ctx, String url, String saveFilename) {
     		try {
@@ -230,7 +257,7 @@ public class Home extends ListActivity {
     	}
 
         /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/
-         * used by ImageOperations to get an image from a URL
+         * used by ImageOperations to get an image from a URL */
          
     	public Object fetch(String address) throws MalformedURLException,IOException {
     		URL url = new URL(address);
@@ -239,4 +266,4 @@ public class Home extends ListActivity {
     	}
     } 
 }
-*/
+

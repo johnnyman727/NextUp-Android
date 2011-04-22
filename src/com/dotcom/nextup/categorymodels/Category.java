@@ -1,10 +1,12 @@
 package com.dotcom.nextup.categorymodels;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class Category implements Comparator<Category>, Serializable {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Category implements Comparator<Category>, Parcelable {
 
 	private static final long serialVersionUID = 3131950815409215218L;
 	private String name;
@@ -50,5 +52,40 @@ public class Category implements Comparator<Category>, Serializable {
 		attrs.add("averageTime");
 		return attrs;
 	}
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public void writeToParcel(Parcel dest, int flag) {
+		dest.writeString(name);
+		if (frequency == null)
+			dest.writeInt(-1);
+		else
+			dest.writeInt(frequency);
+		if (averageTime != null) 
+			dest.writeInt(averageTime);
+		else
+			dest.writeInt(-1);
+	}
+	public Category(Parcel in) {
+		this.name = in.readString();
+		this.frequency = in.readInt();
+		this.averageTime = in.readInt();
+	}
+	
+	  @SuppressWarnings("unchecked")
+	    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+	        public Category createFromParcel(Parcel in)
+	        {
+	            return new Category(in);
+	        }
+
+			@Override
+			public Category[] newArray(int size) {
+				return new Category[size];
+			}
+	    };
 	
 }

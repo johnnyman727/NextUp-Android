@@ -66,7 +66,7 @@ public class Map extends MapActivity{
             case R.id.Friends:    Intent toFriends = new Intent(this, Friends.class);	
     								startActivity(toFriends);
                                 break;
-            case R.id.Home:     Intent toHome = new Intent(this, Intermediate.class);
+            case R.id.Home:     Intent toHome = new Intent(this, Home.class);
             					startActivity(toHome);
                                 break;
             case R.id.Preferences: Intent toPreferences = new Intent(this, Preferences.class);

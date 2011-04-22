@@ -1,5 +1,6 @@
 package com.dotcom.nextup.activities;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -23,6 +24,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
+import com.dotcom.nextup.categorymodels.CategoryManager;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.FoursquareLocationManager;
@@ -121,6 +123,10 @@ public class Intermediate extends Activity {
 			for (int i = 0; i < nearby_locations.size(); i++)
 				adapter.add(nearby_locations.get(i).getName());
 		}
+		if (nearby_locations.size() == 0) {
+			adapter.notifyDataSetChanged();
+			adapter.add("No nearby locations found. You may not have reception.");
+		}
 		adapter.notifyDataSetChanged();
 	}
 	
@@ -215,8 +221,8 @@ public class Intermediate extends Activity {
 		nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
 	}
 	
-	public void toHome(View view) {
-		Intent gotoHome = new Intent(this, Intermediate.class);
+	public void toHome(View view) throws IOException {
+		Intent gotoHome = new Intent(this, Home.class);
 		int numCats = 0;
 		
 		
@@ -224,6 +230,10 @@ public class Intermediate extends Activity {
 			Venue selected = nearby_locations.get(currentSelectedVenue);
 			ArrayList<Category> cats = selected.getCategories();
 			numCats = cats.size();
+			
+			/* Put Name */
+			gotoHome.putExtra("name", selected.getName());
+			 
 			/* Put the number of categories */
 			gotoHome.putExtra("numCats", numCats);
 			

@@ -18,6 +18,8 @@ public class CategoryManager {
 	}
 	
 	public static Category stringToCat(String input) throws IOException, ClassNotFoundException {
+		if (input == null)
+			return null;
 		byte[] bytes = input.getBytes();
 		ByteArrayInputStream bais = new  ByteArrayInputStream(bytes);
 		ObjectInput oi = new ObjectInputStream(bais);
