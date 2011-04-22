@@ -1,5 +1,8 @@
 package com.dotcom.nextup.classes;
 
+import java.util.ArrayList;
+
+import com.dotcom.nextup.categorymodels.Category;
 import com.google.android.maps.GeoPoint;
 
 public class Venue implements Comparable<Venue>{
@@ -10,13 +13,15 @@ public class Venue implements Comparable<Venue>{
     double distance; // distance in meters from current location
     private boolean mSelectable = true;
     double rating; // some venues have a five star rating, some don't
+    private ArrayList<Category> categories;
     
-    public Venue (String name, String url, String imageURL, GeoPoint latlong, double d) {
+    public Venue (String name, String url, String imageURL, GeoPoint latlong, double d, ArrayList<Category> cats) {
     	this.name = name;
     	this.url = url;
     	this.image_url = imageURL;
     	this.latlong = latlong;
     	this.distance = d;
+    	this.categories = cats;
     }
     
     public Venue (String name, String url, GeoPoint latlong, double d) {
@@ -63,6 +68,14 @@ public class Venue implements Comparable<Venue>{
 
 	public boolean ismSelectable() {
 		return mSelectable;
+	}
+
+	public void setCategories(ArrayList<Category> categories) {
+		this.categories = categories;
+	}
+
+	public ArrayList<Category> getCategories() {
+		return categories;
 	}
     
 }

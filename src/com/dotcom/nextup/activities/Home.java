@@ -26,10 +26,9 @@ import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
-import com.dotcom.nextup.yelp.Yelp;
 import com.dotcom.nextup.yelp.YelpVenue;
 import com.google.android.maps.GeoPoint;
-
+/*
 public class Home extends ListActivity {
 	Bundle bundle;
 	ArrayList<Category> categories = new ArrayList<Category>();
@@ -119,13 +118,13 @@ public class Home extends ListActivity {
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
-			/* uses up limited actual Yelp queries */
+			/* uses up limited actual Yelp queries 
 			Yelp yelp = getYelp();
 			/*
 			ArrayList<Category> cats = new ArrayList<Category>();
 			cats.add(new Category("cafe"));
 			cats.add(new Category("dessert"));
-			cats.add(new Category("coffee"));*/
+			cats.add(new Category("coffee"));
 			RecommendationInput input = new RecommendationInput(categories, latitude, longitude, max_distance);
 			//RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
@@ -148,7 +147,7 @@ public class Home extends ListActivity {
 	
 	/* like everything in Java, you need to make a Yelp object in order to actually do anything
 	 * (actually there's a reason for this:  it authorizes you with the Yelp API)
-	 */
+	 
     public Yelp getYelp() {
     	Log.v("Yelp", "entering getYelp()");
         String consumerKey = getString( R.string.oauth_consumer_key );
@@ -196,7 +195,7 @@ public class Home extends ListActivity {
     	    			/* supposed to display this when the image can't be gotten from the url
     	    			 * but instead, no image displays, which is ok but doesn't look so good
     	    			 * probably returning null because it's an incorrect path name
-    	    			 */
+    	    			 
     	    			image = Drawable.createFromPath("../../../../../res/drawable/default_venue_image.png");
     	    		}
     				iv.setImageDrawable(image);
@@ -215,7 +214,7 @@ public class Home extends ListActivity {
          * Drawable image = ImageOperations(this,venues.get(0).rating_img_url_small,"image.jpg");
            ImageView imgView = (ImageView)findViewById(R.id.image1);
            imgView.setImageDrawable(image);
-         */
+         
     	private Drawable ImageOperations(Context ctx, String url, String saveFilename) {
     		try {
     			InputStream is = (InputStream) this.fetch(url);
@@ -232,12 +231,12 @@ public class Home extends ListActivity {
 
         /* http://asantoso.wordpress.com/2008/03/07/download-and-view-image-from-the-web/
          * used by ImageOperations to get an image from a URL
-         */
+         
     	public Object fetch(String address) throws MalformedURLException,IOException {
     		URL url = new URL(address);
     		Object content = url.getContent();
     		return content;
     	}
-    }
+    } 
 }
-
+*/

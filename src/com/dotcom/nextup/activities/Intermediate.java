@@ -26,14 +26,14 @@ import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.FoursquareLocationManager;
-import com.dotcom.nextup.classes.NearbyLocation;
 import com.dotcom.nextup.classes.TokenManager;
+import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.oauth.AndroidOAuth;
 import com.google.android.maps.GeoPoint;
 
 public class Intermediate extends Activity {
-	ArrayList<NearbyLocation> nearby_locations = null;
-	NearbyLocation nearest_location = null;
+	ArrayList<Venue> nearby_locations = null;
+	Venue nearest_location = null;
 	ArrayAdapter<CharSequence> adapter;
 	ArrayList<CharSequence> spinner_locations = null;
 
@@ -48,10 +48,11 @@ public class Intermediate extends Activity {
 	public String lastLocationName;
 	private String token;
 	private String code;
-	private Boolean receivedLocationUpdate = false;
-	private Boolean checkinsUpdated = false;
-	private Boolean locationRegistered = false;
-	private Boolean codeStored = false;
+	private static Boolean receivedLocationUpdate = false;
+	private static Boolean receivedLastLocationUpdate = false;
+	private static Boolean checkinsUpdated = false;
+	private static Boolean locationRegistered = false;
+	private static Boolean codeStored = false;
 	private CheckInManager checkInManager;
 	private ArrayList<CheckIn> checkIns;
 	private SharedPreferences pref;
@@ -64,12 +65,12 @@ public class Intermediate extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.intermediate2);
 		context = this;
-		nearby_locations = new ArrayList<NearbyLocation>();
+		nearby_locations = new ArrayList<Venue>();
 		oa = new AndroidOAuth(this);
 		checkInManager = new CheckInManager();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		
-		if (code == null)
+		if (code == null && codeStored == false)
 			code = TokenManager.getCode(getIntent(), this);
 			if (code != null)
 				codeStored = true;
@@ -90,7 +91,7 @@ public class Intermediate extends Activity {
 		 super.onResume();
 	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-	     if (currentLocation != null && currentLocationName == null && !receivedLocationUpdate)
+	     if (currentLocation != null && currentLocationName == null && !receivedLastLocationUpdate)
 			try {
 				updateLocationInfo();
 			} catch (JSONException e) {
@@ -113,6 +114,7 @@ public class Intermediate extends Activity {
 		spinner_locations = new ArrayList<CharSequence>();
 		adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_locations);
 		spinner.setAdapter(adapter);
+		spinner.setOnItemSelectedListener(spinnerListener);
 		
 		if (nearby_locations != null && nearby_locations.size() > 0) {
 			adapter.notifyDataSetChanged();
@@ -143,9 +145,9 @@ public class Intermediate extends Activity {
 	private void initializeCheckIns() {
 			this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
 			this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
-			this.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
-			FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
-			FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);		
+			Intermediate.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
+			this.lastLocation = FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
+			this.lastLocationName = FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);		
 	}
 	
 
@@ -191,6 +193,7 @@ public class Intermediate extends Activity {
 			if (currentLocationName == null) {
 				updateLocationInfo();
 				updateSpinner();
+				receivedLastLocationUpdate = true;
 			}
 		}
 		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
@@ -199,6 +202,7 @@ public class Intermediate extends Activity {
 			if (currentLocationName == null)
 				updateLocationInfo();
 				updateSpinner();
+				receivedLastLocationUpdate = true;
 		}
 		
 		locationRegistered = true;
@@ -212,27 +216,26 @@ public class Intermediate extends Activity {
 	}
 	
 	public void toHome(View view) {
-		Intent gotoHome = new Intent(this, Home.class);
+		Intent gotoHome = new Intent(this, Intermediate.class);
+		int numCats = 0;
 		
-		if (currentSelectedVenue == -1) {
-			gotoHome.putExtra("currentLocation", this.categories.get(currentSelectedVenue));
+		
+		if (currentSelectedVenue != -1) {
+			Venue selected = nearby_locations.get(currentSelectedVenue);
+			ArrayList<Category> cats = selected.getCategories();
+			numCats = cats.size();
+			/* Put the number of categories */
+			gotoHome.putExtra("numCats", numCats);
+			
+			/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
+			for (int j = 0; j < numCats; j++) {
+				String key = "Category" + new Integer(j).toString();
+				gotoHome.putExtra(key, cats.get(j));
+			}
+			
+			/*Put the location just for shits and giggles */
+			gotoHome.putExtra("location", selected.getLatlong().getLatitudeE6() + "," + selected.getLatlong().getLongitudeE6());
 			startActivity(gotoHome);
-		}
-		
-		
-		// pass it the categories to search for
-		for (int i = 0; i < categories.size(); i++) {
-			String ii = Integer.toString(i);
-			gotoHome.putExtra("cat"+ii, categories.get(i));
-		}
-		gotoHome.putExtra("num_categories", categories.size());
-		
-		// pass it current location
-		gotoHome.putExtra("latitude", currentLocation.getLatitudeE6());
-		gotoHome.putExtra("longitude", currentLocation.getLongitudeE6());
-		
-		startActivity(gotoHome);
-		
+		}		
 	}
-
 }

@@ -71,13 +71,13 @@ public class FoursquareLocationManager {
 		return null;
 	}
     
-    public static NearbyLocation getNearestLocationFromFoursquare(ArrayList<NearbyLocation> venues) {
+    public static Venue getNearestLocationFromFoursquare(ArrayList<Venue> venues) {
     	if (venues == null) 
     		return null;
     	return venues.get(0);
     }
     
-	public static ArrayList<NearbyLocation> getNearbyLocationsFromFoursquare(JSONArray close, ArrayList<NearbyLocation> nearby_locations) throws JSONException {
+	public static ArrayList<Venue> getNearbyLocationsFromFoursquare(JSONArray close, ArrayList<Venue> nearby_locations) throws JSONException {
 		if (nearby_locations == null || close == null)
 			return null;
 		nearby_locations.clear();
@@ -86,6 +86,7 @@ public class FoursquareLocationManager {
 			JSONObject nearbyPlace = close.getJSONObject(i);
 			JSONObject location = nearbyPlace.getJSONObject("location");
 			JSONArray categories = nearbyPlace.getJSONArray("categories");
+			double distance = Double.parseDouble(location.getString("distance"));
 			String name = nearbyPlace.getString("name");
 			for (int j = 0; j < categories.length(); j++) {
 				Category newCat = new Category(categories.getJSONObject(j).getString("name"));
@@ -94,9 +95,9 @@ public class FoursquareLocationManager {
 			int lat = (int) (Double.parseDouble(location.getString("lat")) * 1E6);
 			int lon = (int) (Double.parseDouble(location.getString("lng")) * 1E6);
 			GeoPoint locationGeoPoint = new GeoPoint(lat, lon);
-			NearbyLocation nearbyLocation;
+			Venue nearbyLocation;
 			try {
-				nearbyLocation = new NearbyLocation(locationGeoPoint, cats, name);
+				nearbyLocation = new Venue(name, "url", "imageurl", locationGeoPoint, distance, cats);
 				nearby_locations.add(nearbyLocation);
 			} catch (NumberFormatException e) {
 				//TODO: Deal with this error
