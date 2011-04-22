@@ -31,7 +31,9 @@ import com.dotcom.nextup.yelp.YelpVenue;
 import com.google.android.maps.GeoPoint;
 
 public class Home extends ListActivity {
-	/** Called when the activity is first created. */
+	Bundle bundle;
+	ArrayList<Category> categories = new ArrayList<Category>();
+	
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
 	ProgressDialog dialog = null;
@@ -41,11 +43,25 @@ public class Home extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_checkedin);
+
+		bundle = this.getIntent().getExtras();
+		getCategories();
+		
+		my_venues = new ArrayList<Venue>();
+		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
+		setListAdapter(this.m_adapter);
+		
+		viewVenues = new Runnable() {
+			@Override
+			public void run() {
+				getVenues();
+			}
+		};
+
 		Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
 		thread.start();
 	}
 
-	/*---------------- UI CODE BELOW *----------------------*/
 
 	public void toFriends(View view) {
 		Intent toFriends = new Intent(this, Friends.class);
@@ -67,6 +83,15 @@ public class Home extends ListActivity {
 	    startActivity( browse );
 	}
 	
+	private void getCategories() {
+		if (bundle == null) return;
+		int n = bundle.getInt("num_categories");
+		if (n == 0) return;
+		for (int i = n; i < n; i++) {
+			String ii = Integer.toString(i);
+			categories.add((Category)bundle.get("cat"+ii));
+		}
+	}
 	
 	private Runnable returnRes = new Runnable() {
 		@Override
@@ -81,7 +106,6 @@ public class Home extends ListActivity {
 		}
 	};
 
-	@SuppressWarnings("unused")
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
