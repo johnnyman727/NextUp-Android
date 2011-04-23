@@ -24,8 +24,7 @@ import android.widget.TextView;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.categorymodels.CategoryManager;
-import com.dotcom.nextup.classes.RecommendationInput;
+import com.dotcom.nextup.classes.RecommendationEngine;
 import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.yelp.Yelp;
 import com.dotcom.nextup.yelp.YelpVenue;
@@ -79,6 +78,7 @@ public class Home extends ListActivity {
 		String[] latlong = intent.getStringExtra("location").split(",");
 		this.latitude = Double.parseDouble(latlong[0]);
 		this.longitude = Double.parseDouble(latlong[1]);
+		this.max_distance = Double.parseDouble(String.valueOf((intent.getIntExtra("distance", -1))));
 		
 		//Pull name
 		this.name = intent.getStringExtra("name");
@@ -113,22 +113,6 @@ public class Home extends ListActivity {
 	    startActivity( browse );
 	}
 	
-	private void getCategories() {
-		if (bundle == null) return;
-		int n = bundle.getInt("num_categories");
-		if (n == 0) return;
-		for (int i = n; i < n; i++) {
-			String ii = Integer.toString(i);
-			categories.add((Category)bundle.get("cat"+ii));
-		}
-	}
-	
-	private void getLatLong() {
-		if (bundle == null) return;
-		latitude = bundle.getInt("latitude")/1E6;
-		longitude = bundle.getInt("longitude")/1E6;
-	}
-	
 	private Runnable returnRes = new Runnable() {
 		@Override
 		public void run() {
@@ -147,12 +131,7 @@ public class Home extends ListActivity {
 			Log.v("Home", "entering getVenues()");
 			/* uses up limited actual Yelp queries */
 			Yelp yelp = getYelp();
-			
-			ArrayList<Category> cats = new ArrayList<Category>();
-			cats.add(new Category("cafe"));
-			cats.add(new Category("dessert"));
-			cats.add(new Category("coffee"));
-			RecommendationInput input = new RecommendationInput(categories, latitude, longitude, max_distance);
+			RecommendationEngine input = new RecommendationEngine(categories, latitude, longitude, max_distance);
 			//RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
 			my_venues = new ArrayList<Venue>();			

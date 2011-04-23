@@ -105,6 +105,8 @@ public class CheckInManager {
 	}
 	
 	public CheckIn getLastCheckIn(ArrayList<CheckIn> checkins) {
+		if (checkins.size() == 0)
+			return null;
 		return checkins.get(checkins.size() - 1);
 	}
 	

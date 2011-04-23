@@ -21,7 +21,7 @@ import org.scribe.oauth.OAuthService;
 import android.util.Log;
 
 import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.classes.RecommendationInput;
+import com.dotcom.nextup.classes.RecommendationEngine;
 
 /**
 * Example for accessing the Yelp API.
@@ -48,15 +48,15 @@ public class Yelp {
 		this.accessToken = new Token(token, tokenSecret);
 	}
 	
-	public ArrayList<YelpVenue> getRecommendation(RecommendationInput input) {
+	public ArrayList<YelpVenue> getRecommendation(RecommendationEngine input) {
 		/* THE RECOMMENDATION ENGINE */
-		RecommendationInput input2 = narrowDownCategories(input);
+		RecommendationEngine input2 = narrowDownCategories(input);
 		ArrayList<YelpVenue> all_venues = getManyPossibleVenues(input2);
 		ArrayList<YelpVenue> rec = chooseBest(input2, all_venues);
 		return rec;
 	}
 	
-	private RecommendationInput narrowDownCategories(RecommendationInput in) {
+	private RecommendationEngine narrowDownCategories(RecommendationEngine in) {
 		
 		
 		ArrayList<Category> all_cats = in.getCategories();
@@ -83,7 +83,7 @@ public class Yelp {
 		int j = 0; 
 		while (best_cats.size() < 3 && best_cats.size() < ncats
 				&& j < within_times.size()) {
-			int i = all_cats.size();
+			int i = all_cats.size() - 1;
 			while ( best_cats.size() < 3 && i >= 0) {
 				Category cat = (Category) options.get(i).getObject();
 				if ( rankCategory(cat, now) <= within_times.get(j) && !isIn(cat, best_cats) ) {
@@ -95,7 +95,7 @@ public class Yelp {
 			j++;
 		}
 
-		RecommendationInput out = new RecommendationInput(best_cats, in.getLatitude(), in.getLongitude(), in.getMaxDistance());
+		RecommendationEngine out = new RecommendationEngine(best_cats, in.getLatitude(), in.getLongitude(), in.getMaxDistance());
 		return out;
 	}
 	
@@ -109,7 +109,7 @@ public class Yelp {
 		return Integer.parseInt(sdf.format(cal.getTime()));
 	}
 	
-	public ArrayList<YelpVenue> getManyPossibleVenues(RecommendationInput input) {
+	public ArrayList<YelpVenue> getManyPossibleVenues(RecommendationEngine input) {
 		/* part of the recommendation engine:
 		 * does a yelp search() for each given category
 		 * returns all results
@@ -122,8 +122,12 @@ public class Yelp {
 		ArrayList<YelpVenue> all_venues = new ArrayList<YelpVenue>();
 		ArrayList<YelpVenue> one_search = new ArrayList<YelpVenue>();
 		for (Category cat : input.getCategories()) {
+			if (cat.getName() == null)
+				continue;
 			Log.v("Yelp", "cat: " + cat.getName());
 			one_search = venuesSearch(cat.getName(), lat, lon, maxd);
+			if (one_search == null)
+				continue;
 			for (YelpVenue venue : one_search) {
 				all_venues.add(venue);
 			}
@@ -133,6 +137,8 @@ public class Yelp {
 	
 	public ArrayList<YelpVenue> venuesSearch(String term, double latitude, double longitude, double max_distance) {
 		String response = this.search(term, latitude, longitude, max_distance);
+		if (response == null)
+			return null;
 		return this.searchResponseToYelpVenues(response);
 	}
 	
@@ -152,6 +158,8 @@ public class Yelp {
 	    request.addQuerystringParameter("radius_filter", Double.toString(max_distance));
 	    this.service.signRequest(this.accessToken, request);
 	    Response response = request.send();
+	    if (response.getCode() == -1)
+	    	return null;
 	    return response.getBody();
 	}
 	
@@ -174,7 +182,7 @@ public class Yelp {
 	}
 
 		
-	public ArrayList<YelpVenue> chooseBest(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
+	public ArrayList<YelpVenue> chooseBest(RecommendationEngine input, ArrayList<YelpVenue> all_venues) {
 		/* part of the recommendation engine
 		 * given a lot of yelp venues to consider, returns the best 3
 		 */

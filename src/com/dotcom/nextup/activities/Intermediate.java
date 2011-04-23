@@ -123,7 +123,7 @@ public class Intermediate extends Activity {
 			for (int i = 0; i < nearby_locations.size(); i++)
 				adapter.add(nearby_locations.get(i).getName());
 		}
-		if (nearby_locations.size() == 0) {
+		if (nearby_locations == null || nearby_locations.size() == 0) {
 			adapter.notifyDataSetChanged();
 			adapter.add("No nearby locations found. You may not have reception.");
 		}
@@ -151,9 +151,11 @@ public class Intermediate extends Activity {
 	private void initializeCheckIns() {
 			this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
 			this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
-			Intermediate.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
-			this.lastLocation = FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
-			this.lastLocationName = FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);		
+			if (this.checkIns.size() > 0) {
+				Intermediate.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
+				this.lastLocation = FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
+				this.lastLocationName = FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);
+			}
 	}
 	
 
@@ -236,6 +238,9 @@ public class Intermediate extends Activity {
 			 
 			/* Put the number of categories */
 			gotoHome.putExtra("numCats", numCats);
+			
+			/* Put the distance */
+			gotoHome.putExtra("distance", selected.getDistance());
 			
 			/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
 			for (int j = 0; j < numCats; j++) {
