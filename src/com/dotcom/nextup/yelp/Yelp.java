@@ -57,8 +57,6 @@ public class Yelp {
 	}
 	
 	private RecommendationEngine narrowDownCategories(RecommendationEngine in) {
-		
-		
 		ArrayList<Category> all_cats = in.getCategories();
 		int ncats = all_cats.size();
 		
@@ -136,9 +134,11 @@ public class Yelp {
 	}
 	
 	public ArrayList<YelpVenue> venuesSearch(String term, double latitude, double longitude, double max_distance) {
+		Log.v("Yelp", "entering venuesSearch");
 		String response = this.search(term, latitude, longitude, max_distance);
 		if (response == null)
 			return null;
+		Log.v("Yelp", "sending response to searchResponseToYelpVenues");
 		return this.searchResponseToYelpVenues(response);
 	}
 	
@@ -153,21 +153,40 @@ public class Yelp {
 	public String search(String term, double latitude, double longitude, double max_distance) {
 		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.yelp.com/v2/search");
 		request.addQuerystringParameter("limit", "3");
-		request.addQuerystringParameter("term", term);
+		String term2 = convertTermToYelpForm(term);
+		request.addQuerystringParameter("term", term2);
 	    request.addQuerystringParameter("ll", latitude + "," + longitude);
 	    request.addQuerystringParameter("radius_filter", Double.toString(max_distance));
 	    this.service.signRequest(this.accessToken, request);
 	    Response response = request.send();
+	    if (response == null) Log.v("Yelp", "response is null");
 	    if (response.getCode() == -1)
 	    	return null;
+	    Log.v("Yelp", response.toString());
+	    Log.v("Yelp", "about to return response body from Yelp search");
 	    return response.getBody();
 	}
 	
+	private String convertTermToYelpForm(String term) { // "Middle Eastern"
+		String lower = term.toLowerCase(); // "middle eastern"
+		String[] pieces = lower.split(" "); // ["middle", "eastern"]
+		String res = "";
+		if (pieces != null) {
+			if ( pieces.length > 0) {
+				res = res + pieces[0];
+				for (int i = 1; i < pieces.length; i++) {
+					res = res + "+" + pieces[i];
+				}
+			}
+		}
+		return res;
+	}
+	
 	private ArrayList<YelpVenue> searchResponseToYelpVenues(String response) {
+		Log.v(TAG, response);
 		ArrayList<YelpVenue> venues = new ArrayList<YelpVenue>();
 		try {
 			JSONObject jresponse = new JSONObject(response);
-			Log.v(TAG, jresponse.toString());
 			JSONArray jbusinesses = new JSONArray(jresponse.getString("businesses"));
 			JSONObject jbus = new JSONObject();
 			for (int i = 0; i < jbusinesses.length(); i++) {

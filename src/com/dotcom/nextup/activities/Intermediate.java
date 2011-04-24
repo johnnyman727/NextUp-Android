@@ -24,7 +24,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.categorymodels.CategoryManager;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
 import com.dotcom.nextup.classes.FoursquareLocationManager;
@@ -235,32 +234,50 @@ public class Intermediate extends Activity {
 		
 		
 		if (currentSelectedVenue != -1) {
-			
+			Venue selected;
+			ArrayList<Category> cats;
 			if (nearby_locations != null && nearby_locations.size() > 0) {
-				Venue selected = nearby_locations.get(currentSelectedVenue);
+				selected = nearby_locations.get(currentSelectedVenue);
 				
-				ArrayList<Category> cats = selected.getCategories();
-				numCats = cats.size();
+				// wrong - what we want here is the categories that the user should go to NEXT,
+				// NOT the categories of the place they're currently at
+				cats = selected.getCategories();
+	
+			} else {
+				cats = new ArrayList<Category>();
+				cats.add(new Category("restaurant"));
+				cats.add(new Category("Middle Eastern"));
+				cats.add(new Category("cafe"));
 				
-				/* Put Name */
-				gotoHome.putExtra("name", selected.getName());
-				 
-				/* Put the number of categories */
-				gotoHome.putExtra("numCats", numCats);
-				
-				/* Put the distance */
-				gotoHome.putExtra("distance", selected.getDistance());
-				
-				/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
-				for (int j = 0; j < numCats; j++) {
-					String key = "Category" + new Integer(j).toString();
-					gotoHome.putExtra(key, cats.get(j));
-				}
-				
-				/*Put the location just for shits and giggles */
-				gotoHome.putExtra("location", selected.getLatlong().getLatitudeE6() + "," + selected.getLatlong().getLongitudeE6());
-				
+				selected = new Venue(
+						"Moody's Falafel Palace", 
+						"http://www.yelp.com/biz/moodys-falafel-palace-cambridge",
+						"http://farm4.static.flickr.com/3046/2595970267_aeaf1b35dc.jpg",
+						new GeoPoint((int)(42.3654358 * 1E6), (int)(-71.1042283 * 1E6)),
+						500,
+						cats);
 			}
+			
+			numCats = cats.size();
+			
+			/* Put Name */
+			gotoHome.putExtra("name", selected.getName());
+			 
+			/* Put the number of categories */
+			gotoHome.putExtra("numCats", numCats);
+			
+			/* Put the distance */
+			gotoHome.putExtra("distance", selected.getDistance());
+			
+			/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
+			for (int j = 0; j < numCats; j++) {
+				String key = "Category" + new Integer(j).toString();
+				gotoHome.putExtra(key, cats.get(j));
+			}
+			
+			/*Put the location just for shits and giggles */
+			gotoHome.putExtra("location", selected.getLatlong().getLatitudeE6() + "," + selected.getLatlong().getLongitudeE6());
+		
 			
 			startActivity(gotoHome);
 		}		

@@ -65,6 +65,7 @@ public class Home extends ListActivity {
 			};
 
 			Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
+			//dialog = ProgressDialog.show(Home.this, "", "Loading. Please wait...", true);
 			thread.start();
 			
 		} catch (IOException e) {
@@ -132,7 +133,7 @@ public class Home extends ListActivity {
 				for (int i = 0; i < my_venues.size(); i++)
 					m_adapter.add(my_venues.get(i));
 			}
-			dialog.dismiss();
+			//dialog.dismiss();
 			m_adapter.notifyDataSetChanged();
 		}
 	};
@@ -142,7 +143,7 @@ public class Home extends ListActivity {
 			Log.v("Home", "entering getVenues()");
 			/* uses up limited actual Yelp queries */
 			Yelp yelp = getYelp();
-			RecommendationEngine input = new RecommendationEngine(categories, latitude, longitude, max_distance);
+			RecommendationEngine input = new RecommendationEngine(categories, latitude, longitude, 3000);
 			//RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
 			my_venues = new ArrayList<Venue>();			

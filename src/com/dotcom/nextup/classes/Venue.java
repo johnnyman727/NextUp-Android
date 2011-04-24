@@ -1,7 +1,6 @@
 package com.dotcom.nextup.classes;
 
 import java.util.ArrayList;
-
 import com.dotcom.nextup.categorymodels.Category;
 import com.google.android.maps.GeoPoint;
 
