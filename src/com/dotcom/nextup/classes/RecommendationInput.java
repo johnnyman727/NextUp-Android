@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.dotcom.nextup.categorymodels.Category;
 
-public class RecommendationEngine {
+public class RecommendationInput {
 	/* This class does not actually make the recommendation.
 	 * It just represents the appropriate input to provide
 	 * when asking for a recommendation.
@@ -14,7 +14,7 @@ public class RecommendationEngine {
 	double longitude;
 	double max_distance; // in meters, cut off distance for how far away a venue can be, should vary by transportation type
 	
-	public RecommendationEngine(ArrayList<Category> categories, double lat, double lon, double distance) {
+	public RecommendationInput(ArrayList<Category> categories, double lat, double lon, double distance) {
 		this.categories = categories;
 		this.latitude = lat;
 		this.longitude = lon;

@@ -21,7 +21,7 @@ import org.scribe.oauth.OAuthService;
 import android.util.Log;
 
 import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.classes.RecommendationEngine;
+import com.dotcom.nextup.classes.RecommendationInput;
 
 /**
 * Example for accessing the Yelp API.
@@ -48,15 +48,15 @@ public class Yelp {
 		this.accessToken = new Token(token, tokenSecret);
 	}
 	
-	public ArrayList<YelpVenue> getRecommendation(RecommendationEngine input) {
+	public ArrayList<YelpVenue> getRecommendation(RecommendationInput input) {
 		/* THE RECOMMENDATION ENGINE */
-		RecommendationEngine input2 = narrowDownCategories(input);
+		RecommendationInput input2 = narrowDownCategories(input);
 		ArrayList<YelpVenue> all_venues = getManyPossibleVenues(input2);
 		ArrayList<YelpVenue> rec = chooseBest(input2, all_venues);
 		return rec;
 	}
 	
-	private RecommendationEngine narrowDownCategories(RecommendationEngine in) {
+	private RecommendationInput narrowDownCategories(RecommendationInput in) {
 		ArrayList<Category> all_cats = in.getCategories();
 		int ncats = all_cats.size();
 		
@@ -93,7 +93,7 @@ public class Yelp {
 			j++;
 		}
 
-		RecommendationEngine out = new RecommendationEngine(best_cats, in.getLatitude(), in.getLongitude(), in.getMaxDistance());
+		RecommendationInput out = new RecommendationInput(best_cats, in.getLatitude(), in.getLongitude(), in.getMaxDistance());
 		return out;
 	}
 	
@@ -151,6 +151,10 @@ public class Yelp {
      * @return JSON string response
      */
 	public String search(String term, double latitude, double longitude, double max_distance) {
+		Log.v("Yelp", "search term: " + term);
+		Log.v("Yelp", "search lat: " + Double.toString(latitude));
+		Log.v("Yelp", "search long: " + Double.toString(longitude));
+		Log.v("Yelp", "search max distance not used: " + Double.toString(max_distance));
 		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.yelp.com/v2/search");
 		request.addQuerystringParameter("limit", "3");
 		String term2 = convertTermToYelpForm(term);
@@ -164,6 +168,7 @@ public class Yelp {
 	    	return null;
 	    Log.v("Yelp", response.toString());
 	    Log.v("Yelp", "about to return response body from Yelp search");
+	    Log.v("Yelp", response.getBody());
 	    return response.getBody();
 	}
 	
@@ -179,7 +184,7 @@ public class Yelp {
 				}
 			}
 		}
-		return res;
+		return res; // "middle+eastern"
 	}
 	
 	private ArrayList<YelpVenue> searchResponseToYelpVenues(String response) {

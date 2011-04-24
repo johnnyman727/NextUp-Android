@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
-import com.dotcom.nextup.classes.RecommendationEngine;
+import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.yelp.Yelp;
 import com.dotcom.nextup.yelp.YelpVenue;
@@ -32,11 +32,15 @@ import com.google.android.maps.GeoPoint;
 
 public class Home extends ListActivity {
 	Bundle bundle;
-	ArrayList<Category> categories = new ArrayList<Category>();
+	
 	double latitude;
 	double longitude;
 	String name;
 	double max_distance = 3000;
+	
+	ArrayList<Category> categories_now = new ArrayList<Category>();
+	ArrayList<Category> categories_next = new ArrayList<Category>();
+	RecommendationInput input = null;
 	
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
@@ -86,8 +90,8 @@ public class Home extends ListActivity {
 		throws IOException, ClassNotFoundException, NullPointerException {
 		//Pull location data
 		String[] latlong = intent.getStringExtra("location").split(",");
-		this.latitude = Double.parseDouble(latlong[0]);
-		this.longitude = Double.parseDouble(latlong[1]);
+		this.latitude = Double.parseDouble(latlong[0])/1E6;
+		this.longitude = Double.parseDouble(latlong[1])/1E6;
 		// isn't the "distance" here the distance the person is from the selected venue?
 		// this is NOT the same as the max distance they are willing to travel to go to the next place
 		this.max_distance = Double.parseDouble(String.valueOf((intent.getIntExtra("distance", -1))));
@@ -100,7 +104,7 @@ public class Home extends ListActivity {
 		
 		for (int i = 0; i < iter; i++) {
 			Category category = (Category)intent.getParcelableExtra("Category" + new Integer(i).toString());
-			this.categories.add(category);
+			this.categories_now.add(category);
 		}		
 	}
 
@@ -143,8 +147,8 @@ public class Home extends ListActivity {
 			Log.v("Home", "entering getVenues()");
 			/* uses up limited actual Yelp queries */
 			Yelp yelp = getYelp();
-			RecommendationEngine input = new RecommendationEngine(categories, latitude, longitude, 3000);
-			//RecommendationInput input = new RecommendationInput(cats, 42.283, -71.23, 5000);
+			getNextCategories();
+			makeRecommendationInput();
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
 			my_venues = new ArrayList<Venue>();			
 			for (int i = 0; i < venues.size(); i++) {
@@ -163,9 +167,16 @@ public class Home extends ListActivity {
 		runOnUiThread(returnRes);
 	}
 	
+	private void makeRecommendationInput() {
+		input = new RecommendationInput(categories_next, latitude, longitude, 3000);
+	}
+	
+	private void getNextCategories() {
+		
+	}
+	
 	/* like everything in Java, you need to make a Yelp object in order to actually do anything
 	 * (actually there's a reason for this:  it authorizes you with the Yelp API) */
-	 
     public Yelp getYelp() {
     	Log.v("Yelp", "entering getYelp()");
         String consumerKey = getString( R.string.oauth_consumer_key );
