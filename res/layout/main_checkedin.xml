@@ -9,8 +9,8 @@
 		android:id="@+id/Logo" 
 		android:scaleType="fitXY"
 		android:layout_width="fill_parent" 
-		android:src="@drawable/images"
-		android:layout_height="40dip">
+		android:src="@drawable/logo"
+		android:layout_height="50dip">
 	</ImageView>
 
 		

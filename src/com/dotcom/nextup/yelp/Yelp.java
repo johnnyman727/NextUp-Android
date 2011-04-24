@@ -69,22 +69,25 @@ public class Yelp {
 		Collections.sort(options); // sorts lowest to highest by num
 		
 		ArrayList<Category> best_cats = new ArrayList<Category>();
-		// would like activities whose avg time is as close as possible to current time, 
-		// but will increase within_time to make sure we get at least 3 categories
+		// would like activities whose avg time is as close as possible to current time,
+		// meaning those with the lowest possible time_rank
+		// but will increase time_rank to make sure we get at least 3 categories
 		int now = getCurrentHours();
-		ArrayList<Integer> within_times = new ArrayList<Integer>();
+		ArrayList<Integer> time_ranks = new ArrayList<Integer>();
 		for (int i = 0; i < ncats; i++) {
-			within_times.add(rankCategory(all_cats.get(i), now));
+			int time_rank = rankCategory(all_cats.get(i), now);
+			if (!isIn(time_rank, time_ranks))
+				time_ranks.add(rankCategory(all_cats.get(i), now));
 		}
-		Collections.sort(within_times);
+		Collections.sort(time_ranks);
 		
 		int j = 0; 
 		while (best_cats.size() < 3 && best_cats.size() < ncats
-				&& j < within_times.size()) {
+				&& j < time_ranks.size()) {
 			int i = all_cats.size() - 1;
 			while ( best_cats.size() < 3 && i >= 0) {
 				Category cat = (Category) options.get(i).getObject();
-				if ( rankCategory(cat, now) <= within_times.get(j) && !isIn(cat, best_cats) ) {
+				if ( rankCategory(cat, now) <= time_ranks.get(j) && !isIn(cat, best_cats) ) {
 					best_cats.add(cat);
 					all_cats.remove(i);
 				}
@@ -246,6 +249,13 @@ public class Yelp {
 	private boolean isIn(Category kitty, ArrayList<Category> cats) {
 		for (Category cat : cats) {
 			if ( kitty.getName().equals(cat.getName())) return true;
+		}
+		return false;
+	}
+	
+	private boolean isIn(int num, ArrayList<Integer> nums) {
+		for (int n : nums) {
+			if ( n == num ) return true;
 		}
 		return false;
 	}
