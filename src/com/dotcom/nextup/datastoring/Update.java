@@ -82,7 +82,7 @@ public class Update {
 				storedMap.addCheckInsToHistogram(newCheckins);
 			} else {
 				CategoryHistogram newMap = new CategoryHistogram();
-				newMap.addCheckInsToHistogram(newCheckins);
+				newMap.addCheckInsToHistogram(checkins);
 				CategoryHistogramManager.storeHistogramToPhone(newMap, pref, context.getString(R.string.histogramPreferenceName));
 			}
 			

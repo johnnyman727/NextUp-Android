@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 
 
 public class CategoryHistogram implements Comparator<Category>{
@@ -50,6 +52,13 @@ public class CategoryHistogram implements Comparator<Category>{
 				}
 			}
 		}
+	}
+	public String toString() {
+		//TODO: FIgure out how to store hashmap
+		String ret = "";
+		Iterator iter = map.entrySet().iterator();
+		Entry current;
+		return ret;
 	}
 	
 	public void addToHistogram(ArrayList<CheckIn> checkins) {

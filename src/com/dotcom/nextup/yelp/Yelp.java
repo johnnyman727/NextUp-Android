@@ -107,7 +107,7 @@ public class Yelp {
 		return Integer.parseInt(sdf.format(cal.getTime()));
 	}
 	
-	public ArrayList<YelpVenue> getManyPossibleVenues(RecommendationEngine input) {
+	public ArrayList<YelpVenue> getManyPossibleVenues(RecommendationInput input) {
 		/* part of the recommendation engine:
 		 * does a yelp search() for each given category
 		 * returns all results
@@ -206,7 +206,7 @@ public class Yelp {
 	}
 
 		
-	public ArrayList<YelpVenue> chooseBest(RecommendationEngine input, ArrayList<YelpVenue> all_venues) {
+	public ArrayList<YelpVenue> chooseBest(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
 		/* part of the recommendation engine
 		 * given a lot of yelp venues to consider, returns the best 3
 		 */

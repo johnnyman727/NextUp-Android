@@ -10,9 +10,11 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,8 +26,11 @@ import android.widget.TextView;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.Category;
+import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.classes.RecommendationInput;
 import com.dotcom.nextup.classes.Venue;
+import com.dotcom.nextup.datastoring.BackendManager;
+import com.dotcom.nextup.datastoring.CategoryHistogramManager;
 import com.dotcom.nextup.yelp.Yelp;
 import com.dotcom.nextup.yelp.YelpVenue;
 import com.google.android.maps.GeoPoint;
@@ -46,10 +51,14 @@ public class Home extends ListActivity {
 	private VenueAdapter m_adapter;
 	ProgressDialog dialog = null;
 	private Runnable viewVenues;
+	
+	private SharedPreferences pref;
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		try {
 			// all of Home hinges on being able to extractLocationData
 			// if we fail at that, there is no point in doing anything else
@@ -177,6 +186,19 @@ public class Home extends ListActivity {
 	}
 	
 	private void getNextCategories() {
+		ArrayList<Category> customHistReturn = new ArrayList<Category>();
+		ArrayList<Category> cloudHistReturn = new ArrayList<Category>();
+		CategoryHistogram ch = CategoryHistogramManager.getHistogramFromPhone(pref, getString(R.string.histogramPreferenceName));
+		
+		for (Category inputCat: categories_now) {
+			//customHistReturn.addAll(ch.getAllSuffixes(inputCat));
+			cloudHistReturn.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
+		}
+		
+		categories_next.addAll(customHistReturn);
+		categories_next.addAll(cloudHistReturn);
+		
+		//TODO:SORT BASED ON RANKING FROM PREFERENCES
 		
 	}
 	
