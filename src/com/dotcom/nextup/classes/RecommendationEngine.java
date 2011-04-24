@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import com.dotcom.nextup.categorymodels.Category;
 
 public class RecommendationEngine {
+	/* This class does not actually make the recommendation.
+	 * It just represents the appropriate input to provide
+	 * when asking for a recommendation.
+	 */
 	ArrayList<Category> categories;
 	double latitude;
 	double longitude;

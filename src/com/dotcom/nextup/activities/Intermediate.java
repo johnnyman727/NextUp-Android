@@ -80,13 +80,16 @@ public class Intermediate extends Activity {
 		if (this.checkIns == null && !code.equals("-1"))
 			initializeCheckIns();
 		
-		if (!locationRegistered)
+		if (!locationRegistered) {
 			try {
 				initializeLocationListener();
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+		
+		updateSpinner();
 	}
 
 	public void onResume() {
@@ -100,6 +103,8 @@ public class Intermediate extends Activity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			updateSpinner();
 	}
 
 	@Override
@@ -115,6 +120,7 @@ public class Intermediate extends Activity {
 		Spinner spinner = (Spinner)findViewById(R.id.Intermediate2Spinner);
 		spinner_locations = new ArrayList<CharSequence>();
 		adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_locations);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		spinner.setOnItemSelectedListener(spinnerListener);
 		
@@ -229,27 +235,33 @@ public class Intermediate extends Activity {
 		
 		
 		if (currentSelectedVenue != -1) {
-			Venue selected = nearby_locations.get(currentSelectedVenue);
-			ArrayList<Category> cats = selected.getCategories();
-			numCats = cats.size();
 			
-			/* Put Name */
-			gotoHome.putExtra("name", selected.getName());
-			 
-			/* Put the number of categories */
-			gotoHome.putExtra("numCats", numCats);
-			
-			/* Put the distance */
-			gotoHome.putExtra("distance", selected.getDistance());
-			
-			/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
-			for (int j = 0; j < numCats; j++) {
-				String key = "Category" + new Integer(j).toString();
-				gotoHome.putExtra(key, cats.get(j));
+			if (nearby_locations != null && nearby_locations.size() > 0) {
+				Venue selected = nearby_locations.get(currentSelectedVenue);
+				
+				ArrayList<Category> cats = selected.getCategories();
+				numCats = cats.size();
+				
+				/* Put Name */
+				gotoHome.putExtra("name", selected.getName());
+				 
+				/* Put the number of categories */
+				gotoHome.putExtra("numCats", numCats);
+				
+				/* Put the distance */
+				gotoHome.putExtra("distance", selected.getDistance());
+				
+				/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
+				for (int j = 0; j < numCats; j++) {
+					String key = "Category" + new Integer(j).toString();
+					gotoHome.putExtra(key, cats.get(j));
+				}
+				
+				/*Put the location just for shits and giggles */
+				gotoHome.putExtra("location", selected.getLatlong().getLatitudeE6() + "," + selected.getLatlong().getLongitudeE6());
+				
 			}
 			
-			/*Put the location just for shits and giggles */
-			gotoHome.putExtra("location", selected.getLatlong().getLatitudeE6() + "," + selected.getLatlong().getLongitudeE6());
 			startActivity(gotoHome);
 		}		
 	}

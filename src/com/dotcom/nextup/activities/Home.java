@@ -46,38 +46,49 @@ public class Home extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main_checkedin);
 		try {
+			// all of Home hinges on being able to extractLocationData
+			// if we fail at that, there is no point in doing anything else
+			
 			extractLocationData(getIntent());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		my_venues = new ArrayList<Venue>();
-		this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
-		setListAdapter(this.m_adapter);
-		
-		viewVenues = new Runnable() {
-			@Override
-			public void run() {
-				getVenues();
-			}
-		};
+			setContentView(R.layout.main_checkedin);
+			
+			my_venues = new ArrayList<Venue>();
+			this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
+			setListAdapter(this.m_adapter);
+			
+			viewVenues = new Runnable() {
+				@Override
+				public void run() {
+					getVenues();
+				}
+			};
 
-		Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
-		thread.start();
+			Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
+			thread.start();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			setContentView(R.layout.fail);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			setContentView(R.layout.fail);
+		} catch (NullPointerException e) {
+			// we couldn't find their location, so there's no data to extract
+			e.printStackTrace();
+			setContentView(R.layout.fail);
+		}
 	}
 
 
-	private void extractLocationData(Intent intent) throws IOException, ClassNotFoundException {
+	private void extractLocationData(Intent intent) 
+		throws IOException, ClassNotFoundException, NullPointerException {
 		//Pull location data
 		String[] latlong = intent.getStringExtra("location").split(",");
 		this.latitude = Double.parseDouble(latlong[0]);
 		this.longitude = Double.parseDouble(latlong[1]);
+		// isn't the "distance" here the distance the person is from the selected venue?
+		// this is NOT the same as the max distance they are willing to travel to go to the next place
 		this.max_distance = Double.parseDouble(String.valueOf((intent.getIntExtra("distance", -1))));
 		
 		//Pull name
