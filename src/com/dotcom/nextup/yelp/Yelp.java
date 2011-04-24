@@ -59,6 +59,7 @@ public class Yelp {
 	private RecommendationInput narrowDownCategories(RecommendationInput in) {
 		ArrayList<Category> all_cats = in.getCategories();
 		int ncats = all_cats.size();
+		ArrayList<Category> best_cats = new ArrayList<Category>();
 		
 		// sort by frequency
 		ArrayList<NumObjectPair> options = new ArrayList<NumObjectPair>(); // will assign rank to each venue, then select venues with highest ranks
@@ -67,8 +68,6 @@ public class Yelp {
 			options.add(new NumObjectPair(cat.getFrequency(), cat));
 		}
 		Collections.sort(options); // sorts lowest to highest by num
-		
-		ArrayList<Category> best_cats = new ArrayList<Category>();
 		// would like activities whose avg time is as close as possible to current time,
 		// meaning those with the lowest possible time_rank
 		// but will increase time_rank to make sure we get at least 3 categories
@@ -96,7 +95,8 @@ public class Yelp {
 			j++;
 		}
 
-		RecommendationInput out = new RecommendationInput(best_cats, in.getLatitude(), in.getLongitude(), in.getMaxDistance());
+		RecommendationInput out = new RecommendationInput(best_cats, in.getLatitude(), in.getLongitude(), 
+				in.getMaxDistance(), in.getNumResultsDesired());
 		return out;
 	}
 	
@@ -133,6 +133,7 @@ public class Yelp {
 				all_venues.add(venue);
 			}
 		}
+		Log.v("Yelp", "venues " + all_venues.toString());
 		return all_venues;
 	}
 	
@@ -157,19 +158,18 @@ public class Yelp {
 		Log.v("Yelp", "search term: " + term);
 		Log.v("Yelp", "search lat: " + Double.toString(latitude));
 		Log.v("Yelp", "search long: " + Double.toString(longitude));
-		Log.v("Yelp", "search max distance not used: " + Double.toString(max_distance));
+		Log.v("Yelp", "search max distance: " + Integer.toString((int)max_distance));
 		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.yelp.com/v2/search");
 		request.addQuerystringParameter("limit", "3");
 		String term2 = convertTermToYelpForm(term);
 		request.addQuerystringParameter("term", term2);
 	    request.addQuerystringParameter("ll", latitude + "," + longitude);
-	    request.addQuerystringParameter("radius_filter", Double.toString(max_distance));
+	    request.addQuerystringParameter("radius_filter", Integer.toString((int)max_distance));
 	    this.service.signRequest(this.accessToken, request);
 	    Response response = request.send();
 	    if (response == null) Log.v("Yelp", "response is null");
 	    if (response.getCode() == -1)
 	    	return null;
-	    Log.v("Yelp", response.toString());
 	    Log.v("Yelp", "about to return response body from Yelp search");
 	    Log.v("Yelp", response.getBody());
 	    return response.getBody();
@@ -207,11 +207,10 @@ public class Yelp {
 		}
 		return venues;
 	}
-
-		
+	
 	public ArrayList<YelpVenue> chooseBest(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
 		/* part of the recommendation engine
-		 * given a lot of yelp venues to consider, returns the best 3
+		 * given a lot of yelp venues to consider, returns the best
 		 */
 		ArrayList<YelpVenue> best = new ArrayList<YelpVenue>();
 		YelpVenue venue;
@@ -231,9 +230,12 @@ public class Yelp {
 		}*/
 		
 		int i = options.size() -1;
-		while ( best.size() < 3 && i >= 0) {
+		while ( best.size() < input.getNumResultsDesired() && i >= 0) {
 			YelpVenue ven = (YelpVenue) options.get(i).getObject();
-			if ( ! isIn(ven, best) ) best.add(ven);
+			if ( ! isIn(ven, best) ) { 
+				best.add(ven);
+				Log.v("Yelp", "added " + ven.toString() + " to best");
+			}
 			i--;
 		}
 		return best;

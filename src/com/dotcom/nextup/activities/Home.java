@@ -39,13 +39,15 @@ public class Home extends ListActivity {
 	double max_distance = 3000;
 	
 	ArrayList<Category> categories_now = new ArrayList<Category>();
-	ArrayList<Category> categories_next = new ArrayList<Category>();
+	ArrayList<Category> categories_next = null;
 	RecommendationInput input = null;
 	
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
 	ProgressDialog dialog = null;
 	private Runnable viewVenues;
+	int my_venues_index_of_first_to_display = 0;
+	int my_venues_index_of_last_to_display = 3;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -128,6 +130,12 @@ public class Home extends ListActivity {
 		Intent toPreferences = new Intent(this, Preferences.class);
 		startActivity(toPreferences);
 	}
+	
+	public void showNextThreeVenues(View view) {
+		int start = my_venues_index_of_last_to_display + 1;
+		int end = start + 3;
+		updateAdapter(start, end);
+	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 	    Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( my_venues.get(position).getURL() ) );
@@ -137,15 +145,33 @@ public class Home extends ListActivity {
 	private Runnable returnRes = new Runnable() {
 		@Override
 		public void run() {
-			if (my_venues != null && my_venues.size() > 0) {
-				m_adapter.notifyDataSetChanged();
-				for (int i = 0; i < my_venues.size(); i++)
-					m_adapter.add(my_venues.get(i));
-			}
-			//dialog.dismiss();
-			m_adapter.notifyDataSetChanged();
+			Log.v("Home", "running returnRes");
+			updateAdapter(0,3);
 		}
 	};
+	
+	private void updateAdapter(int start, int end) { // start is inclusive, end is exclusive
+		m_adapter.clear();
+		if (my_venues != null && my_venues.size() > 0) {
+			m_adapter.notifyDataSetChanged();
+			try {
+				int i = start;
+				my_venues_index_of_first_to_display = i;
+				for (i = start; i < end && i < my_venues.size(); i++) {
+					m_adapter.add(my_venues.get(i));
+				}
+				my_venues_index_of_last_to_display = i - 1;
+			} catch (ArrayIndexOutOfBoundsException e) {
+				int i = 0;
+				my_venues_index_of_first_to_display = i;
+				for (i = 0; i < end - start && i < my_venues.size(); i++) {
+					m_adapter.add(my_venues.get(i));
+				}
+				my_venues_index_of_last_to_display = i - 1;
+			}
+			m_adapter.notifyDataSetChanged();
+		} else { Log.v("Home", "updateAdapter called when my_venues is either null or of size 0"); }
+	}
 
 	private void getVenues() {
 		try {
@@ -155,6 +181,7 @@ public class Home extends ListActivity {
 			getNextCategories();
 			makeRecommendationInput();
 			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
+			
 			my_venues = new ArrayList<Venue>();			
 			for (int i = 0; i < venues.size(); i++) {
 				YelpVenue yven = venues.get(i);
@@ -167,17 +194,21 @@ public class Home extends ListActivity {
 			} 
 
 		} catch (Exception e) {
-			Log.e("getVenues()", e.toString());
+			Log.e("Home", "getVenues(): "+e.toString());
 		}
 		runOnUiThread(returnRes);
 	}
 	
 	private void makeRecommendationInput() {
-		input = new RecommendationInput(categories_next, latitude, longitude, 3000);
+		input = new RecommendationInput(categories_next, latitude, longitude, 3000, 9);
 	}
 	
 	private void getNextCategories() {
-		
+		// dummy place holder for until we pull from cloud and custom histogram
+		categories_next = new ArrayList<Category>();
+		categories_next.add(new Category("burritos", 5, 18));
+		categories_next.add(new Category("ice cream", 7, 15));
+		categories_next.add(new Category("coffee", 5, 14));
 	}
 	
 	/* like everything in Java, you need to make a Yelp object in order to actually do anything
