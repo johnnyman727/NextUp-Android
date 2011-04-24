@@ -86,11 +86,8 @@ public class Home extends ListActivity {
 		throws IOException, ClassNotFoundException, NullPointerException {
 		//Pull location data
 		String[] latlong = intent.getStringExtra("location").split(",");
-		this.latitude = Double.parseDouble(latlong[0]);
-		this.longitude = Double.parseDouble(latlong[1]);
-		// isn't the "distance" here the distance the person is from the selected venue?
-		// this is NOT the same as the max distance they are willing to travel to go to the next place
-		this.max_distance = Double.parseDouble(String.valueOf((intent.getIntExtra("distance", -1))));
+		this.latitude = (Double.parseDouble(latlong[0])/1E6);
+		this.longitude = (Double.parseDouble(latlong[1])/1E6);
 		
 		//Pull name
 		this.name = intent.getStringExtra("name");
@@ -98,9 +95,13 @@ public class Home extends ListActivity {
 		//Pull Categories
 		int iter = intent.getIntExtra("numCats", 0);
 		
+		ArrayList<String> alreadyAccounted = new ArrayList<String>();
 		for (int i = 0; i < iter; i++) {
 			Category category = (Category)intent.getParcelableExtra("Category" + new Integer(i).toString());
-			this.categories.add(category);
+			if (!alreadyAccounted.contains(category.getName())) {
+				this.categories.add(category);
+				alreadyAccounted.add(category.getName());
+			}
 		}		
 	}
 

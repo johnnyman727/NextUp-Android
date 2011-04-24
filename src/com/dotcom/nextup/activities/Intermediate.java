@@ -266,9 +266,6 @@ public class Intermediate extends Activity {
 			/* Put the number of categories */
 			gotoHome.putExtra("numCats", numCats);
 			
-			/* Put the distance */
-			gotoHome.putExtra("distance", selected.getDistance());
-			
 			/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
 			for (int j = 0; j < numCats; j++) {
 				String key = "Category" + new Integer(j).toString();
