@@ -36,7 +36,7 @@ public final class R {
         public static final int New=0x7f06001d;
         public static final int Preferences=0x7f060022;
         public static final int Recommend=0x7f06001c;
-        public static final int ShowNewVenues=0x7f060014;
+        public static final int ShowVenuesForward=0x7f060014;
         public static final int SignInButton=0x7f060005;
         public static final int SignInLayout=0x7f060004;
         public static final int TextView01=0x7f06000a;

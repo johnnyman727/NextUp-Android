@@ -42,7 +42,6 @@ public class Yelp {
 	* @param tokenSecret Token secret
 	*/
 	public Yelp(String consumerKey, String consumerSecret, String token, String tokenSecret) {
-		Log.v("Yelp", "entering Yelp constructor");
 		//Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
 		this.service = new ServiceBuilder().provider(YelpApi2.class).apiKey(consumerKey).apiSecret(consumerSecret).build();
 		this.accessToken = new Token(token, tokenSecret);
@@ -133,7 +132,6 @@ public class Yelp {
 				all_venues.add(venue);
 			}
 		}
-		Log.v("Yelp", "venues " + all_venues.toString());
 		return all_venues;
 	}
 	
@@ -142,7 +140,6 @@ public class Yelp {
 		String response = this.search(term, latitude, longitude, max_distance);
 		if (response == null)
 			return null;
-		Log.v("Yelp", "sending response to searchResponseToYelpVenues");
 		return this.searchResponseToYelpVenues(response);
 	}
 	
@@ -155,12 +152,8 @@ public class Yelp {
      * @return JSON string response
      */
 	public String search(String term, double latitude, double longitude, double max_distance) {
-		Log.v("Yelp", "search term: " + term);
-		Log.v("Yelp", "search lat: " + Double.toString(latitude));
-		Log.v("Yelp", "search long: " + Double.toString(longitude));
-		Log.v("Yelp", "search max distance: " + Integer.toString((int)max_distance));
 		OAuthRequest request = new OAuthRequest(Verb.GET, "http://api.yelp.com/v2/search");
-		request.addQuerystringParameter("limit", "3");
+		request.addQuerystringParameter("limit", "10");
 		String term2 = convertTermToYelpForm(term);
 		request.addQuerystringParameter("term", term2);
 	    request.addQuerystringParameter("ll", latitude + "," + longitude);
@@ -171,7 +164,6 @@ public class Yelp {
 	    if (response.getCode() == -1)
 	    	return null;
 	    Log.v("Yelp", "about to return response body from Yelp search");
-	    Log.v("Yelp", response.getBody());
 	    return response.getBody();
 	}
 	

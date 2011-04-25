@@ -132,8 +132,18 @@ public class Home extends ListActivity {
 	}
 	
 	public void showNextThreeVenues(View view) {
+		if (my_venues == null || my_venues.size() == 0) return;
+		if (my_venues_index_of_last_to_display == my_venues.size() - 1) return;
 		int start = my_venues_index_of_last_to_display + 1;
 		int end = start + 3;
+		updateAdapter(start, end);
+	}
+	
+	public void showPrevThreeVenues(View view) {
+		if (my_venues == null || my_venues.size() == 0) return;
+		if (my_venues_index_of_first_to_display == 0) return;
+		int end = my_venues_index_of_first_to_display;
+		int start = end - 3;
 		updateAdapter(start, end);
 	}
 
@@ -156,13 +166,14 @@ public class Home extends ListActivity {
 		// ex. [2, 2) displays nothing
 		
 		Log.v("Home", "updateAdapter("+Integer.toString(start)+","+Integer.toString(end)+")");
-		Log.v("Home", "my_venues.size()="+Integer.toString(my_venues.size()));
-		
+				
 		if (my_venues == null) return;
 		int nven = my_venues.size();
 		if (nven == 0) return;
 		if ( start < 0 || start >= nven || start > end ) start = 0;
-		if ( end < 0   || end > nven    || end < start ) end = min(3, nven);
+		if ( end <= 0   || end > nven    || end < start ) end = min(3, nven);
+		
+		Log.v("Home", "updateAdapter corrected start="+Integer.toString(start)+", end="+Integer.toString(end));
 		
 		m_adapter.clear();
 		m_adapter.notifyDataSetChanged();
@@ -174,6 +185,10 @@ public class Home extends ListActivity {
 			i++;
 		}
 		my_venues_index_of_last_to_display = i - 1;
+		
+		Log.v("Home", "my_venues_index_of_first_to_display="+Integer.toString(my_venues_index_of_first_to_display));
+		Log.v("Home", "my_venus_index_of_last_to_display="+Integer.toString(my_venues_index_of_last_to_display));
+
 		
 		m_adapter.notifyDataSetChanged();
 	}
