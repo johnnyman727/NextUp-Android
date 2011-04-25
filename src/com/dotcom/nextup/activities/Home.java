@@ -46,8 +46,8 @@ public class Home extends ListActivity {
 	private VenueAdapter m_adapter;
 	ProgressDialog dialog = null;
 	private Runnable viewVenues;
-	int my_venues_index_of_first_to_display = 0;
-	int my_venues_index_of_last_to_display = 3;
+	int my_venues_index_of_first_to_display = 0; // inclusive
+	int my_venues_index_of_last_to_display = 2;  // inclusive
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -151,28 +151,33 @@ public class Home extends ListActivity {
 	};
 	
 	private void updateAdapter(int start, int end) { // start is inclusive, end is exclusive
+		// updates adapter to display venues in range [start, end) of my_venues
+		// ex. [0, 3) displays 0, 1, and 2
+		// ex. [2, 2) displays nothing
+		
+		Log.v("Home", "updateAdapter("+Integer.toString(start)+","+Integer.toString(end)+")");
+		Log.v("Home", "my_venues.size()="+Integer.toString(my_venues.size()));
+		
+		if (my_venues == null) return;
+		int nven = my_venues.size();
+		if (nven == 0) return;
+		if ( start < 0 || start >= nven || start > end ) start = 0;
+		if ( end < 0   || end > nven    || end < start ) end = min(3, nven);
+		
 		m_adapter.clear();
-		if (my_venues != null && my_venues.size() > 0) {
-			m_adapter.notifyDataSetChanged();
-			try {
-				int i = start;
-				my_venues_index_of_first_to_display = i;
-				for (i = start; i < end && i < my_venues.size(); i++) {
-					m_adapter.add(my_venues.get(i));
-				}
-				my_venues_index_of_last_to_display = i - 1;
-			} catch (ArrayIndexOutOfBoundsException e) {
-				int i = 0;
-				my_venues_index_of_first_to_display = i;
-				for (i = 0; i < end - start && i < my_venues.size(); i++) {
-					m_adapter.add(my_venues.get(i));
-				}
-				my_venues_index_of_last_to_display = i - 1;
-			}
-			m_adapter.notifyDataSetChanged();
-		} else { Log.v("Home", "updateAdapter called when my_venues is either null or of size 0"); }
+		m_adapter.notifyDataSetChanged();
+		
+		int i = start;
+		my_venues_index_of_first_to_display = i;
+		while (i < end && i < nven) {
+			m_adapter.add(my_venues.get(i));
+			i++;
+		}
+		my_venues_index_of_last_to_display = i - 1;
+		
+		m_adapter.notifyDataSetChanged();
 	}
-
+	
 	private void getVenues() {
 		try {
 			Log.v("Home", "entering getVenues()");
@@ -224,6 +229,8 @@ public class Home extends ListActivity {
         
         return yelp;
     }
+    
+    private int min(int a, int b) { if (a < b) { return a; } return b; }
     
     public class VenueAdapter extends ArrayAdapter<Venue> {
 
