@@ -1,12 +1,12 @@
 package com.dotcom.nextup.categorymodels;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Comparator;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Category implements Comparator<Category>, Parcelable {
+public class Category implements Comparator<Category>, Parcelable, Serializable {
 
 	private static final long serialVersionUID = 3131950815409215218L;
 	private String name;
@@ -42,20 +42,7 @@ public class Category implements Comparator<Category>, Parcelable {
 	public int compare(Category c1, Category c2) {
 		return c1.getFrequency() - c2.getFrequency();
 	}
-	public ArrayList<String> getAttributeValues() {
-		ArrayList<String> attrs = new ArrayList<String>();
-		attrs.add(name);
-		attrs.add(frequency.toString());
-		attrs.add(averageTime.toString());
-		return attrs;
-	}
-	public ArrayList<String> getAttributes() {
-		ArrayList<String> attrs = new ArrayList<String>();
-		attrs.add("name");
-		attrs.add("frequency");
-		attrs.add("averageTime");
-		return attrs;
-	}
+
 	@Override
 	public int describeContents() {
 		// TODO Auto-generated method stub
@@ -79,7 +66,8 @@ public class Category implements Comparator<Category>, Parcelable {
 		this.averageTime = in.readInt();
 	}
 	
-	  @SuppressWarnings("unchecked")
+
+	@SuppressWarnings("unchecked")
 	    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
 	        public Category createFromParcel(Parcel in)
 	        {
@@ -90,6 +78,5 @@ public class Category implements Comparator<Category>, Parcelable {
 			public Category[] newArray(int size) {
 				return new Category[size];
 			}
-	    };
-	
+	    };	
 }

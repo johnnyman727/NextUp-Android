@@ -1,17 +1,20 @@
 package com.dotcom.nextup.categorymodels;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
-import java.util.Map.Entry;
 
 
-public class CategoryHistogram implements Comparator<Category>{
+public class CategoryHistogram implements Comparator<Category>, Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1408459070568084039L;
 	private HashMap<Category, ArrayList<Category>> map = 
 		new HashMap<Category, ArrayList<Category>>();
 	//Amount of time which defines one event is "after" another (in seconds (4 hrs))
@@ -52,13 +55,6 @@ public class CategoryHistogram implements Comparator<Category>{
 				}
 			}
 		}
-	}
-	public String toString() {
-		//TODO: FIgure out how to store hashmap
-		String ret = "";
-		Iterator iter = map.entrySet().iterator();
-		Entry current;
-		return ret;
 	}
 	
 	public void addToHistogram(ArrayList<CheckIn> checkins) {
@@ -113,7 +109,12 @@ public class CategoryHistogram implements Comparator<Category>{
 	}
 	
 	public int addToCategoryHistogram(Category prefix, Category suffix) {
+		Boolean prefixExists = false;
+		Boolean suffixExists = false;
+		int index = -1;
 		
+		if (prefix == null || suffix == null)
+			return -1;
 		if (map.keySet().size() == 0) {
 			ArrayList<Category> suffixList = new ArrayList<Category>();
 			suffixList.add(suffix);
@@ -121,20 +122,29 @@ public class CategoryHistogram implements Comparator<Category>{
 			return 1;
 		}
 		for (Category category : map.keySet()) {
-			if (category.getName().equals(prefix.getName())) {
-				ArrayList<Category> suffixes = getAllSuffixes(prefix);
-				Category foundSuff = suffixes.get(suffixes.indexOf(suffix));
+			if (category.getName().equals(prefix.getName()))
+				prefixExists = true;
+		}
+		if (prefixExists) {
+			ArrayList<Category> suffixes = getAllSuffixes(prefix);
+			if ((index = suffixes.indexOf(suffix)) != -1)
+				suffixExists = true;
+			if (suffixExists) {
+				Category foundSuff = suffixes.get(index);
 				foundSuff.setFrequency(foundSuff.getFrequency() + 1);
 				return 0;
-			} 
-			else {
+				
+			} else {
+				suffix.setFrequency(1);
+				suffixes.add(suffix);
+				return 0;
+			}
+		}else {
 				ArrayList<Category> suffixList = new ArrayList<Category>();
 				suffixList.add(suffix);
 				map.put(prefix, suffixList);
 				return 1;
 			}
-		}
-		return -1;
 	}
 	
 

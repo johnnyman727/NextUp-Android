@@ -2,6 +2,8 @@ package com.dotcom.nextup.datastoring;
 
 import java.util.ArrayList;
 
+import org.json.JSONException;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -20,7 +22,7 @@ public class Update {
 		return pref.getLong(updateTimeLocation, -1);
 	}
 	
-	public static void update(SharedPreferences pref, String updateTimeLocation, ArrayList<CheckIn> checkins, Context context) {
+	public static void update(SharedPreferences pref, String updateTimeLocation, ArrayList<CheckIn> checkins, Context context) throws JSONException {
 		/*
 		 * If checkins is empty, return
 		 */
@@ -82,7 +84,7 @@ public class Update {
 				storedMap.addCheckInsToHistogram(newCheckins);
 			} else {
 				CategoryHistogram newMap = new CategoryHistogram();
-				newMap.addCheckInsToHistogram(checkins);
+				newMap.addCheckInsToHistogram(newCheckins);
 				CategoryHistogramManager.storeHistogramToPhone(newMap, pref, context.getString(R.string.histogramPreferenceName));
 			}
 			

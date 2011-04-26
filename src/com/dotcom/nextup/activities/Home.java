@@ -188,15 +188,26 @@ public class Home extends ListActivity {
 	private void getNextCategories() {
 		ArrayList<Category> customHistReturn = new ArrayList<Category>();
 		ArrayList<Category> cloudHistReturn = new ArrayList<Category>();
+		Boolean customFound = false;
+		Boolean cloudFound = false;
 		CategoryHistogram ch = CategoryHistogramManager.getHistogramFromPhone(pref, getString(R.string.histogramPreferenceName));
 		
+		if (customHistReturn != null)
+			customFound = true;
+		if (cloudHistReturn != null)
+			cloudFound = true;
+			
 		for (Category inputCat: categories_now) {
-			//customHistReturn.addAll(ch.getAllSuffixes(inputCat));
-			cloudHistReturn.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
+			if (customFound)
+				customHistReturn.addAll(ch.getAllSuffixes(inputCat));
+			if (cloudFound)
+				cloudHistReturn.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
 		}
 		
-		categories_next.addAll(customHistReturn);
-		categories_next.addAll(cloudHistReturn);
+		if (customFound)
+			categories_next.addAll(customHistReturn);
+		if(cloudFound)
+			categories_next.addAll(cloudHistReturn);
 		
 		//TODO:SORT BASED ON RANKING FROM PREFERENCES
 		

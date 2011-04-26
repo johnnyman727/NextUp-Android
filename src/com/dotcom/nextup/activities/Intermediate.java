@@ -14,6 +14,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AdapterView;
@@ -72,12 +73,17 @@ public class Intermediate extends Activity {
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		
 		if (code == null && codeStored == false)
-			code = TokenManager.getCode(getIntent(), this);
+			code = TokenManager.getCode(getIntent(), this, pref);
 			if (code != null)
 				codeStored = true;
 		
 		if (this.checkIns == null && !code.equals("-1"))
-			initializeCheckIns();
+			try {
+				initializeCheckIns();
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		
 		if (!locationRegistered) {
 			try {
@@ -127,10 +133,17 @@ public class Intermediate extends Activity {
 			adapter.notifyDataSetChanged();
 			for (int i = 0; i < nearby_locations.size(); i++)
 				adapter.add(nearby_locations.get(i).getName());
+			
+			Button next = (Button)findViewById(R.id.Intermediate2Button);
+			next.setVisibility(View.VISIBLE);
+			next.setClickable(true);
 		}
 		if (nearby_locations == null || nearby_locations.size() == 0) {
 			adapter.notifyDataSetChanged();
 			adapter.add("No nearby locations found. You may not have reception.");
+			Button next = (Button)findViewById(R.id.Intermediate2Button);
+			next.setVisibility(View.INVISIBLE);
+			next.setClickable(false);
 		}
 		adapter.notifyDataSetChanged();
 	}
@@ -153,7 +166,7 @@ public class Intermediate extends Activity {
 	
 	/* -------------TOKEN/CODE STUFF BELOW------------*/
 	
-	private void initializeCheckIns() {
+	private void initializeCheckIns() throws JSONException {
 			this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
 			this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
 			if (this.checkIns.size() > 0) {
@@ -269,7 +282,7 @@ public class Intermediate extends Activity {
 			/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
 			for (int j = 0; j < numCats; j++) {
 				String key = "Category" + new Integer(j).toString();
-				gotoHome.putExtra(key, cats.get(j));
+				gotoHome.putExtra(key, (Parcelable)cats.get(j));
 			}
 			
 			/*Put the location just for shits and giggles */

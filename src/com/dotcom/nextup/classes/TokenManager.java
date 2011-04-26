@@ -57,7 +57,7 @@ public class TokenManager {
 
 	public static Boolean updateHistograms(Context context,
 			Boolean checkinsUpdated, ArrayList<CheckIn> checkIns,
-			SharedPreferences pref) {
+			SharedPreferences pref) throws JSONException {
 		if (!checkinsUpdated) {
 			Update.update(pref, context
 					.getString(R.string.updateTimePreferenceName), checkIns,
@@ -98,8 +98,6 @@ public class TokenManager {
 				token = jsonObj.getString("access_token");
 				edit.putString(context
 						.getString(R.string.accessTokenPreferenceName), token);
-				edit.putString(context
-						.getString(R.string.accessCodePreferenceName), code);
 				edit.commit();
 				return token;
 			}
@@ -129,20 +127,23 @@ public class TokenManager {
 		return null;
 	}
 
-	public static String getCode(Intent i, Context context) {
+	public static String getCode(Intent i, Context context, SharedPreferences pref) {
 		String code = null;
 		if (i.getData() != null) {
 			code = i.getData().getQueryParameter("code");
+			Editor e = pref.edit();
+			e.putString(context.getString(R.string.accessCodePreferenceName), code);
+			e.commit();
 			return code;
 		} else {
-			if (i.getStringExtra(context
-					.getString(R.string.accessCodePreferenceName)) != "None") {
+			if ((code=i.getStringExtra(context
+					.getString(R.string.accessCodePreferenceName))) != "None") {
 				code = i.getStringExtra(context
 						.getString(R.string.accessCodePreferenceName));
 				return code;
 			}
 		}
-		return code;
+		return null;
 	}
 
 	public static String responseToString(HttpResponse resp)
