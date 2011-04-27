@@ -33,7 +33,7 @@ public class TokenManager {
 		String token = null;
 		if (codeStored) {
 			if ((token = getTokenFromPreferences(context, pref)) == null) {
-				retrieveToken(context, oa, code, pref);
+				token = retrieveToken(context, oa, code, pref);
 				return token;
 			}
 			return token;
@@ -129,7 +129,7 @@ public class TokenManager {
 
 	public static String getCode(Intent i, Context context, SharedPreferences pref) {
 		String code = null;
-		if (i.getData() != null) {
+		if (i != null && i.getData() != null) {
 			code = i.getData().getQueryParameter("code");
 			Editor e = pref.edit();
 			e.putString(context.getString(R.string.accessCodePreferenceName), code);

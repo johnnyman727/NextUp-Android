@@ -14,7 +14,7 @@ public class CategoryHistogram implements Comparator<Category>, Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -1408459070568084039L;
+	private static final long serialVersionUID = 3131950815409215218L;
 	private HashMap<Category, ArrayList<Category>> map = 
 		new HashMap<Category, ArrayList<Category>>();
 	//Amount of time which defines one event is "after" another (in seconds (4 hrs))

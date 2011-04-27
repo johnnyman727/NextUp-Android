@@ -13,12 +13,16 @@ public class RecommendationInput {
 	double latitude;
 	double longitude;
 	double max_distance; // in meters, cut off distance for how far away a venue can be, should vary by transportation type
+	int numResultsDesired;
 	
-	public RecommendationInput(ArrayList<Category> categories, double lat, double lon, double distance) {
+	
+	public RecommendationInput(ArrayList<Category> categories, double lat, double lon, double distance,
+			int n) {
 		this.categories = categories;
 		this.latitude = lat;
 		this.longitude = lon;
 		this.max_distance = distance;
+		this.numResultsDesired = n;
 	}
 	
 	public ArrayList<Category> getCategories() {return this.categories;}
@@ -28,4 +32,5 @@ public class RecommendationInput {
 	public double getLongitude() {return this.longitude;}
 	public void setLongitude(double lon) {this.latitude = lon;}
 	public double getMaxDistance() { return this.max_distance; }
+	public int getNumResultsDesired() { return this.numResultsDesired; }
 }

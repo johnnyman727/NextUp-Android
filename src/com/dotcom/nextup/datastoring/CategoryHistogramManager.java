@@ -4,17 +4,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
 import org.json.JSONException;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.Parcel;
 import android.util.Log;
 
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
+import com.dotcom.nextup.categorymodels.TempHist;
 
 public class CategoryHistogramManager {
 	
@@ -73,10 +72,11 @@ public class CategoryHistogramManager {
 				}
 			}
 		}  */
-			byte[] ret;
-			if ((ret = convertHashMapTobytes(ch)) != null) {
+			String ret = null;
+			TempHist th = new TempHist(ch);
+			if ((ret = convertHashMapTobytes(th)) != null) {
 				Editor edit = pref.edit();
-				edit.putString(prefName, new String(ret));
+				edit.putString(prefName, ret);
 				edit.commit();
 			}
 	}
@@ -85,32 +85,34 @@ public class CategoryHistogramManager {
 		String map = pref.getString(prefName, null);
 		if (map == null)
 			return null;
-		CategoryHistogram hash = convertBytesToHashMap(map.getBytes());
+		TempHist th = convertBytesToHashMap(map.getBytes());
+		CategoryHistogram hash = th.toCatHist();
 		return hash;
 	}
 	
 
-	private static byte[] convertHashMapTobytes(CategoryHistogram map) {
+	private static String convertHashMapTobytes(TempHist th) {
 		try {
+			String ret = null;
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ObjectOutputStream oo = new ObjectOutputStream(baos);
-			oo.writeObject(map);
+			oo.writeObject(th);
+			ret = baos.toString();
 			oo.close();
-			return baos.toByteArray();
+			return ret;
 		} catch (Exception e) {
 			Log.e("Home.java", "Error storing Histogram");
 		}
 		return null;
 	}
-	
-	private static CategoryHistogram convertBytesToHashMap(byte[] map) {
+	private static TempHist convertBytesToHashMap(byte[] map) {
 		try {
 			ByteArrayInputStream bais = new ByteArrayInputStream(map);
 			ObjectInput oi = new ObjectInputStream(bais);
-			CategoryHistogram ret = new CategoryHistogram();
-			ret = (CategoryHistogram) oi.readObject();
-			return ret;
+			TempHist th = ((TempHist) oi.readObject());
+			return th;
 		}catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 	}

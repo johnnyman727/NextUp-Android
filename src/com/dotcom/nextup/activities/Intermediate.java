@@ -73,11 +73,12 @@ public class Intermediate extends Activity {
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		
 		if (code == null && codeStored == false)
+			
 			code = TokenManager.getCode(getIntent(), this, pref);
 			if (code != null)
 				codeStored = true;
 		
-		if (this.checkIns == null && !code.equals("-1"))
+		if (codeStored && this.checkIns == null && !code.equals("-1"))
 			try {
 				initializeCheckIns();
 			} catch (JSONException e1) {
@@ -101,11 +102,16 @@ public class Intermediate extends Activity {
 		 super.onResume();
 	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+	     if (this.checkIns == null || this.checkIns.size() == 0)
+			try {
+				initializeCheckIns();
+			} catch (JSONException e1) {
+				e1.printStackTrace();
+			}
 	     if (currentLocation != null && currentLocationName == null && !receivedLastLocationUpdate)
 			try {
 				updateLocationInfo();
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
