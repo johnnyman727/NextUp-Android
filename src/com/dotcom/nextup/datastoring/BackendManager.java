@@ -86,6 +86,8 @@ public class BackendManager {
 			response = hc.execute(request);
 			entity = response.getEntity();
 			String resp = CheckInManager.convertStreamToString(entity.getContent());
+			if (resp.equals("None\n"))
+				return suggs;
 			JSONArray suggestions = new JSONArray(resp);
 			for (int i = 0; i < suggestions.length(); i++) {
 				String snuggie = suggestions.getString(i);

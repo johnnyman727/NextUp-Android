@@ -10,11 +10,9 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +41,8 @@ public class Home extends ListActivity {
 	String name;
 	double max_distance = 3000;
 	
+	private Context context;
+	
 	ArrayList<Category> categories_now = new ArrayList<Category>();
 	ArrayList<Category> categories_next = null;
 	RecommendationInput input = null;
@@ -52,14 +52,13 @@ public class Home extends ListActivity {
 	ProgressDialog dialog = null;
 	private Runnable viewVenues;
 	
-	private SharedPreferences pref;
 	int my_venues_index_of_first_to_display = 0; // inclusive
 	int my_venues_index_of_last_to_display = 2;  // inclusive
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		pref = PreferenceManager.getDefaultSharedPreferences(this);
+		context = this;
 		try {
 			// all of Home hinges on being able to extractLocationData
 			// if we fail at that, there is no point in doing anything else
@@ -208,7 +207,12 @@ public class Home extends ListActivity {
 			Yelp yelp = getYelp();
 			getNextCategories();
 			makeRecommendationInput();
-			ArrayList<YelpVenue> venues = yelp.getRecommendation(input);
+			ArrayList<YelpVenue> venues;
+			if (input != null) {
+				venues = yelp.getRecommendation(input);
+			} else {
+				venues = new ArrayList<YelpVenue>();
+			}
 			
 			my_venues = new ArrayList<Venue>();			
 			for (int i = 0; i < venues.size(); i++) {
@@ -228,32 +232,19 @@ public class Home extends ListActivity {
 	}
 	
 	private void makeRecommendationInput() {
-		//input = new RecommendationInput(categories_next, latitude, longitude, 3000, 9);
+		input = new RecommendationInput(categories_next, latitude, longitude, 3000, 9);
 	}
 	
 	private void getNextCategories() {
 		ArrayList<Category> customHistReturn = new ArrayList<Category>();
 		ArrayList<Category> cloudHistReturn = new ArrayList<Category>();
-		Boolean customFound = false;
-		Boolean cloudFound = false;
-		CategoryHistogram ch = CategoryHistogramManager.getHistogramFromPhone(pref, getString(R.string.histogramPreferenceName));
+		CategoryHistogram ch = CategoryHistogramManager.getHistogramFromPhone(context);
 		
-		if (customHistReturn != null && customHistReturn.size() > 0)
-			customFound = true;
-		if (cloudHistReturn != null && cloudHistReturn.size() > 0)
-			cloudFound = true;
-			
 		for (Category inputCat: categories_now) {
-			if (customFound)
+			if (ch != null)
 				customHistReturn.addAll(ch.getAllSuffixes(inputCat));
-			if (cloudFound)
 				cloudHistReturn.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
 		}
-		
-		if (customFound)
-			categories_next.addAll(customHistReturn);
-		if(cloudFound)
-			categories_next.addAll(cloudHistReturn);
 		
 		//TODO:SORT BASED ON RANKING FROM PREFERENCES
 		// dummy place holder for until we pull from cloud and custom histogram

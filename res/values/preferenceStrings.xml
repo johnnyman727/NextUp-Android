@@ -2,7 +2,6 @@
 <resources>
 	<string name="accessTokenPreferenceName">accessTokenPreference</string>
 	<string name="accessCodePreferenceName">accessCodePreference</string>
-	<string name="histogramPreferenceName">histogramPreference7</string>
 	<string name="updateTimePreferenceName">updateTimePreference</string>
-	<string name="uniqueKeyPrefix">ARNDFHSDJK::</string>
+	<string name="histogramFileName">histogramFile1</string>
 </resources>

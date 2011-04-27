@@ -79,23 +79,22 @@ public final class R {
         public static final int accessTokenPreferenceName=0x7f04000a;
         public static final int accessTokenUrl=0x7f040002;
         public static final int androidOauthLogTag=0x7f040006;
-        public static final int app_name=0x7f040010;
+        public static final int app_name=0x7f04000f;
         public static final int authenticationUrl=0x7f040003;
         public static final int consumerKey=0x7f040000;
         public static final int consumerSecret=0x7f040001;
-        public static final int hello=0x7f04000f;
-        public static final int histogramPreferenceName=0x7f04000c;
+        public static final int hello=0x7f04000e;
+        public static final int histogramFileName=0x7f04000d;
         public static final int initialHistogramFile=0x7f040009;
         public static final int oauthCallbackUri=0x7f040004;
-        public static final int oauth_consumer_key=0x7f040011;
-        public static final int oauth_consumer_secret=0x7f040012;
-        public static final int oauth_signature_method=0x7f040014;
-        public static final int oauth_token=0x7f040013;
-        public static final int oauth_token_secret=0x7f040015;
+        public static final int oauth_consumer_key=0x7f040010;
+        public static final int oauth_consumer_secret=0x7f040011;
+        public static final int oauth_signature_method=0x7f040013;
+        public static final int oauth_token=0x7f040012;
+        public static final int oauth_token_secret=0x7f040014;
         public static final int resultingActivityClassName=0x7f040008;
         public static final int resultingActivityPackageName=0x7f040007;
         public static final int touch=0x7f040005;
-        public static final int uniqueKeyPrefix=0x7f04000e;
-        public static final int updateTimePreferenceName=0x7f04000d;
+        public static final int updateTimePreferenceName=0x7f04000c;
     }
 }

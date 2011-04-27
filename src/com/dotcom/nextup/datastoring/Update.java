@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-import com.dotcom.nextup.R;
 import com.dotcom.nextup.categorymodels.CategoryHistogram;
 import com.dotcom.nextup.categorymodels.CheckIn;
 
@@ -65,27 +64,25 @@ public class Update {
 				newCheckins.add(c);
 			}		
 			/*
-			 * Set new updatetime
+			 * Store new updatetime
 			 */
 			Editor e = pref.edit();
 			e.putLong(updateTimeLocation, updateTime);
 			e.commit();
 		}
 		
-
-
-		
 		/*
 		 * Update phone histogram with new checkins
 		 */
 		if (newCheckins.size() != 0) {
-			if (CategoryHistogramManager.containsHistogram(pref, context.getString(R.string.histogramPreferenceName))) {
-				CategoryHistogram storedMap = CategoryHistogramManager.getHistogramFromPhone(pref, context.getString(R.string.histogramPreferenceName));
+			if (CategoryHistogramManager.containsHistogram(context)) {
+				CategoryHistogram storedMap = CategoryHistogramManager.getHistogramFromPhone(context);
 				storedMap.addCheckInsToHistogram(newCheckins);
+				CategoryHistogramManager.storeHistogramToPhone(storedMap, context);
 			} else {
 				CategoryHistogram newMap = new CategoryHistogram();
 				newMap.addCheckInsToHistogram(newCheckins);
-				CategoryHistogramManager.storeHistogramToPhone(newMap, pref, context.getString(R.string.histogramPreferenceName));
+				CategoryHistogramManager.storeHistogramToPhone(newMap, context);
 			}
 			
 			/*
