@@ -48,7 +48,6 @@ public class TokenManager {
 			try {
 				checkIns = CheckInManager.getCheckins(token, checkIns);
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -106,13 +105,11 @@ public class TokenManager {
 					"There was an error connecting to Foursquare",
 					Toast.LENGTH_LONG).show();
 			e.printStackTrace();
-			// TODO: Deal with this error
 		} catch (IOException e) {
 			Toast.makeText(context,
 					"There was an error connecting to Foursquare",
 					Toast.LENGTH_LONG).show();
 			e.printStackTrace();
-			// TODO: Deal with this error
 		} catch (JSONException e) {
 			// This means that they probably revoked the token
 			// We are going to clear the preferences and go back to

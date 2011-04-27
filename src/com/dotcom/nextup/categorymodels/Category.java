@@ -27,12 +27,6 @@ public class Category implements Comparator<Category>, Parcelable, Serializable 
 		averageTime = time;
 	}
 	
-	public Category(TempCat oldCat) {
-		this.name = oldCat.getName();
-		this.frequency = oldCat.getFrequency();
-		this.averageTime = oldCat.getAverageTime();
-	}
-	
 	public String getName() {
 		if (this.name != null)
 			return this.name;
@@ -51,7 +45,6 @@ public class Category implements Comparator<Category>, Parcelable, Serializable 
 
 	@Override
 	public int describeContents() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	@Override

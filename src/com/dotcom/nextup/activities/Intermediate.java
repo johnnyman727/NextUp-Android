@@ -82,7 +82,6 @@ public class Intermediate extends Activity {
 			try {
 				initializeCheckIns();
 			} catch (JSONException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		
@@ -90,7 +89,6 @@ public class Intermediate extends Activity {
 			try {
 				initializeLocationListener();
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -207,7 +205,6 @@ public class Intermediate extends Activity {
 					try {
 						updateLocationInfo();
 					} catch (JSONException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					updateSpinner();
