@@ -246,12 +246,14 @@ public class Home extends ListActivity {
 				cloudHistReturn.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
 		}
 		
+		categories_next.addAll(customHistReturn);
+		categories_next.addAll(cloudHistReturn);
+		
 		//TODO:SORT BASED ON RANKING FROM PREFERENCES
 		// dummy place holder for until we pull from cloud and custom histogram
-		categories_next = new ArrayList<Category>();
-		categories_next.add(new Category("burritos", 5, 18));
-		categories_next.add(new Category("ice cream", 7, 15));
-		categories_next.add(new Category("coffee", 5, 14));
+		categories_next.add(new Category("burritos", 1, 18));
+		categories_next.add(new Category("ice cream", 1, 15));
+		categories_next.add(new Category("coffee", 1, 14));
 	}
 	
 	/* like everything in Java, you need to make a Yelp object in order to actually do anything

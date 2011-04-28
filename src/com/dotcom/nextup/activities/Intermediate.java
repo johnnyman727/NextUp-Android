@@ -245,7 +245,6 @@ public class Intermediate extends Activity {
 			/*Put the location just for shits and giggles */
 			gotoHome.putExtra("location", selected.getLatlong().getLatitudeE6() + "," + selected.getLatlong().getLongitudeE6());
 		
-			
 			startActivity(gotoHome);
 		}		
 	}
