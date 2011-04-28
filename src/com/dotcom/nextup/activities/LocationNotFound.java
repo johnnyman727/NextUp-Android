@@ -18,7 +18,8 @@ import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.dotcom.nextup.R;
@@ -32,7 +33,8 @@ public class LocationNotFound extends Activity {
 	private Geocoder geoCoder;
 	private String token;
 	private SharedPreferences pref;
-	private TextView currentAddress;
+	private EditText currentAddress;
+	private Button submit;
 	private GeoPoint currentLocation;
 	private ArrayList<Venue> nearby_locations;
 	Venue nearest_location;
@@ -43,7 +45,9 @@ public class LocationNotFound extends Activity {
 		setContentView(R.layout.intermediatelocationnotfound);
 		context = this;
 		pref = PreferenceManager.getDefaultSharedPreferences(context);
-		currentAddress = (TextView)findViewById(R.id.notFoundText);
+		currentAddress = (EditText)findViewById(R.id.submitaddresstext);
+		submit = (Button)findViewById(R.id.getAddressButton);
+		submit.setOnClickListener(getAddress);
 		geoCoder = new Geocoder(context, Locale.getDefault());
 		getToken();
 		

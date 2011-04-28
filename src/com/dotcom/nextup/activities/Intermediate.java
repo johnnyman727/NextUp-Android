@@ -82,7 +82,7 @@ public class Intermediate extends Activity {
 		checkInManager = new CheckInManager();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		handler = new Handler();
-		handler.postDelayed(noLocationFound, 15000);
+		handler.postDelayed(noLocationFound, 1500);
 		
 		fourSquare = new Runnable() {
 			@Override
@@ -192,8 +192,8 @@ public class Intermediate extends Activity {
 		
 		@Override
 		public void run() {
-			if (nearby_locations != null)
-				return;
+			//if (nearby_locations != null)
+				//return;
 			Intent i = new Intent(Intermediate.this, LocationNotFound.class);
 			startActivity(i);			
 		}

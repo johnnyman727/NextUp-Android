@@ -8,9 +8,8 @@
 		android:layout_height="wrap_content"/>
 	<EditText android:id="@+id/submitaddresstext"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:text="This is my location!" />
+		android:text="Olin Way, Needham MA 02492" />
 	<Button android:id="@+id/getAddressButton" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:text="This is my location!"
-		android:onClick="getAddress" />
+		android:layout_height="wrap_content" android:text="This is my location!" />
 
 </LinearLayout>
