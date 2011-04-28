@@ -15,13 +15,16 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.dotcom.nextup.R;
@@ -45,13 +48,14 @@ public class Intermediate extends Activity {
 	private AndroidOAuth oa;
 	private LocationManager locationManager;
 	private LocationListener locationListener;
-	public GeoPoint currentLocation;
+	public GeoPoint currentLocation = null;
 	public GeoPoint lastLocation;
 	public String currentLocationName;
 	public String lastLocationName;
 	private String token;
 	private String code;
 	private static Boolean receivedLocationUpdate = false;
+	@SuppressWarnings("unused")
 	private static Boolean receivedLastLocationUpdate = false;
 	private static Boolean checkinsUpdated = false;
 	private static Boolean locationRegistered = false;
@@ -61,8 +65,12 @@ public class Intermediate extends Activity {
 	private SharedPreferences pref;
 	private Context context;
 	private int currentSelectedVenue = -1;
-	private Handler handler;
-
+	private Handler handler;	
+	private Runnable fourSquare;
+	private Runnable locationListening;
+	private Runnable fourSquareAndLocation;
+	private boolean foursquare_thread_done = false;
+	private boolean location_thread_done = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -74,36 +82,49 @@ public class Intermediate extends Activity {
 		checkInManager = new CheckInManager();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		handler = new Handler();
-		handler.postDelayed(noLocationFound, 5000);
+		handler.postDelayed(noLocationFound, 15000);
 		
-		if (code == null && codeStored == false)
-			
-			code = TokenManager.getCode(getIntent(), this, pref);
-			if (code != null)
-				codeStored = true;
-		
-		if (codeStored && this.checkIns == null && !code.equals("-1"))
-			try {
-				initializeCheckIns();
-			} catch (JSONException e1) {
-				e1.printStackTrace();
+		fourSquare = new Runnable() {
+			@Override
+			public void run() {
+				connectWithFourSquare();
 			}
+		};
 		
-		if (!locationRegistered) {
-			try {
-				initializeLocationListener();
-			} catch (JSONException e) {
-				e.printStackTrace();
+		locationListening = new Runnable() {
+			@Override
+			public void run() {
+				Looper.prepare();
+				findCurrentLocation();
 			}
-		}
+		};
 		
-		updateSpinner();
+		fourSquareAndLocation = new Runnable() {
+			@Override
+			public void run() {
+				locationUpdateWithFoursquare();
+			}
+		};
+
+		// does foursquare stuff, can work independently
+		Thread foursquare_thread = new Thread(null, fourSquare, "Foursquare thread");
+		foursquare_thread.start();
+		
+		// does location stuff, can work independently
+		Thread location_thread = new Thread(null, locationListening, "Location thread");
+		location_thread.start();
+		
+		// can only do stuff after foursquare and location stuff finished
+		Thread foursquare_and_location_thread = new Thread(null, fourSquareAndLocation, "Location + Foursquare thread");
+		foursquare_and_location_thread.start();
 	}
 
+/*
 	public void onResume() {
 		 super.onResume();
 	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+	     
 	     if (this.checkIns == null || this.checkIns.size() == 0)
 			try {
 				initializeCheckIns();
@@ -119,6 +140,7 @@ public class Intermediate extends Activity {
 			
 			updateSpinner();
 	}
+*/
 
 	@Override
 	public void onPause() {
@@ -127,6 +149,16 @@ public class Intermediate extends Activity {
 	}
 	
 	/* ---------------- UI CODE BELOW -------------------*/
+
+	private Runnable returnRes = new Runnable() {
+		@Override
+		public void run() {
+			Log.v("Intermediate", "running returnRes");
+			TextView textview = (TextView) findViewById(R.id.Intermediate2Text);
+			textview.setText("Nearby locations:");
+			updateSpinner();
+		}
+	};
 	
 	@SuppressWarnings("unchecked")
 	public void updateSpinner() {
@@ -160,6 +192,8 @@ public class Intermediate extends Activity {
 		
 		@Override
 		public void run() {
+			if (nearby_locations != null)
+				return;
 			Intent i = new Intent(Intermediate.this, LocationNotFound.class);
 			startActivity(i);			
 		}
@@ -167,7 +201,6 @@ public class Intermediate extends Activity {
 
 	
 	OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
-
 		@Override
 		public void onItemSelected(AdapterView<?> arg0, View arg1, int position,
 				long id) {
@@ -182,86 +215,9 @@ public class Intermediate extends Activity {
 		}
 	};
 	
-	/* -------------TOKEN/CODE STUFF BELOW------------*/
-	
-	private void initializeCheckIns() throws JSONException {
-			this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
-			this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
-			if (this.checkIns.size() > 0) {
-				Intermediate.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
-				this.lastLocation = FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
-				this.lastLocationName = FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);
-			}
-	}
-	
-
-	/* ----------------LOCATION CODE BELOW --------------------- */
-	private void initializeLocationListener() throws JSONException {
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-		locationListener = new LocationListener() {
-			@Override
-			public void onStatusChanged(String provider, int status, Bundle extras) {
-			}
-
-			@Override
-			public void onProviderEnabled(String provider) {
-			}
-
-			@Override
-			public void onProviderDisabled(String provider) {
-			}
-
-			@Override
-			public void onLocationChanged(Location location) {
-				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
-				if (!receivedLocationUpdate) {
-					try {
-						updateLocationInfo();
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-					updateSpinner();
-					receivedLocationUpdate = true;
-				}
-			}
-		};
-
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-		Location temp = null;
-		if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
-			temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
-			if (currentLocationName == null) {
-				updateLocationInfo();
-				updateSpinner();
-				receivedLastLocationUpdate = true;
-			}
-		}
-		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
-			temp = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
-			if (currentLocationName == null)
-				updateLocationInfo();
-				updateSpinner();
-				receivedLastLocationUpdate = true;
-		}
-		
-		locationRegistered = true;
-		
-	}
-	
-	public void updateLocationInfo() throws JSONException {
-		JSONArray nearest = FoursquareLocationManager.getCurrentLocationDataFromFoursquare(currentLocation, token);
-		nearby_locations = FoursquareLocationManager.getNearbyLocationsFromFoursquare(nearest, nearby_locations);
-		nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
-	}
-	
 	public void toHome(View view) throws IOException {
 		Intent gotoHome = new Intent(this, Home.class);
 		int numCats = 0;
-		
 		
 		if (currentSelectedVenue != -1) {
 			Venue selected;
@@ -273,20 +229,6 @@ public class Intermediate extends Activity {
 				// NOT the categories of the place they're currently at
 				cats = selected.getCategories();
 	
-			} else {
-				cats = new ArrayList<Category>();
-				cats.add(new Category("restaurant"));
-				cats.add(new Category("Middle Eastern"));
-				cats.add(new Category("cafe"));
-				
-				selected = new Venue(
-						"Moody's Falafel Palace", 
-						"http://www.yelp.com/biz/moodys-falafel-palace-cambridge",
-						"http://farm4.static.flickr.com/3046/2595970267_aeaf1b35dc.jpg",
-						new GeoPoint((int)(42.3654358 * 1E6), (int)(-71.1042283 * 1E6)),
-						500,
-						cats);
-			}
 			
 			numCats = cats.size();
 			
@@ -307,6 +249,131 @@ public class Intermediate extends Activity {
 		
 			
 			startActivity(gotoHome);
+			}
 		}		
 	}
+	
+	/* -------------TOKEN/CODE STUFF BELOW------------*/
+	
+	private void connectWithFourSquare() {
+		Log.v("Intermediate", "foursquare thread starting");
+		
+		if (code == null && codeStored == false)
+			code = TokenManager.getCode(getIntent(), this, pref);
+		
+		if (code != null)
+			codeStored = true;
+		
+		if (codeStored && this.checkIns == null && !code.equals("-1"))
+			try {
+				initializeCheckIns();
+			} catch (JSONException e1) {
+				e1.printStackTrace();
+			}
+		
+		Log.v("Intermediate", "foursquare thread finishing");
+		foursquare_thread_done = true;
+	}
+	
+	private void initializeCheckIns() throws JSONException {
+			this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
+			this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
+			if (this.checkIns.size() > 0) {
+				Intermediate.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
+				this.lastLocation = FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
+				this.lastLocationName = FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);
+			}
+	}
+	
+
+	/* ----------------LOCATION CODE BELOW --------------------- */
+	
+	private void locationUpdateWithFoursquare() {
+		while (!foursquare_thread_done || !location_thread_done) {
+			try {
+				Log.v("Intermediate", "final thread waiting for other two threads");
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if (!receivedLocationUpdate) {
+			try {
+				updateLocationInfo();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			receivedLocationUpdate = true;
+		}
+		runOnUiThread(returnRes);
+	}
+	
+	private void findCurrentLocation() {
+		//initialize location listener
+		
+		if (!locationRegistered) {
+			try {
+				initializeLocationListener();
+				getLastKnownLocation();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		location_thread_done = true;
+	}
+	
+	private void getLastKnownLocation() {
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		Location temp = null;
+		if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
+			temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
+			if (currentLocationName == null) {
+				receivedLastLocationUpdate = true;
+			}
+		}
+		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+			temp = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
+			if (currentLocationName == null)
+				receivedLastLocationUpdate = true;
+		}
+		
+		locationRegistered = true;
+	}
+	
+	private void initializeLocationListener() throws JSONException {
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+		locationListener = new LocationListener() {
+			@Override
+			public void onStatusChanged(String provider, int status, Bundle extras) {
+			}
+
+			@Override
+			public void onProviderEnabled(String provider) {
+			}
+
+			@Override
+			public void onProviderDisabled(String provider) {
+			}
+
+			@Override
+			public void onLocationChanged(Location location) {
+				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
+				runOnUiThread(returnRes);
+			}
+		};
+		
+		locationRegistered = true;		
+	}
+	
+	public void updateLocationInfo() throws JSONException {
+		JSONArray nearest = FoursquareLocationManager.getCurrentLocationDataFromFoursquare(currentLocation, token);
+		nearby_locations = FoursquareLocationManager.getNearbyLocationsFromFoursquare(nearest, nearby_locations);
+		nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
+	}
+
 }
