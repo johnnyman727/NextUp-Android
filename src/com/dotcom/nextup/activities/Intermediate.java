@@ -14,6 +14,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -60,6 +61,7 @@ public class Intermediate extends Activity {
 	private SharedPreferences pref;
 	private Context context;
 	private int currentSelectedVenue = -1;
+	private Handler handler;
 
 
 	@Override
@@ -71,6 +73,8 @@ public class Intermediate extends Activity {
 		oa = new AndroidOAuth(this);
 		checkInManager = new CheckInManager();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
+		handler = new Handler();
+		handler.postDelayed(noLocationFound, 5000);
 		
 		if (code == null && codeStored == false)
 			
@@ -151,6 +155,16 @@ public class Intermediate extends Activity {
 		}
 		adapter.notifyDataSetChanged();
 	}
+	
+	Runnable noLocationFound = new Runnable() {
+		
+		@Override
+		public void run() {
+			Intent i = new Intent(Intermediate.this, LocationNotFound.class);
+			startActivity(i);			
+		}
+	};
+
 	
 	OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
 

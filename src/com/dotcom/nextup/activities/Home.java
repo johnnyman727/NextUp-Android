@@ -78,7 +78,7 @@ public class Home extends ListActivity {
 			};
 
 			Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
-			//dialog = ProgressDialog.show(Home.this, "", "Loading. Please wait...", true);
+			dialog = ProgressDialog.show(Home.this, "", "Loading. Please wait...", true);
 			thread.start();
 			
 		} catch (IOException e) {
@@ -162,6 +162,7 @@ public class Home extends ListActivity {
 	private Runnable returnRes = new Runnable() {
 		@Override
 		public void run() {
+			dialog.dismiss();
 			Log.v("Home", "running returnRes");
 			updateAdapter(0,3);
 		}
