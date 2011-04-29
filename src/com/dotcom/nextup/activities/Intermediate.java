@@ -82,7 +82,7 @@ public class Intermediate extends Activity {
 		checkInManager = new CheckInManager();
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		handler = new Handler();
-		handler.postDelayed(noLocationFound, 1500);
+		handler.postDelayed(noLocationFound, 15000);
 		
 		fourSquare = new Runnable() {
 			@Override
@@ -118,6 +118,11 @@ public class Intermediate extends Activity {
 		Thread foursquare_and_location_thread = new Thread(null, fourSquareAndLocation, "Location + Foursquare thread");
 		foursquare_and_location_thread.start();
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+	}
 
 /*
 	public void onResume() {
@@ -146,6 +151,11 @@ public class Intermediate extends Activity {
 	public void onPause() {
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
+	}
+	
+	@Override
+	public void onBackPressed() {
+		super.onDestroy();
 	}
 	
 	/* ---------------- UI CODE BELOW -------------------*/
@@ -303,6 +313,7 @@ public class Intermediate extends Activity {
 				e.printStackTrace();
 			}
 			receivedLocationUpdate = true;
+			handler.removeCallbacks(noLocationFound);
 		}
 		runOnUiThread(returnRes);
 	}
