@@ -44,7 +44,8 @@ public class Home extends ListActivity {
 	private Context context;
 	
 	ArrayList<Category> categories_now = new ArrayList<Category>();
-	ArrayList<Category> categories_next = null;
+	ArrayList<Category> categories_next_custom = null;
+	ArrayList<Category> categories_next_cloud = null;
 	RecommendationInput input = null;
 	
 	private ArrayList<Venue> my_venues = null;
@@ -233,28 +234,33 @@ public class Home extends ListActivity {
 	}
 	
 	private void makeRecommendationInput() {
-		input = new RecommendationInput(categories_next, latitude, longitude, 3000, 9);
+		input = new RecommendationInput(categories_next_custom, categories_next_cloud, latitude, longitude, 3000, 9);
 	}
 	
 	private void getNextCategories() {
-		ArrayList<Category> customHistReturn = new ArrayList<Category>();
-		ArrayList<Category> cloudHistReturn = new ArrayList<Category>();
+		categories_next_custom = new ArrayList<Category>();
+		categories_next_cloud = new ArrayList<Category>();
 		CategoryHistogram ch = CategoryHistogramManager.getHistogramFromPhone(context);
 		
 		for (Category inputCat: categories_now) {
 			if (ch != null)
-				customHistReturn.addAll(ch.getAllSuffixes(inputCat));
-				cloudHistReturn.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
+				categories_next_custom.addAll(ch.getAllSuffixes(inputCat));
+				categories_next_cloud.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
 		}
 		
-		categories_next.addAll(customHistReturn);
-		categories_next.addAll(cloudHistReturn);
-		
-		//TODO:SORT BASED ON RANKING FROM PREFERENCES
-		// dummy place holder for until we pull from cloud and custom histogram
-		categories_next.add(new Category("burritos", 1, 18));
-		categories_next.add(new Category("ice cream", 1, 15));
-		categories_next.add(new Category("coffee", 1, 14));
+		// if there are too few 'real' categories, add a few 'fake' ones
+		if (categories_next_custom.size() + categories_next_cloud.size() < 3) {
+			categories_next_cloud.add(new Category("burritos", 1, 18));
+			categories_next_cloud.add(new Category("ice cream", 1, 15));
+			categories_next_cloud.add(new Category("coffee", 1, 14));
+		}
+	}
+	
+	private boolean isIn(Category kitty, ArrayList<Category> cats) {
+		for (Category cat : cats) {
+			if ( kitty.getName().equals(cat.getName())) return true;
+		}
+		return false;
 	}
 	
 	/* like everything in Java, you need to make a Yelp object in order to actually do anything
