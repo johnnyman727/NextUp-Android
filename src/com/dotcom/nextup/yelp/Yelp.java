@@ -56,7 +56,15 @@ public class Yelp {
 	}
 	
 	private RecommendationInput narrowDownCategories(RecommendationInput in) {
-		ArrayList<Category> all_cats = in.getCategories();
+		// try to choose 2 custom categories
+		ArrayList<Category> custom = narrowDown(in.getCustomCategories(), 2);
+		// try to choose 1 cloud category
+		ArrayList<Category> cloud = narrowDown(in.getCustomCategories(), 1);
+		// if not enough, use whatever categories are available so we've chosen 3 categories
+		return new RecommendationInput(custom, cloud, in.getLatitude(), in.getLongitude(), in.getMaxDistance(), in.getNumResultsDesired());
+	}
+	
+	private ArrayList<Category> narrowDown(ArrayList<Category> all_cats, int n_cats_desired) {
 		int ncats = all_cats.size();
 		ArrayList<Category> best_cats = new ArrayList<Category>();
 		
@@ -75,13 +83,12 @@ public class Yelp {
 		for (int i = 0; i < ncats; i++) {
 			int time_rank = rankCategory(all_cats.get(i), now);
 			if (!isIn(time_rank, time_ranks))
-				time_ranks.add(rankCategory(all_cats.get(i), now));
+				time_ranks.add(time_rank);
 		}
 		Collections.sort(time_ranks);
 		
 		int j = 0; 
-		while (best_cats.size() < 3 && best_cats.size() < ncats
-				&& j < time_ranks.size()) {
+		while (best_cats.size() < n_cats_desired && best_cats.size() < ncats && j < time_ranks.size()) {
 			int i = all_cats.size() - 1;
 			while ( best_cats.size() < 3 && i >= 0) {
 				Category cat = (Category) options.get(i).getObject();
@@ -94,9 +101,7 @@ public class Yelp {
 			j++;
 		}
 
-		RecommendationInput out = new RecommendationInput(best_cats, in.getLatitude(), in.getLongitude(), 
-				in.getMaxDistance(), in.getNumResultsDesired());
-		return out;
+		return best_cats;
 	}
 	
 	private int rankCategory(Category cat, int now) {

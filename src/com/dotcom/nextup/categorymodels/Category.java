@@ -27,11 +27,15 @@ public class Category implements Comparator<Category>, Parcelable, Serializable 
 		averageTime = time;
 	}
 	
+	public boolean hasSameNameAs(Category other) {
+		return this.name.equals(other.getName());
+	}
+	
 	public String getName() {
 		if (this.name != null)
 			return this.name;
 		return null;
-		}
+	}
 	public void setName(String name) {this.name = name;}
 	public void setFrequency(Integer frequency) {this.frequency = frequency;}
 	public Integer getFrequency() {return this.frequency;}
