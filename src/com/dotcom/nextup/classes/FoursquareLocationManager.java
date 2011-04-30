@@ -92,7 +92,7 @@ public class FoursquareLocationManager {
 			double distance = Double.parseDouble(location.getString("distance"));
 			String name = nearbyPlace.getString("name");
 			for (int j = 0; j < categories.length(); j++) {
-				Category newCat = new Category(categories.getJSONObject(j).getString("name"));
+				Category newCat = new Category(categories.getJSONObject(j).getString("name"), 1, 12);
 				cats.add(newCat);
 			}
 			int lat = (int) (Double.parseDouble(location.getString("lat")) * 1E6);

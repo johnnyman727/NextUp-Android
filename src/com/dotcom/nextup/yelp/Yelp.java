@@ -30,6 +30,8 @@ public class Yelp {
 	String TAG = "Yelp";
 	OAuthService service;
 	Token accessToken;
+	private static int MAX_CATS = 3;
+	private static int MAX_CUSTOM_CATS = 2;
 
    /**
 	* Setup the Yelp API OAuth credentials.
@@ -55,16 +57,57 @@ public class Yelp {
 		return rec;
 	}
 	
-	private RecommendationInput narrowDownCategories(RecommendationInput in) {
+	@SuppressWarnings("unused")
+	private RecommendationInput narrowDownCategories2(RecommendationInput in) {
 		// try to choose 2 custom categories
-		ArrayList<Category> custom = narrowDown(in.getCustomCategories(), 2);
+		ArrayList<Category> custom = narrowDown2(in.getCustomCategories(), 2);
 		// try to choose 1 cloud category
-		ArrayList<Category> cloud = narrowDown(in.getCustomCategories(), 1);
+		ArrayList<Category> cloud = narrowDown2(in.getCustomCategories(), 1);
 		// if not enough, use whatever categories are available so we've chosen 3 categories
 		return new RecommendationInput(custom, cloud, in.getLatitude(), in.getLongitude(), in.getMaxDistance(), in.getNumResultsDesired());
 	}
 	
-	private ArrayList<Category> narrowDown(ArrayList<Category> all_cats, int n_cats_desired) {
+	private RecommendationInput narrowDownCategories(RecommendationInput in) {
+		for (Category cat: in.getCustomCategories()) {
+			Log.v("Yelp", cat.getFrequency().toString());
+		}
+		Collections.sort(in.getCustomCategories(), Collections.reverseOrder());
+		Collections.sort(in.getCloudCategories(), Collections.reverseOrder());
+		int now = getCurrentHours();
+		for (Category cat: in.getCustomCategories()) {
+			Log.v("Yelp", cat.getFrequency().toString());
+		}
+		
+		for (int i = 0; i < in.getCustomCategories().size(); i++) {
+			Category current = in.getCustomCategories().get(i);
+			current.setFrequency(i + rankCategory(current, now));
+		}
+		
+		for (int i = 0; i < in.getCloudCategories().size(); i++) {
+			Category current = in.getCloudCategories().get(i);
+			current.setFrequency(i + rankCategory(current, now));
+		}
+		
+		Collections.sort(in.getCloudCategories());
+		Collections.sort(in.getCustomCategories());
+
+		ArrayList<Category> custom = pullFrom(in.getCustomCategories(), MAX_CUSTOM_CATS);
+		
+		return new RecommendationInput(custom, pullFrom(in.getCloudCategories(), MAX_CATS - custom.size()), 
+				in.getLatitude(), in.getLongitude(), in.getMaxDistance(), in.getNumResultsDesired());
+		
+	}
+	
+	private ArrayList<Category> pullFrom(ArrayList<Category> categories, int num) {
+		ArrayList<Category> ret = new ArrayList<Category>();
+		int count = 0;
+		while (count < num && count < categories.size()) {
+			ret.add(categories.get(count));
+			count++;
+		}
+		return ret;
+	}
+	private ArrayList<Category> narrowDown2(ArrayList<Category> all_cats, int n_cats_desired) {
 		int ncats = all_cats.size();
 		ArrayList<Category> best_cats = new ArrayList<Category>();
 		
@@ -133,9 +176,7 @@ public class Yelp {
 			one_search = venuesSearch(cat.getName(), lat, lon, maxd);
 			if (one_search == null)
 				continue;
-			for (YelpVenue venue : one_search) {
-				all_venues.add(venue);
-			}
+			all_venues.addAll(one_search);
 		}
 		return all_venues;
 	}

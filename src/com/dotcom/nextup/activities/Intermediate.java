@@ -83,6 +83,9 @@ public class Intermediate extends Activity {
 		pref = PreferenceManager.getDefaultSharedPreferences(this);
 		handler = new Handler();
 		handler.postDelayed(noLocationFound, 15000);
+		Button next = (Button)findViewById(R.id.Intermediate2Button);
+		next.setVisibility(View.INVISIBLE);
+		next.setClickable(false);
 		
 		fourSquare = new Runnable() {
 			@Override
@@ -178,22 +181,14 @@ public class Intermediate extends Activity {
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		spinner.setOnItemSelectedListener(spinnerListener);
-		
 		if (nearby_locations != null && nearby_locations.size() > 0) {
 			adapter.notifyDataSetChanged();
 			for (int i = 0; i < nearby_locations.size(); i++)
 				adapter.add(nearby_locations.get(i).getName());
-			
+			adapter.add("I'm not at any of these...");
 			Button next = (Button)findViewById(R.id.Intermediate2Button);
 			next.setVisibility(View.VISIBLE);
 			next.setClickable(true);
-		}
-		if (nearby_locations == null || nearby_locations.size() == 0) {
-			adapter.notifyDataSetChanged();
-			adapter.add("No nearby locations found. You may not have reception.");
-			Button next = (Button)findViewById(R.id.Intermediate2Button);
-			next.setVisibility(View.INVISIBLE);
-			next.setClickable(false);
 		}
 		adapter.notifyDataSetChanged();
 	}
@@ -225,10 +220,15 @@ public class Intermediate extends Activity {
 		}
 	};
 	
-	public void toHome(View view) throws IOException {
+	public void proceed(View view) throws IOException {
+		if (currentSelectedVenue == adapter.getCount() - 1) {
+			Intent i = new Intent(this, LocationNotFound.class);
+			startActivity(i);
+			return;
+		}
+			
 		Intent gotoHome = new Intent(this, Home.class);
 		int numCats = 0;
-		
 		if (currentSelectedVenue != -1) {
 			Venue selected;
 			ArrayList<Category> cats;
@@ -273,13 +273,16 @@ public class Intermediate extends Activity {
 		if (code != null)
 			codeStored = true;
 		
-		if (codeStored && this.checkIns == null && !code.equals("-1"))
-			try {
-				initializeCheckIns();
-			} catch (JSONException e1) {
-				e1.printStackTrace();
+		if (codeStored && this.checkIns == null) {
+			if(!code.equals("-1")) {
+	
+				try {
+					initializeCheckIns();
+				} catch (JSONException e1) {
+					e1.printStackTrace();
+				}
 			}
-		
+		}
 		Log.v("Intermediate", "foursquare thread finishing");
 		foursquare_thread_done = true;
 	}
@@ -313,7 +316,6 @@ public class Intermediate extends Activity {
 				e.printStackTrace();
 			}
 			receivedLocationUpdate = true;
-			handler.removeCallbacks(noLocationFound);
 		}
 		runOnUiThread(returnRes);
 	}
@@ -340,6 +342,7 @@ public class Intermediate extends Activity {
 		if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
 			temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
+			handler.removeCallbacks(noLocationFound);
 			if (currentLocationName == null) {
 				receivedLastLocationUpdate = true;
 			}
@@ -347,6 +350,7 @@ public class Intermediate extends Activity {
 		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
 			temp = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
+			handler.removeCallbacks(noLocationFound);
 			if (currentLocationName == null)
 				receivedLastLocationUpdate = true;
 		}
@@ -373,6 +377,7 @@ public class Intermediate extends Activity {
 			@Override
 			public void onLocationChanged(Location location) {
 				currentLocation = new GeoPoint((int)(location.getLatitude() * 1E6), (int)(location.getLongitude() * 1E6));
+				handler.removeCallbacks(noLocationFound);
 				runOnUiThread(returnRes);
 			}
 		};

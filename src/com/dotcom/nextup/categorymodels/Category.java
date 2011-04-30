@@ -6,25 +6,19 @@ import java.util.Comparator;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Category implements Comparator<Category>, Parcelable, Serializable {
+public class Category implements Comparable<Category>, Comparator<Category>, Parcelable, Serializable {
 
 	private static final long serialVersionUID = 3131950815409215218L;
 	private String name;
 	private Integer frequency;
 	private Integer averageTime; //hour of day, 0 - 23
+	private Integer count; //Counts number of inputs for average time
 	
-	public Category() {
-		super();
-		this.name = "Unknown Name";
-	}
-	public Category(String name) {
-		super();
+	public Category(String name, Integer freq, Integer time) {
 		this.name = name;
-	}
-	public Category(String nam, Integer freq, Integer time) {
-		name = nam;
-		frequency = freq;
-		averageTime = time;
+		this.frequency = freq;
+		this.averageTime = time;
+		this.count = 1;
 	}
 	
 	public boolean hasSameNameAs(Category other) {
@@ -81,5 +75,19 @@ public class Category implements Comparator<Category>, Parcelable, Serializable 
 			public Category[] newArray(int size) {
 				return new Category[size];
 			}
-	    };	
+	    };
+
+	@Override
+	public int compareTo(Category another) {
+		return this.frequency - another.frequency;
+	}
+
+	public Integer getCount() {
+		return count;
+	}
+	
+	public void addTime(int time) {
+		this.averageTime = ((this.count * this.averageTime) + time)/(count + 1);
+		this.count++;
+	}
 }

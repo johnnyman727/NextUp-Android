@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -47,7 +48,8 @@ public class Home extends ListActivity {
 	ArrayList<Category> categories_next_custom = null;
 	ArrayList<Category> categories_next_cloud = null;
 	RecommendationInput input = null;
-	
+	Button before;
+	Button forward;
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
 	ProgressDialog dialog = null;
@@ -66,7 +68,12 @@ public class Home extends ListActivity {
 			
 			extractLocationData(getIntent());
 			setContentView(R.layout.main_checkedin);
-			
+			before = (Button)findViewById(R.id.ShowVenuesBefore);
+			before.setVisibility(View.INVISIBLE);
+			before.setClickable(false);
+			forward = (Button)findViewById(R.id.ShowVenuesForward);
+			forward.setVisibility(View.INVISIBLE);
+			forward.setClickable(false);
 			my_venues = new ArrayList<Venue>();
 			this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 			setListAdapter(this.m_adapter);
@@ -194,6 +201,21 @@ public class Home extends ListActivity {
 			i++;
 		}
 		my_venues_index_of_last_to_display = i - 1;
+		
+		if (my_venues_index_of_first_to_display == 0) {
+			before.setVisibility(View.INVISIBLE);
+			before.setClickable(false);
+		} else {
+			before.setVisibility(View.VISIBLE);
+			before.setClickable(true);
+		}
+		if (my_venues_index_of_last_to_display == my_venues.size()-1) {
+			forward.setVisibility(View.INVISIBLE);
+			forward.setClickable(false);
+		} else {
+			forward.setVisibility(View.VISIBLE);
+			forward.setClickable(true);
+		}
 		
 		Log.v("Home", "my_venues_index_of_first_to_display="+Integer.toString(my_venues_index_of_first_to_display));
 		Log.v("Home", "my_venus_index_of_last_to_display="+Integer.toString(my_venues_index_of_last_to_display));

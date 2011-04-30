@@ -31,7 +31,7 @@ public class BackendManager {
 		for (Category suffix: suffixes) {
 			if (suffixes.indexOf(suffix) > 0)
 				suffixMessage += ",";
-			suffixMessage+= suffix.getName().replace(" ", "%20") + ":" + suffix.getAverageTime();
+			suffixMessage+= suffix.getName().replace(" ", "%20") + ":"+ suffix.getFrequency() + ":" + suffix.getAverageTime();
 		}
 		
 		String finalUrl = baseUrl + prefixMessage + suffixMessage;
@@ -82,7 +82,6 @@ public class BackendManager {
 		HttpResponse response;
 		HttpEntity entity;
 		try {
-			//TODO CHECK FOR NO SUGGESTION
 			response = hc.execute(request);
 			entity = response.getEntity();
 			String resp = CheckInManager.convertStreamToString(entity.getContent());
@@ -91,9 +90,8 @@ public class BackendManager {
 			JSONArray suggestions = new JSONArray(resp);
 			for (int i = 0; i < suggestions.length(); i++) {
 				String snuggie = suggestions.getString(i);
-				String[] nameTime = snuggie.split(":");				
-				Category suffixCat = new Category(nameTime[0]);
-				suffixCat.setAverageTime(Integer.parseInt(nameTime[1]));
+				String[] attrs = snuggie.split(":");				
+				Category suffixCat = new Category(attrs[0], Integer.parseInt(attrs[1]), Integer.parseInt(attrs[2]));
 				suggs.add(suffixCat);
 			}
 		} catch (IOException e) {

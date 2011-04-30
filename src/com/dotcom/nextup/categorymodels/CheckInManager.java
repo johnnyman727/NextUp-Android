@@ -74,7 +74,7 @@ public class CheckInManager {
 			JSONArray cats = venue.getJSONArray(
 					"categories");
 			for (int j = 0; j < cats.length(); j++) {
-				internalCategories.add(new Category(cats.getJSONObject(j).getString("name")));
+				internalCategories.add(new Category(cats.getJSONObject(j).getString("name"), 1, 12));
 			}
 			CheckIn newCheckin = new CheckIn(time, internalCategories, checkInPoint, name, milliSinceEpoch);
 			Checkins.add(newCheckin);
