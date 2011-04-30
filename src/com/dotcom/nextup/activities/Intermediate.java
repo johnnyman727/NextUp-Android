@@ -238,29 +238,26 @@ public class Intermediate extends Activity {
 			if (nearby_locations != null && nearby_locations.size() > 0) {
 				selected = nearby_locations.get(currentSelectedVenue);
 				
-				// wrong - what we want here is the categories that the user should go to NEXT,
-				// NOT the categories of the place they're currently at
 				cats = selected.getCategories();
 	
+				numCats = cats.size();
+				
+				/* Put Name */
+				gotoHome.putExtra("name", selected.getName());
+				 
+				/* Put the number of categories */
+				gotoHome.putExtra("numCats", numCats);
+				
+				/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
+				for (int j = 0; j < numCats; j++) {
+					String key = "Category" + new Integer(j).toString();
+					gotoHome.putExtra(key, (Parcelable)cats.get(j));
+				}
+				
+				/*Put the location just for shits and giggles */
+				gotoHome.putExtra("location", selected.getLatlong().getLatitudeE6() + "," + selected.getLatlong().getLongitudeE6());
 			
-			numCats = cats.size();
-			
-			/* Put Name */
-			gotoHome.putExtra("name", selected.getName());
-			 
-			/* Put the number of categories */
-			gotoHome.putExtra("numCats", numCats);
-			
-			/* Put each category as format category + index in list (for ex. category1, category2, etc.) */
-			for (int j = 0; j < numCats; j++) {
-				String key = "Category" + new Integer(j).toString();
-				gotoHome.putExtra(key, (Parcelable)cats.get(j));
-			}
-			
-			/*Put the location just for shits and giggles */
-			gotoHome.putExtra("location", selected.getLatlong().getLatitudeE6() + "," + selected.getLatlong().getLongitudeE6());
-		
-			startActivity(gotoHome);
+				startActivity(gotoHome);
 			}
 		}		
 	}
@@ -324,7 +321,9 @@ public class Intermediate extends Activity {
 	}
 	
 	private void findCurrentLocation() {
-		//initialize location listener
+		//do both ways of finding location:  
+		//  location listening (slower, more accurate)
+		//  and last known location (faster, less accurate)
 		
 		if (!locationRegistered) {
 			try {
@@ -338,6 +337,7 @@ public class Intermediate extends Activity {
 		location_thread_done = true;
 	}
 	
+	/** @Olin location hack included */
 	private void getLastKnownLocation() {
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
@@ -346,9 +346,8 @@ public class Intermediate extends Activity {
 			temp = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			currentLocation = new GeoPoint((int)(temp.getLatitude() * 1E6), (int)(temp.getLongitude() * 1E6));
 			handler.removeCallbacks(noLocationFound);
-			if (currentLocationName == null) {
+			if (currentLocationName == null)
 				receivedLastLocationUpdate = true;
-			}
 		}
 		if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
 			temp = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -356,6 +355,13 @@ public class Intermediate extends Activity {
 			handler.removeCallbacks(noLocationFound);
 			if (currentLocationName == null)
 				receivedLastLocationUpdate = true;
+		}
+		
+		// if we really can't find any locations, assume we're at Olin
+		if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) == null 
+				&& locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) == null) {
+			currentLocation = new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6));
+			handler.removeCallbacks(noLocationFound);
 		}
 		
 		locationRegistered = true;
@@ -388,10 +394,28 @@ public class Intermediate extends Activity {
 		locationRegistered = true;		
 	}
 	
+	/** @Olin location hack included */
 	public void updateLocationInfo() throws JSONException {
-		JSONArray nearest = FoursquareLocationManager.getCurrentLocationDataFromFoursquare(currentLocation, token);
-		nearby_locations = FoursquareLocationManager.getNearbyLocationsFromFoursquare(nearest, nearby_locations);
-		nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
+		try {
+			JSONArray nearest = FoursquareLocationManager.getCurrentLocationDataFromFoursquare(currentLocation, token);
+			nearby_locations = FoursquareLocationManager.getNearbyLocationsFromFoursquare(nearest, nearby_locations);
+			nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		// if finding locations fails, assume we're at Olin
+		if ( nearby_locations == null )
+			nearby_locations = new ArrayList<Venue>();
+		if ( nearby_locations.size() == 0 ) {
+			Venue venue = new Venue ("Olin College*", new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6)), 500);
+			venue.addCategory(new Category("college", 1, 12) );
+		    nearby_locations.add(venue);
+		}
+		if ( nearest_location == null ) {
+		    nearest_location = new Venue ("Olin College*", new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6)), 500);
+		    nearest_location.addCategory(new Category("college", 1, 12) );
+		}
 	}
 
 }

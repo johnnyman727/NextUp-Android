@@ -28,12 +28,14 @@ public class Venue implements Comparable<Venue>{
     	this.url = url;
     	this.latlong = latlong;
     	this.distance = d;
+    	this.categories = new ArrayList<Category>();
     }
     
     public Venue (String name, GeoPoint latlong, double d) {
     	this.name = name; 
     	this.latlong = latlong;
     	this.distance = d;
+    	this.categories = new ArrayList<Category>();
     }
      
     public void setRating(double rating) { this.rating = rating; }
@@ -71,6 +73,10 @@ public class Venue implements Comparable<Venue>{
 
 	public void setCategories(ArrayList<Category> categories) {
 		this.categories = categories;
+	}
+	
+	public void addCategory (Category cat) {
+		this.categories.add(cat);
 	}
 
 	public ArrayList<Category> getCategories() {
