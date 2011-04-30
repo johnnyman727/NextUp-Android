@@ -278,6 +278,7 @@ public class Home extends ListActivity {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean isIn(Category kitty, ArrayList<Category> cats) {
 		for (Category cat : cats) {
 			if ( kitty.getName().equals(cat.getName())) return true;

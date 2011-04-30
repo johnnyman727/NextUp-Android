@@ -60,30 +60,36 @@ public class LocationNotFound extends Activity {
 					.getString(R.string.accessTokenPreferenceName), "Unknown");
 	}
 	
+	private Runnable grabLocation = new Runnable() {
+		
+		@Override
+		public void run() {
+			try {
+			String location = currentAddress.getText().toString();
+			Address address = geoCoder.getFromLocationName(location, 1).get(0);
+			currentLocation = new GeoPoint((int)(address.getLatitude() * 1E6), (int)(address.getLongitude() * 1E6));
+			JSONArray nearest = FoursquareLocationManager.getCurrentLocationDataFromFoursquare(currentLocation, token);
+			nearby_locations = FoursquareLocationManager.getNearbyLocationsFromFoursquare(nearest, nearby_locations);
+			nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
+			toHome();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+	};
+	
 	OnClickListener getAddress = new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-			String location = "";
-			if ((location = currentAddress.getText().toString()).equals("")) {
+			if (currentAddress.getText().toString().equals("")) {
 				Toast.makeText(context, "You must type an address", Toast.LENGTH_LONG).show();
 				return;
 			}
-			try {
-				Address address = geoCoder.getFromLocationName(location, 1).get(0);
-				currentLocation = new GeoPoint((int)(address.getLatitude() * 1E6), (int)(address.getLongitude() * 1E6));
-				JSONArray nearest = FoursquareLocationManager.getCurrentLocationDataFromFoursquare(currentLocation, token);
-				nearby_locations = FoursquareLocationManager.getNearbyLocationsFromFoursquare(nearest, nearby_locations);
-				nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
-				toHome(v);
-			} catch (IOException e) {
-				thereWasAnError();
-				e.printStackTrace();
-			} catch (JSONException e) {
-				thereWasAnError();
-				e.printStackTrace();
-			}
-			
+			Thread sendLocation = new Thread(null, grabLocation, "GrabLocation");
+			sendLocation.start();
 		}
 	};
 	
@@ -91,7 +97,7 @@ public class LocationNotFound extends Activity {
 		Toast.makeText(context, "Sorry, we still can't find you.", Toast.LENGTH_LONG).show();
 		LocationNotFound.this.finish();
 	}
-	public void toHome(View view) throws IOException {
+	public void toHome() throws IOException {
 		Intent gotoHome = new Intent(this, Home.class);
 		int numCats = 0;
 

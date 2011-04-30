@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -71,6 +72,7 @@ public class Intermediate extends Activity {
 	private Runnable fourSquareAndLocation;
 	private boolean foursquare_thread_done = false;
 	private boolean location_thread_done = false;
+	private ProgressDialog dialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -86,6 +88,7 @@ public class Intermediate extends Activity {
 		Button next = (Button)findViewById(R.id.Intermediate2Button);
 		next.setVisibility(View.INVISIBLE);
 		next.setClickable(false);
+		dialog = ProgressDialog.show(this, "", "We are finding your location right now...", true);
 		
 		fourSquare = new Runnable() {
 			@Override
@@ -108,7 +111,6 @@ public class Intermediate extends Activity {
 				locationUpdateWithFoursquare();
 			}
 		};
-
 		// does foursquare stuff, can work independently
 		Thread foursquare_thread = new Thread(null, fourSquare, "Foursquare thread");
 		foursquare_thread.start();
@@ -175,6 +177,7 @@ public class Intermediate extends Activity {
 	
 	@SuppressWarnings("unchecked")
 	public void updateSpinner() {
+		dialog.dismiss();
 		Spinner spinner = (Spinner)findViewById(R.id.Intermediate2Spinner);
 		spinner_locations = new ArrayList<CharSequence>();
 		adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_locations);
