@@ -57,16 +57,6 @@ public class Yelp {
 		return rec;
 	}
 	
-	@SuppressWarnings("unused")
-	private RecommendationInput narrowDownCategories2(RecommendationInput in) {
-		// try to choose 2 custom categories
-		ArrayList<Category> custom = narrowDown2(in.getCustomCategories(), 2);
-		// try to choose 1 cloud category
-		ArrayList<Category> cloud = narrowDown2(in.getCustomCategories(), 1);
-		// if not enough, use whatever categories are available so we've chosen 3 categories
-		return new RecommendationInput(custom, cloud, in.getLatitude(), in.getLongitude(), in.getMaxDistance(), in.getNumResultsDesired());
-	}
-	
 	private RecommendationInput narrowDownCategories(RecommendationInput in) {
 		for (Category cat: in.getCustomCategories()) {
 			Log.v("Yelp", cat.getFrequency().toString());
@@ -106,45 +96,6 @@ public class Yelp {
 			count++;
 		}
 		return ret;
-	}
-	private ArrayList<Category> narrowDown2(ArrayList<Category> all_cats, int n_cats_desired) {
-		int ncats = all_cats.size();
-		ArrayList<Category> best_cats = new ArrayList<Category>();
-		
-		// sort by frequency
-		ArrayList<NumObjectPair> options = new ArrayList<NumObjectPair>(); // will assign rank to each venue, then select venues with highest ranks
-		for ( int i = 0; i < all_cats.size(); i++ ) {
-			Category cat = all_cats.get(i);
-			options.add(new NumObjectPair(cat.getFrequency(), cat));
-		}
-		Collections.sort(options); // sorts lowest to highest by num
-		// would like activities whose avg time is as close as possible to current time,
-		// meaning those with the lowest possible time_rank
-		// but will increase time_rank to make sure we get at least 3 categories
-		int now = getCurrentHours();
-		ArrayList<Integer> time_ranks = new ArrayList<Integer>();
-		for (int i = 0; i < ncats; i++) {
-			int time_rank = rankCategory(all_cats.get(i), now);
-			if (!isIn(time_rank, time_ranks))
-				time_ranks.add(time_rank);
-		}
-		Collections.sort(time_ranks);
-		
-		int j = 0; 
-		while (best_cats.size() < n_cats_desired && best_cats.size() < ncats && j < time_ranks.size()) {
-			int i = all_cats.size() - 1;
-			while ( best_cats.size() < 3 && i >= 0) {
-				Category cat = (Category) options.get(i).getObject();
-				if ( rankCategory(cat, now) <= time_ranks.get(j) && !isIn(cat, best_cats) ) {
-					best_cats.add(cat);
-					all_cats.remove(i);
-				}
-				i--;
-			}
-			j++;
-		}
-
-		return best_cats;
 	}
 	
 	private int rankCategory(Category cat, int now) {
@@ -247,6 +198,21 @@ public class Yelp {
 	}
 	
 	public ArrayList<YelpVenue> chooseBest(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
+		Collections.sort(all_venues, Collections.reverseOrder());
+		ArrayList<YelpVenue> best = new ArrayList<YelpVenue>();
+		int i = 0;
+		while ( best.size() < input.getNumResultsDesired() && i < all_venues.size()) {
+			YelpVenue ven = all_venues.get(i);
+			if ( ! isIn(ven, best) ) { 
+				best.add(ven);
+				Log.v("Yelp", "added " + ven.toString() + " to best");
+			}
+			i++;
+		}
+		return best;
+	}
+	
+	public ArrayList<YelpVenue> chooseBest2(RecommendationInput input, ArrayList<YelpVenue> all_venues) {
 		/* part of the recommendation engine
 		 * given a lot of yelp venues to consider, returns the best
 		 */
