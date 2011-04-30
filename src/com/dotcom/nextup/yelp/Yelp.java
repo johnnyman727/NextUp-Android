@@ -32,6 +32,11 @@ public class Yelp {
 	Token accessToken;
 	private static int MAX_CATS = 3;
 	private static int MAX_CUSTOM_CATS = 2;
+	private ArrayList<ArrayList<YelpVenue>> venues_by_category; // the venues we'll recommend
+	private RecommendationInput input;
+	static class theLock extends Object { } // mutex class
+	static public theLock lockObject = new theLock(); // instance of mutex
+	private int threads_finished = 0;
 
    /**
 	* Setup the Yelp API OAuth credentials.
@@ -47,14 +52,36 @@ public class Yelp {
 		//Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
 		this.service = new ServiceBuilder().provider(YelpApi2.class).apiKey(consumerKey).apiSecret(consumerSecret).build();
 		this.accessToken = new Token(token, tokenSecret);
+		this.venues_by_category = new ArrayList<ArrayList<YelpVenue>>();
 	}
 	
-	public ArrayList<YelpVenue> getRecommendation(RecommendationInput input) {
+	public ArrayList<YelpVenue> getRecommendation2(RecommendationInput input) {
 		/* THE RECOMMENDATION ENGINE */
 		RecommendationInput input2 = narrowDownCategories(input);
 		ArrayList<YelpVenue> all_venues = getManyPossibleVenues(input2);
 		ArrayList<YelpVenue> rec = chooseBest(input2, all_venues);
 		return rec;
+	}
+	
+	public ArrayList<YelpVenue> getRecommendation(RecommendationInput input) {
+		/* THE RECOMMENDATION ENGINE - THREADED */
+		this.input = narrowDownCategories(input);
+
+		ArrayList<Thread> threads = new ArrayList<Thread>();
+		
+		int n = input.getCategories().size();
+		for (int i = 0; i < n; i++) {
+			Runnable run = new SearchOneCat(input.getCategories().get(i), i);
+			Thread thread = new Thread(null, run, "getting best venues for a category");
+			threads.add(thread);
+			thread.start();
+		}
+		
+		while ( threads_finished < n ) { // wait until all threads are done
+			try { Thread.sleep(5000); } catch (InterruptedException e) { e.printStackTrace(); }
+		}
+		
+		return shuffle(venues_by_category);
 	}
 	
 	private RecommendationInput narrowDownCategories(RecommendationInput in) {
@@ -85,7 +112,6 @@ public class Yelp {
 		
 		return new RecommendationInput(custom, pullFrom(in.getCloudCategories(), MAX_CATS - custom.size()), 
 				in.getLatitude(), in.getLongitude(), in.getMaxDistance(), in.getNumResultsDesired());
-		
 	}
 	
 	private ArrayList<Category> pullFrom(ArrayList<Category> categories, int num) {
@@ -106,6 +132,33 @@ public class Yelp {
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("HH");
 		return Integer.parseInt(sdf.format(cal.getTime()));
+	}
+	
+	public void getBestVenueForOneCat(Category cat, int i) {
+		Log.v("Yelp", "cat: " + cat.getName());
+		ArrayList<YelpVenue> many_cats = venuesSearch(cat.getName(), input.getLatitude(), input.getLongitude(), input.getMaxDistance());
+		synchronized (lockObject) {
+			venues_by_category.add(many_cats);
+			threads_finished++;
+		}
+	}
+	
+	public ArrayList<YelpVenue> shuffle(ArrayList<ArrayList<YelpVenue>> vens_by_cat) {
+		int ncats = vens_by_cat.size();
+		
+		ArrayList<YelpVenue> res = new ArrayList<YelpVenue>();
+		while ( !vens_by_cat.isEmpty() ) {
+			for (int i = 0; i < ncats; i++) {
+				ArrayList<YelpVenue> vens = vens_by_cat.get(i);
+				if (!vens.isEmpty()) {
+					YelpVenue ven = vens.get(0);
+					res.add(ven);
+					vens.remove(ven);
+				}
+			}
+		}
+		
+		return res;
 	}
 	
 	public ArrayList<YelpVenue> getManyPossibleVenues(RecommendationInput input) {
@@ -270,6 +323,22 @@ public class Yelp {
 		/* if a venue has too few reviews, its rating doesn't mean much */
 		if ( venue.getReviewCount() > 3 ) { return venue.getRating(); }
 		else { return venue.getRating()/2; }
+	}
+	
+	public class SearchOneCat implements Runnable {
+		Category category;
+		int index;
+		
+		public SearchOneCat(Category cat, int i) {
+			this.category = cat;
+			this.index = i;
+		}
+		
+		@Override
+		public void run() {
+			getBestVenueForOneCat(category, index);
+		}
+		
 	}
 	
 	public class NumObjectPair implements Comparable<NumObjectPair> {
