@@ -138,6 +138,8 @@ public class Home extends ListActivity {
 
 	public void toMap(View view) {
 		Intent toMap = new Intent(this, Map.class);
+		if (my_venues != null)
+			toMap.putParcelableArrayListExtra("venues", my_venues);
 		startActivity(toMap);
 	}
 
@@ -228,6 +230,7 @@ public class Home extends ListActivity {
 		try {
 			Log.v("Home", "entering getVenues()");
 			/* uses up limited actual Yelp queries */
+			/*
 			Yelp yelp = getYelp();
 			getNextCategories();
 			makeRecommendationInput();
@@ -248,7 +251,43 @@ public class Home extends ListActivity {
 				ven.setRating(yven.getRating());
 				my_venues.add(ven);
 			} 
-
+			*/
+			
+			/* to avoid using up limited Yelp queries */
+			my_venues = new ArrayList<Venue>();
+			Venue ven;
+			ven = new Venue("Olin", // name
+					        "www.olin.edu", // url
+					        "http://w8.campusexplorer.com/media/376x262/media-6B77B46B.png", // image url
+					        new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6)), 
+					        15, 
+					        null);
+			ven.setRating(5);
+			my_venues.add(ven);
+			ven = new Venue("Falafel Palace", 
+					 		"http://www.yelp.com/biz/moodys-falafel-palace-cambridge", 
+					 		"http://w8.campusexplorer.com/media/376x262/media-http://media3.ct.yelpcdn.com/bphoto/VFBvZKvWAEIqg4c-o7RB-g/l",
+					 		new GeoPoint((int)(42.365364 * 1E6), (int)(-71.104487 * 1E6)), 
+					 		1500, 
+					 		null);
+			ven.setRating(3.5);
+			my_venues.add(ven);
+			ven = new Venue("1369 Coffeehouse",
+							"http://www.yelp.com/biz/1369-coffee-house-cambridge-2#query:1369%20coffee%20house/",
+							"http://media1.ct.yelpcdn.com/bphoto/V5G8W7qcUtKul6M1UUaptg/l",
+							new GeoPoint((int)(42.366525 * 1E6), (int)(-71.105444 * 1E6)),
+							1600,
+							null);
+			ven.setRating(3.5);
+			my_venues.add(ven);
+			ven = new Venue("Middlesex Lounge",
+							"http://www.yelp.com/biz/middlesex-lounge-cambridge",
+							"http://media1.ct.yelpcdn.com/bphoto/RqQ1hE-_QRgH0WDqOjbOVw/l",
+							new GeoPoint((int)(42.36247 * 1E6), (int)(-71.098467 * 1E6)),
+							1400,
+							null);
+			ven.setRating(3.5);
+			my_venues.add(ven);
 		} catch (Exception e) {
 			Log.e("Home", "getVenues(): "+e.toString());
 		}

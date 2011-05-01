@@ -33,6 +33,7 @@ public class Category implements Comparable<Category>, Comparator<Category>, Par
 	public void setName(String name) {this.name = name;}
 	public void setFrequency(Integer frequency) {this.frequency = frequency;}
 	public Integer getFrequency() {return this.frequency;}
+	public void incrementFrequency() { this.frequency++; }
 	public void setAverageTime(Integer averageTime) {this.averageTime = averageTime;}
 	public Integer getAverageTime() {return averageTime;}
 	
@@ -40,42 +41,6 @@ public class Category implements Comparable<Category>, Comparator<Category>, Par
 	public int compare(Category c1, Category c2) {
 		return c1.getFrequency() - c2.getFrequency();
 	}
-
-	@Override
-	public int describeContents() {
-		return 0;
-	}
-	@Override
-	public void writeToParcel(Parcel dest, int flag) {
-		dest.writeString(name);
-		if (frequency == null)
-			dest.writeInt(-1);
-		else
-			dest.writeInt(frequency);
-		if (averageTime != null) 
-			dest.writeInt(averageTime);
-		else
-			dest.writeInt(-1);
-	}
-	public Category(Parcel in) {
-		this.name = in.readString();
-		this.frequency = in.readInt();
-		this.averageTime = in.readInt();
-	}
-	
-
-	@SuppressWarnings("unchecked")
-	    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-	        public Category createFromParcel(Parcel in)
-	        {
-	            return new Category(in);
-	        }
-
-			@Override
-			public Category[] newArray(int size) {
-				return new Category[size];
-			}
-	    };
 
 	@Override
 	public int compareTo(Category another) {
@@ -89,5 +54,44 @@ public class Category implements Comparable<Category>, Comparator<Category>, Par
 	public void addTime(int time) {
 		this.averageTime = ((this.count * this.averageTime) + time)/(count + 1);
 		this.count++;
+	}
+	
+	/* being parcelable */
+	
+	public Category(Parcel in) {
+		this.name = in.readString();
+		this.frequency = in.readInt();
+		this.averageTime = in.readInt();
+	}
+	
+	@Override
+	public void writeToParcel(Parcel dest, int flag) {
+		dest.writeString(name);
+		if (frequency == null)
+			dest.writeInt(-1);
+		else
+			dest.writeInt(frequency);
+		if (averageTime != null) 
+			dest.writeInt(averageTime);
+		else
+			dest.writeInt(-1);
+	}
+	
+	@SuppressWarnings("unchecked")
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Category createFromParcel(Parcel in)
+        {
+            return new Category(in);
+        }
+
+		@Override
+		public Category[] newArray(int size) {
+			return new Category[size];
+		}
+    };
+    
+	@Override
+	public int describeContents() {
+		return 0;
 	}
 }

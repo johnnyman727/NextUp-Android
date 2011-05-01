@@ -55,36 +55,15 @@
 	</LinearLayout>
 		
 	<LinearLayout
-		android:orientation="vertical"
+		android:orientation="horizontal"
     	android:layout_width="fill_parent"
-   		android:layout_height="40dip" 
-   		android:gravity="bottom">
-		<LinearLayout
-			android:orientation="horizontal"
-	    	android:layout_width="fill_parent"
-	    	android:layout_gravity="bottom"
-	   		android:layout_height="40dip" >
-	   		<Button
-	   			android:id="@+id/toPreferences"
-	   			android:onClick="toPreferences"
-	   			android:layout_width="wrap_content"
-	   			android:layout_height="fill_parent"
-	   			android:layout_weight="1"
-	   			android:background="@drawable/icon"/>
-	   		<Button
-	   			android:id="@+id/toMap"
-	   			android:onClick="toMap"
-	   			android:layout_width="wrap_content"
-	   			android:layout_weight="10"
-	   			android:layout_height="fill_parent"
-	   			android:background="@drawable/images"/>
-	   		<Button
-	   			android:id="@+id/toFriends"
-	   			android:onClick="toFriends"
-	   			android:layout_width="wrap_content"
-	   			android:layout_weight="1"
-	   			android:layout_height="fill_parent"
-	   			android:background="@drawable/icon"/>		
-	   	</LinearLayout>
-	</LinearLayout>
+   		android:layout_height="40dip">
+   		
+		<Button android:id="@+id/toMap"
+			android:onClick="toMap"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:text="Map View"/>
+				
+	</LinearLayout>	
 </LinearLayout>

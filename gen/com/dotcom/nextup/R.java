@@ -27,11 +27,11 @@ public final class R {
         public static final int FoursquareLogo=0x7f060006;
         public static final int Friends=0x7f060026;
         public static final int Home=0x7f060025;
-        public static final int ImageView01=0x7f060019;
+        public static final int ImageView01=0x7f060017;
         public static final int Intermediate2Button=0x7f060009;
         public static final int Intermediate2Spinner=0x7f060008;
         public static final int Intermediate2Text=0x7f060007;
-        public static final int Location=0x7f06001a;
+        public static final int Location=0x7f060018;
         public static final int Logo=0x7f060012;
         public static final int New=0x7f06001f;
         public static final int Preferences=0x7f060024;
@@ -43,8 +43,8 @@ public final class R {
         public static final int TextView01=0x7f06000d;
         public static final int atextview=0x7f060013;
         public static final int bottomtext=0x7f060023;
-        public static final int button02=0x7f06001b;
-        public static final int button03=0x7f06001c;
+        public static final int button02=0x7f060019;
+        public static final int button03=0x7f06001a;
         public static final int failtext=0x7f060000;
         public static final int failtext2=0x7f060001;
         public static final int getAddressButton=0x7f06000c;
@@ -54,9 +54,9 @@ public final class R {
         public static final int notFoundText=0x7f06000a;
         public static final int nothanksbutton=0x7f060003;
         public static final int submitaddresstext=0x7f06000b;
-        public static final int toFriends=0x7f060018;
-        public static final int toMap=0x7f060017;
-        public static final int toPreferences=0x7f060016;
+        public static final int toFriends=0x7f06001c;
+        public static final int toMap=0x7f060016;
+        public static final int toPreferences=0x7f06001b;
         public static final int toptext=0x7f060022;
     }
     public static final class layout {
