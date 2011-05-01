@@ -54,7 +54,7 @@ public class FoursquareLocationManager {
 			if (responseCode >= 200 && responseCode < 300) {
 				JSONObject res = responseObj.getJSONObject("response");
 				JSONArray groups = res.getJSONArray("groups");
-				JSONObject nearby = groups.getJSONObject(1);
+				JSONObject nearby = groups.getJSONObject(0);
 				JSONArray close = nearby.getJSONArray("items");
 				return close;
 			} 
@@ -78,9 +78,12 @@ public class FoursquareLocationManager {
     }
     
 	public static ArrayList<Venue> getNearbyLocationsFromFoursquare(JSONArray close, ArrayList<Venue> nearby_locations) throws JSONException {
-		if (nearby_locations == null || close == null)
+		if (close == null)
 			return null;
-		nearby_locations.clear();
+		if (nearby_locations != null)
+			nearby_locations.clear();
+		else
+			nearby_locations = new ArrayList<Venue>();
 		ArrayList<Category> cats = new ArrayList<Category>();
 		for (int i = 0; i < close.length(); i++) {
 			JSONObject nearbyPlace = close.getJSONObject(i);
@@ -89,7 +92,7 @@ public class FoursquareLocationManager {
 			double distance = Double.parseDouble(location.getString("distance"));
 			String name = nearbyPlace.getString("name");
 			for (int j = 0; j < categories.length(); j++) {
-				Category newCat = new Category(categories.getJSONObject(j).getString("name"));
+				Category newCat = new Category(categories.getJSONObject(j).getString("name"), 1, 12);
 				cats.add(newCat);
 			}
 			int lat = (int) (Double.parseDouble(location.getString("lat")) * 1E6);

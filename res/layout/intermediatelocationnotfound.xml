@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical">
+	<TextView android:id="@+id/notFoundText"
+		android:text="We were unable to find where you are! Please tell us!"
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content"/>
+	<EditText android:id="@+id/submitaddresstext"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:text="Olin Way, Needham MA 02492" />
+	<Button android:id="@+id/getAddressButton" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="This is my location!" />
+
+</LinearLayout>

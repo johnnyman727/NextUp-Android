@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -44,9 +45,11 @@ public class Home extends ListActivity {
 	private Context context;
 	
 	ArrayList<Category> categories_now = new ArrayList<Category>();
-	ArrayList<Category> categories_next = null;
+	ArrayList<Category> categories_next_custom = null;
+	ArrayList<Category> categories_next_cloud = null;
 	RecommendationInput input = null;
-	
+	Button before;
+	Button forward;
 	private ArrayList<Venue> my_venues = null;
 	private VenueAdapter m_adapter;
 	ProgressDialog dialog = null;
@@ -65,7 +68,12 @@ public class Home extends ListActivity {
 			
 			extractLocationData(getIntent());
 			setContentView(R.layout.main_checkedin);
-			
+			before = (Button)findViewById(R.id.ShowVenuesBefore);
+			before.setVisibility(View.INVISIBLE);
+			before.setClickable(false);
+			forward = (Button)findViewById(R.id.ShowVenuesForward);
+			forward.setVisibility(View.INVISIBLE);
+			forward.setClickable(false);
 			my_venues = new ArrayList<Venue>();
 			this.m_adapter = new VenueAdapter(this, R.layout.row, my_venues);
 			setListAdapter(this.m_adapter);
@@ -78,7 +86,7 @@ public class Home extends ListActivity {
 			};
 
 			Thread thread = new Thread(null, viewVenues, "GettingVenuesThread");
-			//dialog = ProgressDialog.show(Home.this, "", "Loading. Please wait...", true);
+			dialog = ProgressDialog.show(Home.this, "", "Loading. Please wait...", true);
 			thread.start();
 			
 		} catch (IOException e) {
@@ -130,6 +138,8 @@ public class Home extends ListActivity {
 
 	public void toMap(View view) {
 		Intent toMap = new Intent(this, Map.class);
+		if (my_venues != null)
+			toMap.putParcelableArrayListExtra("venues", my_venues);
 		startActivity(toMap);
 	}
 
@@ -142,7 +152,7 @@ public class Home extends ListActivity {
 		if (my_venues == null || my_venues.size() == 0) return;
 		if (my_venues_index_of_last_to_display == my_venues.size() - 1) return;
 		int start = my_venues_index_of_last_to_display + 1;
-		int end = start + 3;
+		int end = min(start + 3, my_venues.size());
 		updateAdapter(start, end);
 	}
 	
@@ -162,6 +172,7 @@ public class Home extends ListActivity {
 	private Runnable returnRes = new Runnable() {
 		@Override
 		public void run() {
+			dialog.dismiss();
 			Log.v("Home", "running returnRes");
 			updateAdapter(0,3);
 		}
@@ -193,6 +204,21 @@ public class Home extends ListActivity {
 		}
 		my_venues_index_of_last_to_display = i - 1;
 		
+		if (my_venues_index_of_first_to_display == 0) {
+			before.setVisibility(View.INVISIBLE);
+			before.setClickable(false);
+		} else {
+			before.setVisibility(View.VISIBLE);
+			before.setClickable(true);
+		}
+		if (my_venues_index_of_last_to_display == my_venues.size()-1) {
+			forward.setVisibility(View.INVISIBLE);
+			forward.setClickable(false);
+		} else {
+			forward.setVisibility(View.VISIBLE);
+			forward.setClickable(true);
+		}
+		
 		Log.v("Home", "my_venues_index_of_first_to_display="+Integer.toString(my_venues_index_of_first_to_display));
 		Log.v("Home", "my_venus_index_of_last_to_display="+Integer.toString(my_venues_index_of_last_to_display));
 
@@ -204,6 +230,7 @@ public class Home extends ListActivity {
 		try {
 			Log.v("Home", "entering getVenues()");
 			/* uses up limited actual Yelp queries */
+			/*
 			Yelp yelp = getYelp();
 			getNextCategories();
 			makeRecommendationInput();
@@ -224,7 +251,43 @@ public class Home extends ListActivity {
 				ven.setRating(yven.getRating());
 				my_venues.add(ven);
 			} 
-
+			*/
+			
+			/* to avoid using up limited Yelp queries */
+			my_venues = new ArrayList<Venue>();
+			Venue ven;
+			ven = new Venue("Olin", // name
+					        "www.olin.edu", // url
+					        "http://w8.campusexplorer.com/media/376x262/media-6B77B46B.png", // image url
+					        new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6)), 
+					        15, 
+					        null);
+			ven.setRating(5);
+			my_venues.add(ven);
+			ven = new Venue("Falafel Palace", 
+					 		"http://www.yelp.com/biz/moodys-falafel-palace-cambridge", 
+					 		"http://w8.campusexplorer.com/media/376x262/media-http://media3.ct.yelpcdn.com/bphoto/VFBvZKvWAEIqg4c-o7RB-g/l",
+					 		new GeoPoint((int)(42.365364 * 1E6), (int)(-71.104487 * 1E6)), 
+					 		1500, 
+					 		null);
+			ven.setRating(3.5);
+			my_venues.add(ven);
+			ven = new Venue("1369 Coffeehouse",
+							"http://www.yelp.com/biz/1369-coffee-house-cambridge-2#query:1369%20coffee%20house/",
+							"http://media1.ct.yelpcdn.com/bphoto/V5G8W7qcUtKul6M1UUaptg/l",
+							new GeoPoint((int)(42.366525 * 1E6), (int)(-71.105444 * 1E6)),
+							1600,
+							null);
+			ven.setRating(3.5);
+			my_venues.add(ven);
+			ven = new Venue("Middlesex Lounge",
+							"http://www.yelp.com/biz/middlesex-lounge-cambridge",
+							"http://media1.ct.yelpcdn.com/bphoto/RqQ1hE-_QRgH0WDqOjbOVw/l",
+							new GeoPoint((int)(42.36247 * 1E6), (int)(-71.098467 * 1E6)),
+							1400,
+							null);
+			ven.setRating(3.5);
+			my_venues.add(ven);
 		} catch (Exception e) {
 			Log.e("Home", "getVenues(): "+e.toString());
 		}
@@ -232,26 +295,34 @@ public class Home extends ListActivity {
 	}
 	
 	private void makeRecommendationInput() {
-		input = new RecommendationInput(categories_next, latitude, longitude, 3000, 9);
+		input = new RecommendationInput(categories_next_custom, categories_next_cloud, latitude, longitude, 3000, 9);
 	}
 	
 	private void getNextCategories() {
-		ArrayList<Category> customHistReturn = new ArrayList<Category>();
-		ArrayList<Category> cloudHistReturn = new ArrayList<Category>();
+		categories_next_custom = new ArrayList<Category>();
+		categories_next_cloud = new ArrayList<Category>();
 		CategoryHistogram ch = CategoryHistogramManager.getHistogramFromPhone(context);
 		
 		for (Category inputCat: categories_now) {
 			if (ch != null)
-				customHistReturn.addAll(ch.getAllSuffixes(inputCat));
-				cloudHistReturn.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
+				categories_next_custom.addAll(ch.getAllSuffixes(inputCat));
+				categories_next_cloud.addAll(BackendManager.getSuggestionsFromCloud(inputCat));
 		}
 		
-		//TODO:SORT BASED ON RANKING FROM PREFERENCES
-		// dummy place holder for until we pull from cloud and custom histogram
-		categories_next = new ArrayList<Category>();
-		categories_next.add(new Category("burritos", 5, 18));
-		categories_next.add(new Category("ice cream", 7, 15));
-		categories_next.add(new Category("coffee", 5, 14));
+		// if there are too few 'real' categories, add a few 'fake' ones
+		if (categories_next_custom.size() + categories_next_cloud.size() < 3) {
+			categories_next_cloud.add(new Category("burritos", 2, 18));
+			categories_next_cloud.add(new Category("ice cream", 1, 15));
+			categories_next_cloud.add(new Category("coffee", 3, 14));
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private boolean isIn(Category kitty, ArrayList<Category> cats) {
+		for (Category cat : cats) {
+			if ( kitty.getName().equals(cat.getName())) return true;
+		}
+		return false;
 	}
 	
 	/* like everything in Java, you need to make a Yelp object in order to actually do anything
@@ -302,13 +373,10 @@ public class Home extends ListActivity {
     			if (iv != null) {
     	    		Drawable image = ImageOperations(context, items.get(position).getImageURL(), "item" + Integer.toString(position) + ".jpg");
     	    		if (image == null) {
-    	    			/* supposed to display this when the image can't be gotten from the url
-    	    			 * but instead, no image displays, which is ok but doesn't look so good
-    	    			 * probably returning null because it's an incorrect path name */
-    	    			 
-    	    			image = Drawable.createFromPath("../../../../../res/drawable/default_venue_image.png");
+    	    			iv.setImageResource(R.drawable.yelp_logo);
+    	    		} else {
+    	    			iv.setImageDrawable(image);
     	    		}
-    				iv.setImageDrawable(image);
     			}
     		}
     		return v;

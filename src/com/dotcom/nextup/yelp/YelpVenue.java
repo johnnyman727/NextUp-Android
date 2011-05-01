@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import org.json.JSONObject;
 
+import com.dotcom.nextup.categorymodels.Category;
+
 import android.util.Log;
 
 /* search by category (and your lat long) - 3 best things as YelpVenue.
@@ -14,7 +16,7 @@ import android.util.Log;
  * 
  */
 
-public class YelpVenue {
+public class YelpVenue implements Comparable<YelpVenue>{
 	// attributes mimic http://www.yelp.com/developers/documentation/v2/business
 	
 	ArrayList<ArrayList<String>> categories = new ArrayList<ArrayList<String>>();
@@ -167,6 +169,17 @@ public class YelpVenue {
 	public boolean hasSameNameAs(YelpVenue other) {
 		/* distinctly NOT trying to override the equals method here */
 		return this.getName().equals(other.getName());
+	}
+	
+	@Override
+	public int compareTo(YelpVenue another) {
+		return (int) (this.rank() - another.rank());
+	}
+	
+	public double rank() {
+		/* if a venue has too few reviews, its rating doesn't mean much */
+		if ( this.getReviewCount() > 3 ) { return this.getRating() * 2; }
+		else { return this.getRating(); }
 	}
 
 }

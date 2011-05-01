@@ -90,6 +90,14 @@ public class FourSquareLoginPrompt extends Activity {
 	private void sendCode(String code, Class c) {
 		Intent i = new Intent(this, c);
 		i.putExtra(getString(R.string.accessCodePreferenceName), code);
-		startActivity(i);
+		startActivityForResult(i, 0);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == 0 && resultCode == 123) {
+			this.finish();
+		}
 	}
 }
