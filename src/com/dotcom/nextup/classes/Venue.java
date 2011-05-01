@@ -96,7 +96,7 @@ public class Venue implements Comparable<Venue>, Parcelable{
 		if (c != -1) {
 			for (int i = 0; i < c; i++) {
 				try {
-					Category cat = (Category) in.readParcelable(null);
+					Category cat = (Category) in.readParcelable(Category.class.getClassLoader());
 					if (cat != null) this.categories.add(cat);
 				} catch (BadParcelableException e) {
 					e.printStackTrace();
@@ -128,7 +128,7 @@ public class Venue implements Comparable<Venue>, Parcelable{
 		if (categories != null && categories.size() > 0) {
 			dest.writeInt(categories.size());
 			for (int i = 0; i < categories.size(); i++) {
-				dest.writeParcelable(categories.get(i), i);
+				dest.writeParcelable(categories.get(i), 0);
 			}
 		} else {
 			dest.writeInt(-1);
@@ -137,14 +137,14 @@ public class Venue implements Comparable<Venue>, Parcelable{
 	
 	@SuppressWarnings("unchecked")
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public Category createFromParcel(Parcel in)
+        public Venue createFromParcel(Parcel in)
         {
-            return new Category(in);
+            return new Venue(in);
         }
 
 		@Override
-		public Category[] newArray(int size) {
-			return new Category[size];
+		public Venue[] newArray(int size) {
+			return new Venue[size];
 		}
     };
     
