@@ -73,9 +73,12 @@ public class Intermediate extends Activity {
 	private boolean foursquare_thread_done = false;
 	private boolean location_thread_done = false;
 	private ProgressDialog dialog;
+	String TAG = "Intermediate";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.v("Intermediate", "entering onCreate");
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.intermediate2);
 		context = this;
@@ -114,18 +117,22 @@ public class Intermediate extends Activity {
 		// does foursquare stuff, can work independently
 		Thread foursquare_thread = new Thread(null, fourSquare, "Foursquare thread");
 		foursquare_thread.start();
+		Log.v(TAG, "just started foursquare_thread");
 		
 		// does location stuff, can work independently
 		Thread location_thread = new Thread(null, locationListening, "Location thread");
 		location_thread.start();
+		Log.v(TAG, "just started location_thread");
 		
 		// can only do stuff after foursquare and location stuff finished
 		Thread foursquare_and_location_thread = new Thread(null, fourSquareAndLocation, "Location + Foursquare thread");
 		foursquare_and_location_thread.start();
+		Log.v(TAG, "just started foursquare_and_location_thread");
 	}
 	
 	@Override
 	public void onResume() {
+		Log.v(TAG, "entered onResume");
 		super.onResume();
 	}
 
@@ -154,12 +161,14 @@ public class Intermediate extends Activity {
 
 	@Override
 	public void onPause() {
+		Log.v(TAG, "entered onPause");
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
 	}
 	
 	@Override
 	public void onBackPressed() {
+		Log.v(TAG, "entered onBackPressed");
 		super.onDestroy();
 	}
 	
@@ -168,7 +177,7 @@ public class Intermediate extends Activity {
 	private Runnable returnRes = new Runnable() {
 		@Override
 		public void run() {
-			Log.v("Intermediate", "running returnRes");
+			Log.v(TAG, "running returnRes");
 			TextView textview = (TextView) findViewById(R.id.Intermediate2Text);
 			textview.setText("Nearby locations:");
 			updateSpinner();
@@ -177,6 +186,7 @@ public class Intermediate extends Activity {
 	
 	@SuppressWarnings("unchecked")
 	public void updateSpinner() {
+		Log.v(TAG, "entering updateSpinner");
 		dialog.dismiss();
 		Spinner spinner = (Spinner)findViewById(R.id.Intermediate2Spinner);
 		spinner_locations = new ArrayList<CharSequence>();
@@ -197,11 +207,11 @@ public class Intermediate extends Activity {
 	}
 	
 	Runnable noLocationFound = new Runnable() {
-		
 		@Override
 		public void run() {
 			//if (nearby_locations != null)
 				//return;
+			Log.v(TAG, "running noLocationFound");
 			Intent i = new Intent(Intermediate.this, LocationNotFound.class);
 			startActivity(i);			
 		}
@@ -224,12 +234,16 @@ public class Intermediate extends Activity {
 	};
 	
 	public void proceed(View view) throws IOException {
+		Log.v(TAG, "entering proceed()");
+		
 		if (currentSelectedVenue == adapter.getCount() - 1) {
+			Log.v(TAG, "proceed(): they chose the last option - I'm not at any of these places");
 			Intent i = new Intent(this, LocationNotFound.class);
 			startActivity(i);
 			return;
 		}
-			
+		
+		Log.v(TAG, "proceed(): they chose something other than the last option");
 		Intent gotoHome = new Intent(this, Home.class);
 		int numCats = 0;
 		if (currentSelectedVenue != -1) {
@@ -274,13 +288,17 @@ public class Intermediate extends Activity {
 			codeStored = true;
 		
 		if (codeStored && this.checkIns == null) {
-			if(!code.equals("-1")) {
-	
-				try {
-					initializeCheckIns();
-				} catch (JSONException e1) {
-					e1.printStackTrace();
+			if (code != null) {
+				if(!code.equals("-1")) {
+					try {
+						initializeCheckIns();
+					} catch (JSONException e1) {
+						e1.printStackTrace();
+					}
 				}
+			}
+			else {
+				Log.v("Intermediate", "foursquare thread finds: code is null");
 			}
 		}
 		Log.v("Intermediate", "foursquare thread finishing");
@@ -288,19 +306,21 @@ public class Intermediate extends Activity {
 	}
 	
 	private void initializeCheckIns() throws JSONException {
-			this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
-			this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
-			if (this.checkIns.size() > 0) {
-				Intermediate.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
-				this.lastLocation = FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
-				this.lastLocationName = FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);
-			}
+		Log.v(TAG, "entering initializeCheckIns");
+		this.token = TokenManager.getToken(context, codeStored, code, pref, oa);
+		this.checkIns = TokenManager.getCheckIns(context, token, checkinsUpdated);
+		if (this.checkIns.size() > 0) {
+			Intermediate.checkinsUpdated = TokenManager.updateHistograms(context, checkinsUpdated, checkIns, pref);
+			this.lastLocation = FoursquareLocationManager.getLastLocation(this.checkIns, this.checkInManager);
+			this.lastLocationName = FoursquareLocationManager.getLastLocationName(this.checkIns, this.checkInManager);
+		}
 	}
 	
 
 	/* ----------------LOCATION CODE BELOW --------------------- */
 	
 	private void locationUpdateWithFoursquare() {
+		Log.v(TAG, "entering locationUpdateWithFoursquare");
 		while (!foursquare_thread_done || !location_thread_done) {
 			try {
 				Log.v("Intermediate", "final thread waiting for other two threads");
@@ -325,6 +345,8 @@ public class Intermediate extends Activity {
 		//  location listening (slower, more accurate)
 		//  and last known location (faster, less accurate)
 		
+		Log.v(TAG, "entering findCurrentLocation");
+		
 		if (!locationRegistered) {
 			try {
 				initializeLocationListener();
@@ -339,6 +361,7 @@ public class Intermediate extends Activity {
 	
 	/** @Olin location hack included */
 	private void getLastKnownLocation() {
+		Log.v(TAG, "entering getLastKnownLocation");
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 		Location temp = null;
@@ -368,6 +391,7 @@ public class Intermediate extends Activity {
 	}
 	
 	private void initializeLocationListener() throws JSONException {
+		Log.v(TAG, "entering initializeLocationListener");
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
 		locationListener = new LocationListener() {
@@ -396,6 +420,7 @@ public class Intermediate extends Activity {
 	
 	/** @Olin location hack included */
 	public void updateLocationInfo() throws JSONException {
+		Log.v(TAG, "entering updateLocationInfo");
 		try {
 			JSONArray nearest = FoursquareLocationManager.getCurrentLocationDataFromFoursquare(currentLocation, token);
 			nearby_locations = FoursquareLocationManager.getNearbyLocationsFromFoursquare(nearest, nearby_locations);

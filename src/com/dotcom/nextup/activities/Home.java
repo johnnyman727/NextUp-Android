@@ -272,9 +272,9 @@ public class Home extends ListActivity {
 		
 		// if there are too few 'real' categories, add a few 'fake' ones
 		if (categories_next_custom.size() + categories_next_cloud.size() < 3) {
-			categories_next_cloud.add(new Category("burritos", 1, 18));
+			categories_next_cloud.add(new Category("burritos", 2, 18));
 			categories_next_cloud.add(new Category("ice cream", 1, 15));
-			categories_next_cloud.add(new Category("coffee", 1, 14));
+			categories_next_cloud.add(new Category("coffee", 3, 14));
 		}
 	}
 	
