@@ -373,13 +373,10 @@ public class Home extends ListActivity {
     			if (iv != null) {
     	    		Drawable image = ImageOperations(context, items.get(position).getImageURL(), "item" + Integer.toString(position) + ".jpg");
     	    		if (image == null) {
-    	    			/* supposed to display this when the image can't be gotten from the url
-    	    			 * but instead, no image displays, which is ok but doesn't look so good
-    	    			 * probably returning null because it's an incorrect path name */
-    	    			 
-    	    			image = Drawable.createFromPath("../../../../../res/drawable/default_venue_image.png");
+    	    			iv.setImageResource(R.drawable.yelp_logo);
+    	    		} else {
+    	    			iv.setImageDrawable(image);
     	    		}
-    				iv.setImageDrawable(image);
     			}
     		}
     		return v;
