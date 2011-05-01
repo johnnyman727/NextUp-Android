@@ -150,7 +150,7 @@ public class Home extends ListActivity {
 		if (my_venues == null || my_venues.size() == 0) return;
 		if (my_venues_index_of_last_to_display == my_venues.size() - 1) return;
 		int start = my_venues_index_of_last_to_display + 1;
-		int end = start + 3;
+		int end = min(start + 3, my_venues.size());
 		updateAdapter(start, end);
 	}
 	
