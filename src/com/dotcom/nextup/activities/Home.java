@@ -37,10 +37,13 @@ import com.google.android.maps.GeoPoint;
 public class Home extends ListActivity {
 	Bundle bundle;
 	
+	// info about current location
 	double latitude;
 	double longitude;
 	String name;
+	
 	double max_distance = 3000;
+	int num_results_desired = 9;
 	
 	private Context context;
 	
@@ -110,9 +113,6 @@ public class Home extends ListActivity {
 
 		this.latitude = Double.parseDouble(latlong[0])/1E6;
 		this.longitude = Double.parseDouble(latlong[1])/1E6;
-		// isn't the "distance" here the distance the person is from the selected venue?
-		// this is NOT the same as the max distance they are willing to travel to go to the next place
-		this.max_distance = Double.parseDouble(String.valueOf((intent.getIntExtra("distance", -1))));
 		
 		//Pull name
 		this.name = intent.getStringExtra("name");
@@ -140,6 +140,14 @@ public class Home extends ListActivity {
 		Intent toMap = new Intent(this, Map.class);
 		if (my_venues != null)
 			toMap.putParcelableArrayListExtra("venues", my_venues);
+		if (!Double.isNaN(max_distance))
+			toMap.putExtra("max distance", max_distance);
+		if (!Double.isNaN(latitude))
+			toMap.putExtra("latitude", latitude);
+		if (!Double.isNaN(longitude))
+			toMap.putExtra("longitude", longitude);
+		if (name != null)
+			toMap.putExtra("name", name);
 		startActivity(toMap);
 	}
 
@@ -295,7 +303,7 @@ public class Home extends ListActivity {
 	}
 	
 	private void makeRecommendationInput() {
-		input = new RecommendationInput(categories_next_custom, categories_next_cloud, latitude, longitude, 3000, 9);
+		input = new RecommendationInput(categories_next_custom, categories_next_cloud, latitude, longitude, max_distance, num_results_desired);
 	}
 	
 	private void getNextCategories() {

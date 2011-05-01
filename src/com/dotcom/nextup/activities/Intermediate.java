@@ -243,7 +243,7 @@ public class Intermediate extends Activity {
 			return;
 		}
 		
-		Log.v(TAG, "proceed(): they chose something other than the last option");
+		Log.v(TAG, "proceed(): they chose a known location");
 		Intent gotoHome = new Intent(this, Home.class);
 		int numCats = 0;
 		if (currentSelectedVenue != -1) {
