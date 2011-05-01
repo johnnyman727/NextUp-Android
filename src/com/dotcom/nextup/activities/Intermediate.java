@@ -146,8 +146,8 @@ public class Intermediate extends Activity {
 			adapter.notifyDataSetChanged();
 			adapter.add("No nearby locations found. You may not have reception.");
 			Button next = (Button)findViewById(R.id.Intermediate2Button);
-			next.setVisibility(View.INVISIBLE);
-			next.setClickable(false);
+			next.setVisibility(View.VISIBLE);
+			next.setClickable(true);
 		}
 		adapter.notifyDataSetChanged();
 	}
