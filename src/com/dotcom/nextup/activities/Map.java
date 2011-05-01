@@ -114,19 +114,4 @@ public class Map extends MapActivity{
 	        mapView.invalidate();
     	}
     }
-	
-	public boolean onCreateOptionsMenu(Menu menu) {
-    	MenuInflater inflater = getMenuInflater();
-    	inflater.inflate(R.menu.menu, menu);
-    	return true; 
-    }
-	
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.Home:     Intent toHome = new Intent(this, Home.class);
-            					startActivity(toHome);
-                                break;
-        }
-        return true;
-    } 
 }
