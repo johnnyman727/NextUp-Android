@@ -203,6 +203,13 @@ public class Intermediate extends Activity {
 			next.setVisibility(View.VISIBLE);
 			next.setClickable(true);
 		}
+		if (nearby_locations == null || nearby_locations.size() == 0) {
+			adapter.notifyDataSetChanged();
+			adapter.add("No nearby locations found. You may not have reception.");
+			Button next = (Button)findViewById(R.id.Intermediate2Button);
+			next.setVisibility(View.VISIBLE);
+			next.setClickable(true);
+		}
 		adapter.notifyDataSetChanged();
 	}
 	
