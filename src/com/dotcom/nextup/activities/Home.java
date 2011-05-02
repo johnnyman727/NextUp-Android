@@ -264,35 +264,35 @@ public class Home extends ListActivity {
 			/* to avoid using up limited Yelp queries */
 			my_venues = new ArrayList<Venue>();
 			Venue ven;
-			ven = new Venue("Olin", // name
-					        "www.olin.edu", // url
-					        "http://w8.campusexplorer.com/media/376x262/media-6B77B46B.png", // image url
-					        new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6)), 
-					        15, 
+			ven = new Venue("Sweet Basil", // name
+					        "http://www.yelp.com/biz/sweet-basil-needham", // url
+					        "http://media3.px.yelpcdn.com/bphoto/ju4irrmTDTPJ9HqWFRGiHw/l", // image url
+					        new GeoPoint((int)(42.280142 * 1E6), (int)(-71.234935 * 1E6)), 
+					        2735, 
 					        null);
-			ven.setRating(5);
+			ven.setRating(4.5);
 			my_venues.add(ven);
-			ven = new Venue("Falafel Palace", 
-					 		"http://www.yelp.com/biz/moodys-falafel-palace-cambridge", 
-					 		"http://w8.campusexplorer.com/media/376x262/media-http://media3.ct.yelpcdn.com/bphoto/VFBvZKvWAEIqg4c-o7RB-g/l",
-					 		new GeoPoint((int)(42.365364 * 1E6), (int)(-71.104487 * 1E6)), 
-					 		1500, 
+			ven = new Venue("Masala Art", 
+					 		"http://www.yelp.com/biz/masala-art-needham", 
+					 		"http://media1.px.yelpcdn.com/bphoto/xeUK8_f2IUDBQHOxJx96TA/m",
+					 		new GeoPoint((int)(42.280129 * 1E6), (int)(-71.236618 * 1E6)), 
+					 		2574, 
 					 		null);
 			ven.setRating(3.5);
 			my_venues.add(ven);
-			ven = new Venue("1369 Coffeehouse",
-							"http://www.yelp.com/biz/1369-coffee-house-cambridge-2#query:1369%20coffee%20house/",
-							"http://media1.ct.yelpcdn.com/bphoto/V5G8W7qcUtKul6M1UUaptg/l",
-							new GeoPoint((int)(42.366525 * 1E6), (int)(-71.105444 * 1E6)),
-							1600,
+			ven = new Venue("Yama Japanese Restaurant",
+							"http://www.yelp.com/biz/yama-japanese-restaurant-wellesley",
+							"http://media3.px.yelpcdn.com/bphoto/ctGrsTrZXCAJSr16cGPMnQ/l",
+							new GeoPoint((int)(42.313773 * 1E6), (int)(-71.273195 * 1E6)),
+							3701,
 							null);
-			ven.setRating(3.5);
+			ven.setRating(4);
 			my_venues.add(ven);
-			ven = new Venue("Middlesex Lounge",
-							"http://www.yelp.com/biz/middlesex-lounge-cambridge",
-							"http://media1.ct.yelpcdn.com/bphoto/RqQ1hE-_QRgH0WDqOjbOVw/l",
-							new GeoPoint((int)(42.36247 * 1E6), (int)(-71.098467 * 1E6)),
-							1400,
+			ven = new Venue("Green Tea Restaurant",
+							"http://www.yelp.com/biz/green-tea-restaurant-newton",
+							"http://media2.px.yelpcdn.com/bphoto/2Wqldl6V1XVmQBmxganEHw/l",
+							new GeoPoint((int)(42.317963 * 1E6), (int)(-71.212649 * 1E6)),
+							5632,
 							null);
 			ven.setRating(3.5);
 			my_venues.add(ven);

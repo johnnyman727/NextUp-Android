@@ -74,6 +74,7 @@ public class Map extends MapActivity{
     	latitude = b.getDouble("latitude");
     	longitude = b.getDouble("longitude");
     	distance = b.getDouble("max distance");
+    	name = b.getString("name");
 	}
 	
     public void putVenuesOnMap() {
@@ -109,29 +110,8 @@ public class Map extends MapActivity{
 	    		mc.animateTo(venues.get(0).getLatlong());
     		}
 
-	        mc.setZoom(14);
+	        mc.setZoom(13);
 	        mapView.invalidate();
     	}
     }
-	
-	public boolean onCreateOptionsMenu(Menu menu) {
-    	MenuInflater inflater = getMenuInflater();
-    	inflater.inflate(R.menu.menu, menu);
-    	return true; 
-    }
-	
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.Friends:    Intent toFriends = new Intent(this, Friends.class);	
-    								startActivity(toFriends);
-                                break;
-            case R.id.Home:     Intent toHome = new Intent(this, Home.class);
-            					startActivity(toHome);
-                                break;
-            case R.id.Preferences: Intent toPreferences = new Intent(this, Preferences.class);
-            						startActivity(toPreferences);
-            					break;
-        }
-        return true;
-    } 
 }

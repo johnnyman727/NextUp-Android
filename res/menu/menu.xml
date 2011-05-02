@@ -1,21 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
 <item
-	android:title="Preferences" 
-	android:visible="true" 
-	android:enabled="true" 
-	android:id="@+id/Preferences" />
-<item
 	android:title="List View" 
 	android:visible="true" 
 	android:enabled="true" 
 	android:id="@+id/Home" />
-	
-<item
-	android:title="Friends" 
-	android:visible="true" 
-	android:enabled="true" 
-	android:id="@+id/Friends" />
-
 
 </menu>

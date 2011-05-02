@@ -35,8 +35,7 @@ public final class R {
         public static final int EditText01=0x7f08000f;
         public static final int EditText02=0x7f080010;
         public static final int FoursquareLogo=0x7f080007;
-        public static final int Friends=0x7f080026;
-        public static final int Home=0x7f080025;
+        public static final int Home=0x7f080024;
         public static final int ImageView01=0x7f080017;
         public static final int Intermediate2Button=0x7f08000a;
         public static final int Intermediate2Spinner=0x7f080009;
@@ -44,7 +43,6 @@ public final class R {
         public static final int Location=0x7f080018;
         public static final int Logo=0x7f080000;
         public static final int New=0x7f08001f;
-        public static final int Preferences=0x7f080024;
         public static final int Recommend=0x7f08001e;
         public static final int ShowVenuesBefore=0x7f080014;
         public static final int ShowVenuesForward=0x7f080015;
