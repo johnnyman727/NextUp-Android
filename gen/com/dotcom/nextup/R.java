@@ -10,6 +10,13 @@ package com.dotcom.nextup;
 public final class R {
     public static final class attr {
     }
+    public static final class color {
+        public static final int beige=0x7f050002;
+        public static final int blue=0x7f050000;
+        public static final int green=0x7f050001;
+        public static final int orange=0x7f050003;
+        public static final int pink=0x7f050004;
+    }
     public static final class drawable {
         public static final int default_venue_image=0x7f020000;
         public static final int foursquarelogo=0x7f020001;
@@ -18,50 +25,49 @@ public final class R {
         public static final int logo=0x7f020004;
         public static final int mapspointer=0x7f020005;
         public static final int mapspointergreen=0x7f020006;
-        public static final int yelp_logo=0x7f020007;
+        public static final int nextupicon=0x7f020007;
+        public static final int yelp_logo=0x7f020008;
     }
     public static final class id {
-        public static final int Button01=0x7f060011;
-        public static final int CheckBox01=0x7f060010;
-        public static final int Comfortable=0x7f06001f;
-        public static final int EditText01=0x7f06000e;
-        public static final int EditText02=0x7f06000f;
-        public static final int FoursquareLogo=0x7f060006;
-        public static final int Friends=0x7f060028;
-        public static final int Home=0x7f060027;
-        public static final int ImageView01=0x7f06001a;
-        public static final int Intermediate2Button=0x7f060009;
-        public static final int Intermediate2Spinner=0x7f060008;
-        public static final int Intermediate2Text=0x7f060007;
-        public static final int Location=0x7f060014;
-        public static final int Logo=0x7f060012;
-        public static final int New=0x7f060021;
-        public static final int Preferences=0x7f060026;
-        public static final int Recommend=0x7f060020;
-        public static final int ShowVenuesBefore=0x7f060017;
-        public static final int ShowVenuesForward=0x7f060018;
-        public static final int SignInButton=0x7f060005;
-        public static final int SignInLayout=0x7f060004;
-        public static final int TextView01=0x7f06000d;
-        public static final int TopSectionCheckedIn=0x7f060013;
-        public static final int atextview=0x7f060016;
-        public static final int bottomtext=0x7f060025;
-        public static final int button02=0x7f06001b;
-        public static final int button03=0x7f06001c;
-        public static final int button04=0x7f060015;
-        public static final int failtext=0x7f060000;
-        public static final int failtext2=0x7f060001;
-        public static final int getAddressButton=0x7f06000c;
-        public static final int icon=0x7f060023;
-        public static final int loginbutton=0x7f060002;
-        public static final int mapview=0x7f060022;
-        public static final int notFoundText=0x7f06000a;
-        public static final int nothanksbutton=0x7f060003;
-        public static final int submitaddresstext=0x7f06000b;
-        public static final int toFriends=0x7f06001e;
-        public static final int toMap=0x7f060019;
-        public static final int toPreferences=0x7f06001d;
-        public static final int toptext=0x7f060024;
+        public static final int Button01=0x7f080012;
+        public static final int CheckBox01=0x7f080011;
+        public static final int Comfortable=0x7f08001d;
+        public static final int EditText01=0x7f08000f;
+        public static final int EditText02=0x7f080010;
+        public static final int FoursquareLogo=0x7f080007;
+        public static final int Friends=0x7f080026;
+        public static final int Home=0x7f080025;
+        public static final int ImageView01=0x7f080017;
+        public static final int Intermediate2Button=0x7f08000a;
+        public static final int Intermediate2Spinner=0x7f080009;
+        public static final int Intermediate2Text=0x7f080008;
+        public static final int Location=0x7f080018;
+        public static final int Logo=0x7f080000;
+        public static final int New=0x7f08001f;
+        public static final int Preferences=0x7f080024;
+        public static final int Recommend=0x7f08001e;
+        public static final int ShowVenuesBefore=0x7f080014;
+        public static final int ShowVenuesForward=0x7f080015;
+        public static final int SignInButton=0x7f080006;
+        public static final int SignInLayout=0x7f080005;
+        public static final int TextView01=0x7f08000e;
+        public static final int atextview=0x7f080013;
+        public static final int bottomtext=0x7f080023;
+        public static final int button02=0x7f080019;
+        public static final int button03=0x7f08001a;
+        public static final int failtext=0x7f080001;
+        public static final int failtext2=0x7f080002;
+        public static final int getAddressButton=0x7f08000d;
+        public static final int icon=0x7f080021;
+        public static final int loginbutton=0x7f080003;
+        public static final int mapview=0x7f080020;
+        public static final int notFoundText=0x7f08000b;
+        public static final int nothanksbutton=0x7f080004;
+        public static final int submitaddresstext=0x7f08000c;
+        public static final int toFriends=0x7f08001c;
+        public static final int toMap=0x7f080016;
+        public static final int toPreferences=0x7f08001b;
+        public static final int toptext=0x7f080022;
     }
     public static final class layout {
         public static final int fail=0x7f030000;
@@ -79,7 +85,7 @@ public final class R {
         public static final int string=0x7f03000c;
     }
     public static final class menu {
-        public static final int menu=0x7f050000;
+        public static final int menu=0x7f070000;
     }
     public static final class string {
         public static final int accessCodePreferenceName=0x7f04000b;
@@ -103,5 +109,8 @@ public final class R {
         public static final int resultingActivityPackageName=0x7f040007;
         public static final int touch=0x7f040005;
         public static final int updateTimePreferenceName=0x7f04000c;
+    }
+    public static final class style {
+        public static final int nextuptheme=0x7f060000;
     }
 }

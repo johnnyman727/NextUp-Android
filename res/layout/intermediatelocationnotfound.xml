@@ -2,6 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical">
+	<ImageView 
+		android:id="@+id/Logo" 
+		android:scaleType="fitXY"
+		android:layout_width="fill_parent" 
+		android:src="@drawable/logo"
+		android:layout_height="40dip">
+	</ImageView>
 	<TextView android:id="@+id/notFoundText"
 		android:text="We were unable to find where you are! Please tell us!"
 		android:layout_width="wrap_content" 
