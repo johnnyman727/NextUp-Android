@@ -6,10 +6,6 @@ import java.util.List;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 import com.dotcom.nextup.R;
 import com.dotcom.nextup.classes.Venue;
