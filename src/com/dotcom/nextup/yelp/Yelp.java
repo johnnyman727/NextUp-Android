@@ -335,6 +335,7 @@ public class Yelp {
 		return false;
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean isIn(Category kitty, ArrayList<Category> cats) {
 		for (Category cat : cats) {
 			if ( kitty.getName().equals(cat.getName())) return true;
@@ -342,6 +343,7 @@ public class Yelp {
 		return false;
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean isIn(int num, ArrayList<Integer> nums) {
 		for (int n : nums) {
 			if ( n == num ) return true;

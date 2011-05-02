@@ -5,8 +5,6 @@ import java.util.ArrayList;
 
 import org.json.JSONObject;
 
-import com.dotcom.nextup.categorymodels.Category;
-
 import android.util.Log;
 
 /* search by category (and your lat long) - 3 best things as YelpVenue.

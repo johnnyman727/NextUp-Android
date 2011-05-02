@@ -1,6 +1,5 @@
 package com.dotcom.nextup.activities;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.dotcom.nextup.R;
-import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.classes.VenuesMapOverlay;
 import com.google.android.maps.GeoPoint;

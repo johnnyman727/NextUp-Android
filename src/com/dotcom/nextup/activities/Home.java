@@ -31,7 +31,6 @@ import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.datastoring.BackendManager;
 import com.dotcom.nextup.datastoring.CategoryHistogramManager;
 import com.dotcom.nextup.yelp.Yelp;
-import com.dotcom.nextup.yelp.YelpVenue;
 import com.google.android.maps.GeoPoint;
 
 public class Home extends ListActivity {
