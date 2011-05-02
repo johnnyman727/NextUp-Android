@@ -3,6 +3,14 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <ImageView 
+		android:id="@+id/Logo" 
+		android:scaleType="fitXY"
+		android:layout_width="fill_parent" 
+		android:src="@drawable/logo"
+		android:layout_height="40dip">
+	</ImageView>
 
 	<TextView 
 		android:text="You're not logged in!" 

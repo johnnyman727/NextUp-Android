@@ -9,9 +9,8 @@
 		android:scaleType="fitXY"
 		android:layout_width="fill_parent" 
 		android:src="@drawable/logo"
-		android:layout_height="50dip">
+		android:layout_height="40dip">
 	</ImageView>
-	
    	<TextView 
 		android:text="Looking for somewhere to go next?" 
 		android:id="@+id/atextview" 
@@ -21,7 +20,7 @@
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     	android:orientation="vertical"
      	android:layout_width="fill_parent"
-     	android:layout_height="200dip">
+     	android:layout_height="275dip">
 		<ListView	
 			android:id="@+id/android:list"
 			android:layout_width="fill_parent"
@@ -36,34 +35,40 @@
 	<LinearLayout
 		android:orientation="horizontal"
     	android:layout_width="fill_parent"
-   		android:layout_height="40dip">
-	
+    	android:gravity="bottom"
+   		android:layout_height="60dip">
 		<Button android:id = "@+id/ShowVenuesBefore"
 			android:layout_weight="1"
 			android:layout_width="fill_parent"
-			android:layout_height = "wrap_content"
+			android:layout_height = "60dip"
 			android:text = "Back"
 			android:onClick = "showPrevThreeVenues"/>
 	
 		<Button android:id = "@+id/ShowVenuesForward"
 			android:layout_weight="1"
 			android:layout_width="fill_parent"
-			android:layout_height = "wrap_content"
+			android:layout_height = "60dip"
 			android:text = "Forward"
 			android:onClick = "showNextThreeVenues"/>
 	
 	</LinearLayout>
-		
+	<LinearLayout
+		android:orientation="vertical"
+		android:gravity="bottom"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
 	<LinearLayout
 		android:orientation="horizontal"
+		android:layout_gravity="bottom"
     	android:layout_width="fill_parent"
-   		android:layout_height="40dip">
+   		android:layout_height="60dip">
    		
 		<Button android:id="@+id/toMap"
 			android:onClick="toMap"
-			android:layout_height="wrap_content"
+			android:layout_height="60dip"
 			android:layout_width="fill_parent"
 			android:text="Map View"/>
 				
 	</LinearLayout>	
+	</LinearLayout>
 </LinearLayout>

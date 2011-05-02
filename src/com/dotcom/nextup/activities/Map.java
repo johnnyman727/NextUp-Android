@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,11 +22,20 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
 public class Map extends MapActivity{
+	MapView mapView;
 	MapController mc;
 	VenuesMapOverlay itemizedOverlay;
+	VenuesMapOverlay currentLocationOverlay;
 	List<Overlay> mapOverlays;
+	
     GeoPoint p;
     ArrayList<Venue> venues;
+    
+    // info about current location
+    double latitude;
+    double longitude;
+    double distance;
+    String name;
     
 	@Override
 	protected boolean isRouteDisplayed() {
@@ -37,15 +47,16 @@ public class Map extends MapActivity{
 	    super.onCreate(savedInstanceState);
 	    	
 	    try {
-	    	Bundle b = getIntent().getExtras();
-	    	venues = b.getParcelableArrayList("venues");
+	    	getLocationAndVenues(getIntent());
 			setContentView(R.layout.maps);
-			MapView mapView = (MapView) findViewById(R.id.mapview);
+			mapView = (MapView) findViewById(R.id.mapview);
 		    mapView.setBuiltInZoomControls(true);
 		    mc = mapView.getController();
 		    mapOverlays = mapView.getOverlays();
 		    Drawable pointer = this.getResources().getDrawable(R.drawable.mapspointer);
 		    itemizedOverlay = new VenuesMapOverlay(pointer, this);
+		    Drawable pointergreen = this.getResources().getDrawable(R.drawable.mapspointergreen);
+		    currentLocationOverlay = new VenuesMapOverlay(pointergreen, this);
 		    putVenuesOnMap();
 
 		} catch (NullPointerException e) {
@@ -56,28 +67,16 @@ public class Map extends MapActivity{
 			setContentView(R.layout.fail);
 		}
 	}
-
-	public boolean onCreateOptionsMenu(Menu menu) {
-    	MenuInflater inflater = getMenuInflater();
-    	inflater.inflate(R.menu.menu, menu);
-    	return true; 
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.Friends:    Intent toFriends = new Intent(this, Friends.class);	
-    								startActivity(toFriends);
-                                break;
-            case R.id.Home:     Intent toHome = new Intent(this, Home.class);
-            					startActivity(toHome);
-                                break;
-            case R.id.Preferences: Intent toPreferences = new Intent(this, Preferences.class);
-            						startActivity(toPreferences);
-            					break;
-        }
-        return true;
-    } 
     
+	public void getLocationAndVenues(Intent intent) {
+    	Bundle b = intent.getExtras();
+    	venues = b.getParcelableArrayList("venues");
+    	latitude = b.getDouble("latitude");
+    	longitude = b.getDouble("longitude");
+    	distance = b.getDouble("max distance");
+    	name = b.getString("name");
+	}
+	
     public void putVenuesOnMap() {
     	if (venues != null && venues.size() > 0) {
     		/*
@@ -94,11 +93,25 @@ public class Map extends MapActivity{
 		    itemizedOverlay.addOverlay(overlayitem);
 		    mapOverlays.add(itemizedOverlay);
 		    */
-    		for (int i = 0; i < venues.size(); i++) {
-    			Venue ven = venues.get(i);
-    			itemizedOverlay.addOverlay(new OverlayItem(ven.getLatlong(), ven.getName(), Double.toString(ven.getRating())));
+    		
+    		if ( !Double.isNaN(latitude) && !Double.isNaN(longitude) && name != null) {
+	    		p = new GeoPoint((int)(latitude * 1E6), (int)(longitude * 1E6));
+	    		currentLocationOverlay.addOverlay(new OverlayItem(p, name, "You are here."));
+	    		mapOverlays.add(currentLocationOverlay);
+	    		mc.animateTo(p);
     		}
-    		mapOverlays.add(itemizedOverlay);
+    		
+    		if (venues != null && venues.size() > 0) {
+	    		for (int i = 0; i < venues.size(); i++) {
+	    			Venue ven = venues.get(i);
+	    			itemizedOverlay.addOverlay(new OverlayItem(ven.getLatlong(), ven.getName(), Double.toString(ven.getRating())));
+	    		}
+	    		mapOverlays.add(itemizedOverlay);
+	    		mc.animateTo(venues.get(0).getLatlong());
+    		}
+
+	        mc.setZoom(13);
+	        mapView.invalidate();
     	}
     }
 }

@@ -3,6 +3,13 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
   android:layout_height="fill_parent">
+  		<ImageView 
+		android:id="@+id/Logo" 
+		android:scaleType="fitXY"
+		android:layout_width="fill_parent" 
+		android:src="@drawable/logo"
+		android:layout_height="40dip">
+	</ImageView>
    		<TextView android:id="@+id/failtext" 
 			android:text="Sorry, but we couldn't get your location info, so we can't make any recommendations." 
 			android:layout_width="wrap_content" 
