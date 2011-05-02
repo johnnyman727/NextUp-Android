@@ -19,7 +19,7 @@
 		android:layout_height="wrap_content"/>
 		
 	<ImageView 
-		android:src="#262626"
+		android:src="@color/beige"
 		android:layout_width="fill_parent" 
 		android:layout_height="40dip"/>
 		
@@ -30,7 +30,7 @@
 		android:layout_centerHorizontal="true"/>
 		
 	<ImageView 
-		android:src="#262626"
+		android:src="@color/beige"
 		android:layout_width="fill_parent" 
 		android:layout_height="40dip"/>
 		
@@ -39,7 +39,7 @@
 		android:layout_height="60dip"
 		android:text="Continue"
 		android:onClick="proceed"
-		android:layout_centerVertical="true"
+		android:layout_gravity="bottom"
 		android:layout_centerHorizontal="true"/>
   
 </LinearLayout>

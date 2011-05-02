@@ -131,11 +131,6 @@ public class Home extends ListActivity {
 	}
 
 
-	public void toFriends(View view) {
-		Intent toFriends = new Intent(this, Friends.class);
-		startActivity(toFriends);
-	}
-
 	public void toMap(View view) {
 		Intent toMap = new Intent(this, Map.class);
 		if (my_venues != null)
@@ -376,7 +371,7 @@ public class Home extends ListActivity {
     				tt.setText(o.getName());
     			}
     			if (bt != null) {
-    				bt.setText(Double.toString(o.getRating()));
+    				bt.setText("Rated "+Double.toString(o.getRating())+" out of 5");
     			}
     			if (iv != null) {
     	    		Drawable image = ImageOperations(context, items.get(position).getImageURL(), "item" + Integer.toString(position) + ".jpg");

@@ -20,7 +20,7 @@
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     	android:orientation="vertical"
      	android:layout_width="fill_parent"
-     	android:layout_height="250dip">
+     	android:layout_height="275dip">
 		<ListView	
 			android:id="@+id/android:list"
 			android:layout_width="fill_parent"
@@ -36,9 +36,7 @@
 		android:orientation="horizontal"
     	android:layout_width="fill_parent"
     	android:gravity="bottom"
-   		android:layout_height="90dip">
-
-	
+   		android:layout_height="60dip">
 		<Button android:id = "@+id/ShowVenuesBefore"
 			android:layout_weight="1"
 			android:layout_width="fill_parent"
@@ -63,7 +61,7 @@
 		android:orientation="horizontal"
 		android:layout_gravity="bottom"
     	android:layout_width="fill_parent"
-   		android:layout_height="40dip">
+   		android:layout_height="60dip">
    		
 		<Button android:id="@+id/toMap"
 			android:onClick="toMap"
