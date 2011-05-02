@@ -4,6 +4,7 @@
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
   android:orientation="vertical">
+
   	<ImageView 
 		android:id="@+id/Logo" 
 		android:scaleType="fitXY"
@@ -11,20 +12,34 @@
 		android:src="@drawable/logo"
 		android:layout_height="40dip">
 	</ImageView>
-  
+
 	<TextView android:id="@+id/Intermediate2Text"
 		android:text="Pulling up locations..."
 		android:layout_width="wrap_content" 
 		android:layout_height="wrap_content"/>
 		
+	<ImageView 
+		android:src="#262626"
+		android:layout_width="fill_parent" 
+		android:layout_height="40dip"/>
+		
 	<Spinner android:id="@+id/Intermediate2Spinner" 
 		android:layout_width="fill_parent" 
-		android:layout_height="wrap_content"/>
+		android:layout_height="60dip"
+		android:layout_centerVertical="true" 
+		android:layout_centerHorizontal="true"/>
+		
+	<ImageView 
+		android:src="#262626"
+		android:layout_width="fill_parent" 
+		android:layout_height="40dip"/>
 		
 	<Button android:id="@+id/Intermediate2Button"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="60dip"
 		android:text="Continue"
-		android:onClick="proceed"/>
+		android:onClick="proceed"
+		android:layout_centerVertical="true"
+		android:layout_centerHorizontal="true"/>
   
 </LinearLayout>
