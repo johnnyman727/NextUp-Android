@@ -19,12 +19,6 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".activities.LocationNotFound" android:theme="@style/nextuptheme" android:screenOrientation="portrait">
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.BROWSABLE" />
-				<data android:scheme="nextup-android" />
-			</intent-filter>
 		</activity>
 		<activity android:name=".activities.Intermediate" android:theme="@style/nextuptheme" android:screenOrientation="portrait">
 					<!-- Add this filter -->

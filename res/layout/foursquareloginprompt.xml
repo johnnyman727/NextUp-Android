@@ -9,9 +9,21 @@
 		android:src="@drawable/logo"
 		android:layout_height="40dip">
 	</ImageView>
-
+	<ImageView 
+		android:id="@+id/instructions" 
+		android:scaleType="fitXY"
+		android:layout_width="fill_parent" 
+		android:src="@drawable/instructions"
+		android:layout_height="wrap_content"
+		android:paddingBottom="15dip"
+		android:paddingTop="15dip">
+	</ImageView>
 	<Button android:text="Connect your recommendations to FourSquare!"
 		android:id="@+id/loginbutton" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_centerVertical="true"
+		android:layout_centerHorizontal="true"></Button>
+	<Button android:text="Create a Foursquare account (launches foursuqare.com)"
+		android:id="@+id/createAccountButton" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:layout_centerVertical="true"
 		android:layout_centerHorizontal="true"></Button>
 

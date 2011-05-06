@@ -18,6 +18,7 @@ public class FourSquareLoginPrompt extends Activity {
 	/** Called when the activity is first created. */
 	private Button login;
 	private Button nothanks;
+	private Button create;
 	@SuppressWarnings("unused")
 	private String code;
 	@SuppressWarnings("unused")
@@ -32,6 +33,8 @@ public class FourSquareLoginPrompt extends Activity {
 		login.setOnClickListener(loginClick);
 		nothanks = (Button)findViewById(R.id.nothanksbutton);
 		nothanks.setOnClickListener(nothanksClick);
+		create = (Button)findViewById(R.id.createAccountButton);
+		create.setOnClickListener(createClick);
 		LOG_TAG = "FourSquareLoginPrompt";
 		oauth= new AndroidOAuth(this);
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -53,6 +56,13 @@ public class FourSquareLoginPrompt extends Activity {
 			this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
 					.parse(authUrl)));
 	}
+	
+	private void createAccount() {
+		// Call the webbrowser with the Foursquare OAuth login URL
+		String url = getString(R.string.foursquarepage);
+		this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
+				.parse(url)));
+}
 
 	OnClickListener loginClick = new OnClickListener() {
 		
@@ -67,6 +77,14 @@ public class FourSquareLoginPrompt extends Activity {
 		@Override
 		public void onClick(View v) {
 			setCodePreference("-1");
+		}
+	};
+	OnClickListener createClick = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			createAccount();
+			
 		}
 	};
 	

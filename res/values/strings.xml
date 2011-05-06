@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, Home!</string>
     <string name="app_name">Next Up</string>
+    <string name="foursquarepage">https://foursquare.com/mobile/signup</string>
+    <string name="NotFoundInstructions">We could not find your location. It could be due to a lack of reception. Please hit continue to manually enter your location.</string>
+    <string name="yelppage">http://www.yelp.com</string>
 </resources>

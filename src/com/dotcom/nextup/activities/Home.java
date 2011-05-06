@@ -31,6 +31,7 @@ import com.dotcom.nextup.classes.Venue;
 import com.dotcom.nextup.datastoring.BackendManager;
 import com.dotcom.nextup.datastoring.CategoryHistogramManager;
 import com.dotcom.nextup.yelp.Yelp;
+import com.dotcom.nextup.yelp.YelpVenue;
 import com.google.android.maps.GeoPoint;
 
 public class Home extends ListActivity {
@@ -197,7 +198,6 @@ public class Home extends ListActivity {
 		
 		m_adapter.clear();
 		m_adapter.notifyDataSetChanged();
-		
 		int i = start;
 		my_venues_index_of_first_to_display = i;
 		while (i < end && i < nven) {
@@ -232,7 +232,7 @@ public class Home extends ListActivity {
 		try {
 			Log.v("Home", "entering getVenues()");
 			/* uses up limited actual Yelp queries */
-			/*
+			
 			Yelp yelp = getYelp();
 			getNextCategories();
 			makeRecommendationInput();
@@ -249,13 +249,14 @@ public class Home extends ListActivity {
 				int lat = (int)(yven.getLatitude() * 1E6);
 				int lon = (int)(yven.getLongitude() * 1E6);
 				GeoPoint gp = new GeoPoint(lat, lon);
-				Venue ven = new Venue(yven.getName(), yven.getURL(), yven.getImageURL(), gp, yven.getDistance(), null);
+				Venue ven = new Venue(yven.getName(), yven.getURL(), yven.getImageURL(), gp, yven.getDistance(), null, yven.getRatingImageUrl(), yven.getPhoneNumber());
 				ven.setRating(yven.getRating());
 				my_venues.add(ven);
 			} 
-			*/
+			
 			
 			/* to avoid using up limited Yelp queries */
+			/*
 			my_venues = new ArrayList<Venue>();
 			Venue ven;
 			ven = new Venue("Sweet Basil", // name
@@ -290,6 +291,7 @@ public class Home extends ListActivity {
 							null);
 			ven.setRating(3.5);
 			my_venues.add(ven);
+			*/
 		} catch (Exception e) {
 			Log.e("Home", "getVenues(): "+e.toString());
 		}
@@ -364,20 +366,29 @@ public class Home extends ListActivity {
     		Venue o = items.get(position);
     		if (o != null) {
     			TextView tt = (TextView) v.findViewById(R.id.toptext);
-    			TextView bt = (TextView) v.findViewById(R.id.bottomtext);
+    			TextView deats = (TextView) v.findViewById(R.id.details);
+    			ImageView rating = (ImageView) v.findViewById(R.id.rating);
     			ImageView iv = (ImageView) v.findViewById(R.id.icon);
     			if (tt != null) {
     				tt.setText(o.getName());
     			}
-    			if (bt != null) {
-    				bt.setText("Rated "+Double.toString(o.getRating())+" out of 5");
+    			if (deats != null) {
+    				deats.setText(o.getPhoneNumber());
+    			}
+    			if (rating != null) {
+    				Drawable rating_image = ImageOperations(context, o.getRating_image_url(), "rating" + Integer.toString(position) + ".jpg");
+    	    		if (rating_image == null) {
+    	    			rating.setImageResource(R.drawable.yelp_logo);
+    	    		} else {
+    	    			rating.setImageDrawable(rating_image);
+    	    		}
     			}
     			if (iv != null) {
-    	    		Drawable image = ImageOperations(context, items.get(position).getImageURL(), "item" + Integer.toString(position) + ".jpg");
-    	    		if (image == null) {
+    	    		Drawable venue_image = ImageOperations(context, o.getImageURL(), "item" + Integer.toString(position) + ".jpg");
+    	    		if (venue_image == null) {
     	    			iv.setImageResource(R.drawable.yelp_logo);
     	    		} else {
-    	    			iv.setImageDrawable(image);
+    	    			iv.setImageDrawable(venue_image);
     	    		}
     			}
     		}

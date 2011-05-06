@@ -163,6 +163,8 @@ public class YelpVenue implements Comparable<YelpVenue>{
 	public int getReviewCount() { return review_count; }
 	public double getDistance() { return distance; }
 	public void setDistance(double d) { distance = d; }
+	public String getRatingImageUrl() { return rating_img_url_small;}
+	public String getPhoneNumber() { return phone; }
 	
 	public boolean hasSameNameAs(YelpVenue other) {
 		/* distinctly NOT trying to override the equals method here */

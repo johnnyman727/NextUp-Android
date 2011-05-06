@@ -15,10 +15,12 @@ public class Venue implements Comparable<Venue>, Parcelable{
     private GeoPoint latlong;
     private String image_url;
     private String url;
+    private String rating_image_url;
     double distance; // distance in meters from current location
     private boolean mSelectable = true;
     double rating; // some venues have a five star rating, some don't
     private ArrayList<Category> categories;
+    private String pN;
     
     public Venue (String name, String url, String imageURL, GeoPoint latlong, double d, ArrayList<Category> cats) {
     	this.name = name;
@@ -27,6 +29,18 @@ public class Venue implements Comparable<Venue>, Parcelable{
     	this.latlong = latlong;
     	this.distance = d;
     	this.categories = cats;
+    }
+    
+    public Venue (String name, String url, String imageURL, GeoPoint latlong, double d, ArrayList<Category> cats, String rating_image_url, String phone) {
+    	this.name = name;
+    	this.url = url;
+    	this.image_url = imageURL;
+    	this.latlong = latlong;
+    	this.distance = d;
+    	this.categories = cats;
+    	this.setRating_image_url(rating_image_url);
+    	this.pN = phone;
+    	
     }
     
     public Venue (String name, String url, GeoPoint latlong, double d) {
@@ -63,6 +77,12 @@ public class Venue implements Comparable<Venue>, Parcelable{
 	public void setCategories(ArrayList<Category> categories) { this.categories = categories; }
 	public void addCategory (Category cat) { this.categories.add(cat); }
 	public ArrayList<Category> getCategories() { return categories; }
+	public String getPhoneNumber() {
+		if (pN.length() == 10)
+			return pN.substring(0, 3) + "." + pN.substring(3, 7) + "." + pN.substring(7, 10);
+		else
+			return pN;
+	}
 
 	/* being Comparable */
 	
@@ -151,6 +171,14 @@ public class Venue implements Comparable<Venue>, Parcelable{
 	@Override
 	public int describeContents() {
 		return 0;
+	}
+
+	public void setRating_image_url(String rating_image_url) {
+		this.rating_image_url = rating_image_url;
+	}
+
+	public String getRating_image_url() {
+		return rating_image_url;
 	}
     
 }

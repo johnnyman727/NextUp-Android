@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,6 +27,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.dotcom.nextup.R;
@@ -136,29 +138,6 @@ public class Intermediate extends Activity {
 		super.onResume();
 	}
 
-/*
-	public void onResume() {
-		 super.onResume();
-	     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-	     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-	     
-	     if (this.checkIns == null || this.checkIns.size() == 0)
-			try {
-				initializeCheckIns();
-			} catch (JSONException e1) {
-				e1.printStackTrace();
-			}
-	     if (currentLocation != null && currentLocationName == null && !receivedLastLocationUpdate)
-			try {
-				updateLocationInfo();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			
-			updateSpinner();
-	}
-*/
-
 	@Override
 	public void onPause() {
 		Log.v(TAG, "entered onPause");
@@ -180,6 +159,7 @@ public class Intermediate extends Activity {
 			Log.v(TAG, "running returnRes");
 			TextView textview = (TextView) findViewById(R.id.Intermediate2Text);
 			textview.setText("Nearby locations:");
+			textview.setTextSize(16);
 			updateSpinner();
 		}
 	};
@@ -205,7 +185,9 @@ public class Intermediate extends Activity {
 		}
 		if (nearby_locations == null || nearby_locations.size() == 0) {
 			adapter.notifyDataSetChanged();
-			adapter.add("No nearby locations found. You may not have reception.");
+			adapter.add("No nearby locations found...");
+			spinner.setClickable(false);
+			Toast.makeText(context, getString(R.string.NotFoundInstructions), Toast.LENGTH_LONG).show();
 			Button next = (Button)findViewById(R.id.Intermediate2Button);
 			next.setVisibility(View.VISIBLE);
 			next.setClickable(true);
@@ -240,8 +222,14 @@ public class Intermediate extends Activity {
 		}
 	};
 	
+	public void toYelp(View v) {
+		String url = getString(R.string.yelppage);
+		this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
+				.parse(url)));
+	}
 	public void proceed(View view) throws IOException {
 		Log.v(TAG, "entering proceed()");
+		handler.removeCallbacks(noLocationFound);
 		
 		if (currentSelectedVenue == adapter.getCount() - 1) {
 			Log.v(TAG, "proceed(): they chose the last option - I'm not at any of these places");
@@ -366,7 +354,6 @@ public class Intermediate extends Activity {
 		location_thread_done = true;
 	}
 	
-	/** @Olin location hack included */
 	private void getLastKnownLocation() {
 		Log.v(TAG, "entering getLastKnownLocation");
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
@@ -385,13 +372,6 @@ public class Intermediate extends Activity {
 			handler.removeCallbacks(noLocationFound);
 			if (currentLocationName == null)
 				receivedLastLocationUpdate = true;
-		}
-		
-		// if we really can't find any locations, assume we're at Olin
-		if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) == null 
-				&& locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) == null) {
-			currentLocation = new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6));
-			handler.removeCallbacks(noLocationFound);
 		}
 		
 		locationRegistered = true;
@@ -425,7 +405,6 @@ public class Intermediate extends Activity {
 		locationRegistered = true;		
 	}
 	
-	/** @Olin location hack included */
 	public void updateLocationInfo() throws JSONException {
 		Log.v(TAG, "entering updateLocationInfo");
 		try {
@@ -434,19 +413,6 @@ public class Intermediate extends Activity {
 			nearest_location = FoursquareLocationManager.getNearestLocationFromFoursquare(nearby_locations);
 		} catch (JSONException e) {
 			e.printStackTrace();
-		}
-		
-		// if finding locations fails, assume we're at Olin
-		if ( nearby_locations == null )
-			nearby_locations = new ArrayList<Venue>();
-		if ( nearby_locations.size() == 0 ) {
-			Venue venue = new Venue ("Olin College*", new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6)), 500);
-			venue.addCategory(new Category("college", 1, 12) );
-		    nearby_locations.add(venue);
-		}
-		if ( nearest_location == null ) {
-		    nearest_location = new Venue ("Olin College*", new GeoPoint((int)(42.292831 * 1E6), (int)(-71.26458 * 1E6)), 500);
-		    nearest_location.addCategory(new Category("college", 1, 12) );
 		}
 	}
 

@@ -68,8 +68,7 @@ public class Yelp {
 
 		// create a thread to do a yelp search on each category
 		ArrayList<Thread> threads = new ArrayList<Thread>();
-		int n = input.getCategories().size();
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < MAX_CATS; i++) {
 			Runnable run = new SearchOneCat(input.getCategories().get(i), i);
 			Thread thread = new Thread(null, run, "getting best venues for a category");
 			threads.add(thread);
@@ -158,28 +157,13 @@ public class Yelp {
 		
 		// get many venues as result of Yelp search
 		Log.v(TAG, "thread " + Integer.toString(index) + " entering getBestVenueForOneCat(" + cat.getName() + ")");
-		ArrayList<YelpVenue> many_venues = venuesSearch(cat.getName(), input.getLatitude(), input.getLongitude(), input.getMaxDistance());
-		if (many_venues == null) {
-			Log.v(TAG, "thread " + Integer.toString(index) + " has venuesSearch return null");
-		} else {
-			String results = "";
-			for (YelpVenue venue : many_venues) {
-				results = results + venue.getName() + " ";
-			}
-			Log.v(TAG, "thread " + Integer.toString(index) + " has venuesSearch return " + results);
-		}
-		
-		Log.v(TAG, "thread " + Integer.toString(index) + " about to update venlist_by_cat");
-		
+		ArrayList<YelpVenue> many_venues = venuesSearch(cat.getName(), input.getLatitude(), input.getLongitude(), input.getMaxDistance());		
 		// narrow down to best venues
 		ArrayList<YelpVenue> best_venues = chooseBest(many_venues);
 		
 		// add best venues to shared venues_listed_by_category[][]
 		// ( each thread only interacts with its own venlist_by_cat[index][] )
 		int i = 0;
-		Log.v(TAG, "thread " + Integer.toString(index) + " i = " + Integer.toString(i));
-		Log.v(TAG, "thread " + Integer.toString(index) + " venues_listed_by_category[index].length = " + Integer.toString(venues_listed_by_category[index].length));
-		Log.v(TAG, "thread " + Integer.toString(index) + " many_venues.size() = " + Integer.toString(many_venues.size()));
 		while (i < venues_listed_by_category[index].length && i < best_venues.size()) {
 			Log.v(TAG, "thread " + Integer.toString(index) + " about to add " + best_venues.get(i).getName() + " to venues_listed_by_category");
 			venues_listed_by_category[index][i] = best_venues.get(i);

@@ -12,6 +12,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import com.dotcom.nextup.categorymodels.Category;
 import com.dotcom.nextup.categorymodels.CheckIn;
 import com.dotcom.nextup.categorymodels.CheckInManager;
@@ -36,10 +38,15 @@ public class FoursquareLocationManager {
     }
     
     public static JSONArray getCurrentLocationDataFromFoursquare(GeoPoint location, String token) {
-		if (token == null) {
+		if (token == null || location == null) {
 			return null;
 		}
-		String url = "https://api.foursquare.com/v2/venues/search?ll=" + String.valueOf((location.getLatitudeE6()/1E6)) + "," + String.valueOf((location.getLongitudeE6()/1E6));
+		String url = "https://api.foursquare.com/v2/venues/search?ll";
+		try {
+			url = "https://api.foursquare.com/v2/venues/search?ll=" + String.valueOf((location.getLatitudeE6()/1E6)) + "," + String.valueOf((location.getLongitudeE6()/1E6));
+		} catch (Exception e) {
+			Log.e("Location latitude", "Couldn't get latitude");
+		}
 		String authUrl = url + "&oauth_token=" + token;
 		HttpClient hc = new DefaultHttpClient();
 	
